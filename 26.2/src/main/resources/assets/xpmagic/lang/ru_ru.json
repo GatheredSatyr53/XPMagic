@@ -3,5 +3,6 @@
   "item.xpmagic.memory_powder": "Порошок памяти",
   "item.xpmagic.processing_chip": "Чип обработки",
   "item.xpmagic.xp_cocktail": "Коктейль опыта",
-  "item.xpmagic.xp_cocktail.stored_exp": "Сохранено опыта: %s"
+  "item.xpmagic.xp_cocktail.stored_exp": "Сохранено опыта: %s",
+  "block.xpmagic.xp_keeping_machine": "Хранитель опыта"
 }

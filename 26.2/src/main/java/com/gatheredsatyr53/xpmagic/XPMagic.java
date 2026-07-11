@@ -7,8 +7,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -25,6 +30,7 @@ public final class XPMagic {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
 
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
     public static final RegistryObject<DataComponentType<StoredExp>> STORED_EXP = DATA_COMPONENTS.register("stored_exp",
@@ -49,6 +55,22 @@ public final class XPMagic {
             .usingConvertsTo(Items.GLASS_BOTTLE)
         ));
 
+    public static final RegistryObject<Block> XP_KEEPING_MACHINE = BLOCKS.register("xp_keeping_machine",
+        () -> new XPKeepingMachineBlock(BlockBehaviour.Properties.of()
+            .setId(BLOCKS.key("xp_keeping_machine"))
+            .mapColor(MapColor.METAL)
+            .sound(SoundType.METAL)
+            .requiresCorrectToolForDrops()
+            .strength(15.0F)
+        ));
+
+    public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
+        () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties().setId(ITEMS.key("xp_keeping_machine"))));
+
+    public static final RegistryObject<BlockEntityType<XPKeepingMachineBlockEntity>> XP_KEEPING_MACHINE_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("xp_keeping_machine",
+            () -> new BlockEntityType<>(XPKeepingMachineBlockEntity::new, java.util.Set.of(XP_KEEPING_MACHINE.get())));
+
     public static final RegistryObject<CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.xpmagic"))
@@ -57,6 +79,7 @@ public final class XPMagic {
                 output.accept(MEMORY_POWDER.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
+                output.accept(XP_KEEPING_MACHINE_ITEM.get());
             })
             .build());
 
@@ -67,6 +90,7 @@ public final class XPMagic {
         ITEMS.register(modBusGroup);
         CREATIVE_MODE_TABS.register(modBusGroup);
         DATA_COMPONENTS.register(modBusGroup);
+        BLOCK_ENTITIES.register(modBusGroup);
 
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
