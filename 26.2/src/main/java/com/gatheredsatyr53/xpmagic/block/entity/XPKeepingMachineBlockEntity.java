@@ -1,5 +1,8 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.block.entity;
 
+import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
+import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -12,7 +15,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
@@ -116,7 +118,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
             this.user = null;
     }
 
-    ContainerData getDataAccess() {
+    public ContainerData getDataAccess() {
         return this.dataAccess;
     }
 

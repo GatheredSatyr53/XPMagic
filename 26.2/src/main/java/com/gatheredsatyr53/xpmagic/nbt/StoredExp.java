@@ -1,4 +1,4 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.nbt;
 
 import com.mojang.serialization.Codec;
 

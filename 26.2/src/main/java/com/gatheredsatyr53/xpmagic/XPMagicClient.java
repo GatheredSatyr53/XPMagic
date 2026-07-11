@@ -1,5 +1,6 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.gui.XPKeepingMachineScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;

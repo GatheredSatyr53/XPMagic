@@ -1,5 +1,7 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.block;
 
+import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
+import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;

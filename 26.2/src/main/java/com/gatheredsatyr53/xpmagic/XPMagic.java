@@ -1,5 +1,10 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
+import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
+import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
+import com.gatheredsatyr53.xpmagic.item.XPCocktailItem;
+import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -37,7 +42,7 @@ public final class XPMagic {
 
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
     public static final RegistryObject<DataComponentType<StoredExp>> STORED_EXP = DATA_COMPONENTS.register("stored_exp",
-        () -> DataComponentType.<StoredExp>builder()
+                                                                                                           () -> DataComponentType.<StoredExp>builder()
             .persistent(StoredExp.CODEC)
             .networkSynchronized(StoredExp.STREAM_CODEC)
             .build()
@@ -60,11 +65,11 @@ public final class XPMagic {
 
     public static final RegistryObject<Block> XP_KEEPING_MACHINE = BLOCKS.register("xp_keeping_machine",
         () -> new XPKeepingMachineBlock(BlockBehaviour.Properties.of()
-            .setId(BLOCKS.key("xp_keeping_machine"))
-            .mapColor(MapColor.METAL)
-            .sound(SoundType.METAL)
-            .requiresCorrectToolForDrops()
-            .strength(15.0F)
+                                                                 .setId(BLOCKS.key("xp_keeping_machine"))
+                                                                 .mapColor(MapColor.METAL)
+                                                                 .sound(SoundType.METAL)
+                                                                 .requiresCorrectToolForDrops()
+                                                                 .strength(15.0F)
         ));
 
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",

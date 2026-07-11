@@ -1,7 +1,8 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.item;
 
 import java.util.function.Consumer;
 
+import com.gatheredsatyr53.xpmagic.XPMagic;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

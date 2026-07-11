@@ -1,5 +1,7 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.inventory;
 
+import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -15,7 +17,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jspecify.annotations.Nullable;
 
-import static com.gatheredsatyr53.xpmagic.XPKeepingMachineBlockEntity.*;
+import static com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity.*;
 
 public class XPKeepingMachineMenu extends AbstractContainerMenu {
 
