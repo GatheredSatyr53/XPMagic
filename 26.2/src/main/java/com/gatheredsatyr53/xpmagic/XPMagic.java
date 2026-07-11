@@ -41,7 +41,7 @@ public final class XPMagic {
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
 
     public static final RegistryObject<Item> XP_COCKTAIL = ITEMS.register("xp_cocktail",
-        () -> new Item(new Item.Properties()
+        () -> new XPCocktailItem(new Item.Properties()
             .setId(ITEMS.key("xp_cocktail"))
             .stacksTo(1)
             .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
