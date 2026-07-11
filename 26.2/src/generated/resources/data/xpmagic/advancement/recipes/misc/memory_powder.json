@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "xpmagic:processing_chip"
+        "recipe": "xpmagic:memory_powder"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "xpmagic:processing_chip"
+      "xpmagic:memory_powder"
     ]
   }
 }

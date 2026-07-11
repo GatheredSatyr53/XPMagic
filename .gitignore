@@ -25,3 +25,6 @@ run-data/
 
 # art sources (not shipped)
 /raw/
+
+# datagen bookkeeping
+26.2/src/generated/resources/.cache/

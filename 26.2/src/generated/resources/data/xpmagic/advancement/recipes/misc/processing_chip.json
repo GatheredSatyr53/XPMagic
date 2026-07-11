@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_processing_chip": {
+    "has_redstone": {
       "conditions": {
         "items": [
           {
-            "items": "xpmagic:processing_chip"
+            "items": "minecraft:redstone"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "xpmagic:xp_keeping_machine"
+        "recipe": "xpmagic:processing_chip"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_processing_chip"
+      "has_redstone"
     ]
   ],
   "rewards": {
     "recipes": [
-      "xpmagic:xp_keeping_machine"
+      "xpmagic:processing_chip"
     ]
   }
 }

@@ -2,7 +2,6 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "rolls": 1.0,
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
@@ -13,7 +12,8 @@
           "type": "minecraft:item",
           "name": "xpmagic:xp_keeping_machine"
         }
-      ]
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "xpmagic:blocks/xp_keeping_machine"

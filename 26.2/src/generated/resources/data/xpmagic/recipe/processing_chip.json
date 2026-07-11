@@ -1,15 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "XXX",
-    "YZY",
-    "XXX"
-  ],
   "key": {
     "X": "minecraft:iron_nugget",
     "Y": "minecraft:gold_nugget",
     "Z": "minecraft:redstone"
   },
+  "pattern": [
+    "XXX",
+    "YZY",
+    "XXX"
+  ],
   "result": {
     "id": "xpmagic:processing_chip"
   }
