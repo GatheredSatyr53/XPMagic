@@ -15,10 +15,13 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import org.jspecify.annotations.Nullable;
 
 public class XPKeepingMachineBlock extends BaseEntityBlock {
 
@@ -65,5 +68,11 @@ public class XPKeepingMachineBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new XPKeepingMachineBlockEntity(pos, state);
+    }
+
+    @Override
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide() ? null
+            : createTickerHelper(type, XPMagic.XP_KEEPING_MACHINE_BLOCK_ENTITY.get(), XPKeepingMachineBlockEntity::serverTick);
     }
 }

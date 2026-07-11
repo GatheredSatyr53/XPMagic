@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
@@ -13,7 +14,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -32,6 +35,17 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     public static final int SLOT_POWDER = 2;
     public static final int SLOT_OUTPUT = 3;
     public static final int SLOT_COUNT = 4;
+
+    /** Experience points drained per cocktail, as in 1.12 */
+    public static final int PUSH_EXP = 10;
+    public static final int COOK_TIME = 200;
+
+    /**
+     * The player the machine drains experience from. Unlike the 1.12 setUser
+     * approach this is only set while that player has the menu open; without
+     * a user the machine pauses instead of working against a stale reference.
+     */
+    private @Nullable Player user;
 
     private final MachineInventory inventory = new MachineInventory();
     private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
@@ -93,8 +107,104 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new XPKeepingMachineMenu(containerId, playerInventory, this.inventory, this.dataAccess,
-            ContainerLevelAccess.create(this.level, this.worldPosition));
+        this.user = player;
+        return new XPKeepingMachineMenu(containerId, playerInventory, this);
+    }
+
+    public void onMenuClosed(Player player) {
+        if (this.user == player)
+            this.user = null;
+    }
+
+    ContainerData getDataAccess() {
+        return this.dataAccess;
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, XPKeepingMachineBlockEntity machine) {
+        boolean changed = false;
+
+        if (machine.isBurning())
+            --machine.burnTime;
+
+        if (machine.isBurning() || machine.allInputsPresent()) {
+            boolean canWork = machine.canProduce() && machine.isUserReady();
+
+            if (!machine.isBurning() && canWork) {
+                ItemStack fuel = machine.inventory.getStackInSlot(SLOT_FUEL);
+                int burnDuration = level.fuelValues().burnDuration(fuel);
+                if (burnDuration > 0) {
+                    machine.burnTime = burnDuration;
+                    machine.burnTimeTotal = burnDuration;
+                    machine.cookTimeTotal = COOK_TIME;
+                    machine.consumeFuel();
+                    changed = true;
+                }
+            }
+
+            if (machine.isBurning() && canWork) {
+                ++machine.cookTime;
+                if (machine.cookTime >= machine.cookTimeTotal) {
+                    machine.cookTime = 0;
+                    machine.cookTimeTotal = COOK_TIME;
+                    machine.produce();
+                    changed = true;
+                }
+            } else if (!machine.canProduce()) {
+                machine.cookTime = 0;
+            }
+            // canProduce but no ready user: pause, progress is kept
+
+        } else if (!machine.isBurning() && machine.cookTime > 0) {
+            machine.cookTime = Mth.clamp(machine.cookTime - 2, 0, machine.cookTimeTotal);
+        }
+
+        if (changed)
+            machine.setChanged();
+    }
+
+    public boolean isBurning() {
+        return this.burnTime > 0;
+    }
+
+    private boolean allInputsPresent() {
+        for (int slot = 0; slot < SLOT_OUTPUT; ++slot)
+            if (this.inventory.getStackInSlot(slot).isEmpty())
+                return false;
+        return true;
+    }
+
+    private boolean canProduce() {
+        ItemStack bottle = this.inventory.getStackInSlot(SLOT_BOTTLE);
+        ItemStack powder = this.inventory.getStackInSlot(SLOT_POWDER);
+        if (bottle.isEmpty() || powder.isEmpty())
+            return false;
+        if (!isItemValid(SLOT_BOTTLE, bottle) || !isItemValid(SLOT_POWDER, powder))
+            return false;
+        return this.inventory.getStackInSlot(SLOT_OUTPUT).isEmpty();
+    }
+
+    private boolean isUserReady() {
+        return this.user != null && !this.user.isRemoved() && this.user.totalExperience >= PUSH_EXP;
+    }
+
+    private void consumeFuel() {
+        ItemStack fuel = this.inventory.getStackInSlot(SLOT_FUEL);
+        if (fuel.getCount() == 1) {
+            ItemStackTemplate remainder = fuel.getCraftingRemainder();
+            this.inventory.setStackInSlot(SLOT_FUEL, remainder != null ? remainder.create() : ItemStack.EMPTY);
+        } else {
+            fuel.shrink(1);
+        }
+    }
+
+    private void produce() {
+        ItemStack cocktail = new ItemStack(XPMagic.XP_COCKTAIL.get());
+        cocktail.set(XPMagic.STORED_EXP.get(), new StoredExp(PUSH_EXP));
+
+        this.user.giveExperiencePoints(-PUSH_EXP);
+        this.inventory.setStackInSlot(SLOT_OUTPUT, cocktail);
+        this.inventory.getStackInSlot(SLOT_BOTTLE).shrink(1);
+        this.inventory.getStackInSlot(SLOT_POWDER).shrink(1);
     }
 
     @Override

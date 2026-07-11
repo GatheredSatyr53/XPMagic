@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
+import org.jspecify.annotations.Nullable;
 
 import static com.gatheredsatyr53.xpmagic.XPKeepingMachineBlockEntity.*;
 
@@ -32,17 +33,25 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     private final ContainerData data;
     private final ContainerLevelAccess access;
     private final Level level;
+    private final @Nullable XPKeepingMachineBlockEntity machine;
 
     public XPKeepingMachineMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT), ContainerLevelAccess.NULL);
+        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
+            ContainerLevelAccess.NULL, null);
     }
 
-    public XPKeepingMachineMenu(int containerId, Inventory playerInventory, IItemHandler machineInventory,
-                                ContainerData data, ContainerLevelAccess access) {
+    public XPKeepingMachineMenu(int containerId, Inventory playerInventory, XPKeepingMachineBlockEntity machine) {
+        this(containerId, playerInventory, machine.getInventory(), machine.getDataAccess(),
+            ContainerLevelAccess.create(machine.getLevel(), machine.getBlockPos()), machine);
+    }
+
+    private XPKeepingMachineMenu(int containerId, Inventory playerInventory, IItemHandler machineInventory,
+                                 ContainerData data, ContainerLevelAccess access, @Nullable XPKeepingMachineBlockEntity machine) {
         super(XPMagic.XP_KEEPING_MACHINE_MENU.get(), containerId);
         this.data = data;
         this.access = access;
         this.level = playerInventory.player.level();
+        this.machine = machine;
 
         this.addSlot(new SlotItemHandler(machineInventory, SLOT_BOTTLE, 67, 19) {
             @Override
@@ -82,6 +91,13 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return stillValid(this.access, player, XPMagic.XP_KEEPING_MACHINE.get());
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (this.machine != null)
+            this.machine.onMenuClosed(player);
     }
 
     @Override
