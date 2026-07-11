@@ -4,5 +4,8 @@
   "item.xpmagic.processing_chip": "Processing Chip",
   "item.xpmagic.xp_cocktail": "XP Cocktail",
   "item.xpmagic.xp_cocktail.stored_exp": "Stored XP: %s",
+  "item.xpmagic.player_key": "Player Key",
+  "item.xpmagic.player_key.owner": "Owner: %s",
+  "item.xpmagic.player_key.unbound": "Unbound — right-click to bind",
   "block.xpmagic.xp_keeping_machine": "XP Keeping Machine"
 }

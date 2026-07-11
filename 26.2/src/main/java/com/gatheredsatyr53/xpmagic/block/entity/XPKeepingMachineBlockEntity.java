@@ -2,11 +2,13 @@ package com.gatheredsatyr53.xpmagic.block.entity;
 
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -36,18 +38,12 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     public static final int SLOT_FUEL = 1;
     public static final int SLOT_POWDER = 2;
     public static final int SLOT_OUTPUT = 3;
-    public static final int SLOT_COUNT = 4;
+    public static final int SLOT_KEY = 4;
+    public static final int SLOT_COUNT = 5;
 
     /** Experience points drained per cocktail, as in 1.12 */
     public static final int PUSH_EXP = 10;
     public static final int COOK_TIME = 200;
-
-    /**
-     * The player the machine drains experience from. Unlike the 1.12 setUser
-     * approach this is only set while that player has the menu open; without
-     * a user the machine pauses instead of working against a stale reference.
-     */
-    private @Nullable Player user;
 
     private final MachineInventory inventory = new MachineInventory();
     private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
@@ -109,17 +105,20 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        this.user = player;
         return new XPKeepingMachineMenu(containerId, playerInventory, this);
-    }
-
-    public void onMenuClosed(Player player) {
-        if (this.user == player)
-            this.user = null;
     }
 
     public ContainerData getDataAccess() {
         return this.dataAccess;
+    }
+
+    /** The online player whose key is in the machine, or null if no key / owner offline. */
+    private @Nullable Player resolveOwner(Level level) {
+        PlayerOwner owner = this.inventory.getStackInSlot(SLOT_KEY).get(XPMagic.PLAYER_OWNER.get());
+        if (owner == null)
+            return null;
+        MinecraftServer server = level.getServer();
+        return server == null ? null : server.getPlayerList().getPlayer(owner.id());
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, XPKeepingMachineBlockEntity machine) {
@@ -128,8 +127,11 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         if (machine.isBurning())
             --machine.burnTime;
 
+        Player owner = machine.resolveOwner(level);
+        boolean ownerReady = owner != null && owner.totalExperience >= PUSH_EXP;
+
         if (machine.isBurning() || machine.allInputsPresent()) {
-            boolean canWork = machine.canProduce() && machine.isUserReady();
+            boolean canWork = machine.canProduce() && ownerReady;
 
             if (!machine.isBurning() && canWork) {
                 ItemStack fuel = machine.inventory.getStackInSlot(SLOT_FUEL);
@@ -148,13 +150,13 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
                 if (machine.cookTime >= machine.cookTimeTotal) {
                     machine.cookTime = 0;
                     machine.cookTimeTotal = COOK_TIME;
-                    machine.produce();
+                    machine.produce(owner);
                     changed = true;
                 }
             } else if (!machine.canProduce()) {
                 machine.cookTime = 0;
             }
-            // canProduce but no ready user: pause, progress is kept
+            // canProduce but owner not ready: pause, progress is kept
 
         } else if (!machine.isBurning() && machine.cookTime > 0) {
             machine.cookTime = Mth.clamp(machine.cookTime - 2, 0, machine.cookTimeTotal);
@@ -185,10 +187,6 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         return this.inventory.getStackInSlot(SLOT_OUTPUT).isEmpty();
     }
 
-    private boolean isUserReady() {
-        return this.user != null && !this.user.isRemoved() && this.user.totalExperience >= PUSH_EXP;
-    }
-
     private void consumeFuel() {
         ItemStack fuel = this.inventory.getStackInSlot(SLOT_FUEL);
         if (fuel.getCount() == 1) {
@@ -199,11 +197,13 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         }
     }
 
-    private void produce() {
-        ItemStack cocktail = new ItemStack(XPMagic.XP_COCKTAIL.get());
-        cocktail.set(XPMagic.STORED_EXP.get(), new StoredExp(PUSH_EXP));
+    private void produce(Player owner) {
+        // Safeguard: never charge more XP than the owner actually has; store what was taken.
+        int charged = Math.min(PUSH_EXP, Math.max(0, owner.totalExperience));
+        owner.giveExperiencePoints(-charged);
 
-        this.user.giveExperiencePoints(-PUSH_EXP);
+        ItemStack cocktail = new ItemStack(XPMagic.XP_COCKTAIL.get());
+        cocktail.set(XPMagic.STORED_EXP.get(), new StoredExp(charged));
         this.inventory.setStackInSlot(SLOT_OUTPUT, cocktail);
         this.inventory.getStackInSlot(SLOT_BOTTLE).shrink(1);
         this.inventory.getStackInSlot(SLOT_POWDER).shrink(1);
@@ -262,6 +262,10 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
         @Override
         protected void onContentsChanged(int slot) {
+            // Removing (or swapping) the key resets cooking, so a half-done cycle
+            // started by one owner can't be finished on — and charged to — another.
+            if (slot == SLOT_KEY)
+                XPKeepingMachineBlockEntity.this.cookTime = 0;
             XPKeepingMachineBlockEntity.this.setChanged();
         }
 

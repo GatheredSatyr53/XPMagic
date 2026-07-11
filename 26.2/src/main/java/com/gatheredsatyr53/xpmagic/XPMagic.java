@@ -3,7 +3,9 @@ package com.gatheredsatyr53.xpmagic;
 import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
+import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
 import com.gatheredsatyr53.xpmagic.item.XPCocktailItem;
+import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -54,6 +56,17 @@ public final class XPMagic {
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
 
+    // Owner recorded on a Player Key; the machine drains XP from this player
+    public static final RegistryObject<DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
+        () -> DataComponentType.<PlayerOwner>builder()
+            .persistent(PlayerOwner.CODEC)
+            .networkSynchronized(PlayerOwner.STREAM_CODEC)
+            .build()
+    );
+
+    public static final RegistryObject<Item> PLAYER_KEY = ITEMS.register("player_key",
+        () -> new PlayerKeyItem(new Item.Properties().setId(ITEMS.key("player_key")).stacksTo(1)));
+
     public static final RegistryObject<Item> XP_COCKTAIL = ITEMS.register("xp_cocktail",
         () -> new XPCocktailItem(new Item.Properties()
             .setId(ITEMS.key("xp_cocktail"))
@@ -93,6 +106,7 @@ public final class XPMagic {
                 output.accept(MEMORY_POWDER.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
+                output.accept(PLAYER_KEY.get());
                 output.accept(XP_KEEPING_MACHINE_ITEM.get());
             })
             .build());

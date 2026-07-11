@@ -2,6 +2,7 @@ package com.gatheredsatyr53.xpmagic.inventory;
 
 import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
+import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
-import org.jspecify.annotations.Nullable;
 
 import static com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity.*;
 
@@ -35,25 +35,25 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     private final ContainerData data;
     private final ContainerLevelAccess access;
     private final Level level;
-    private final @Nullable XPKeepingMachineBlockEntity machine;
+    private final Player player;
 
     public XPKeepingMachineMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
-            ContainerLevelAccess.NULL, null);
+            ContainerLevelAccess.NULL);
     }
 
     public XPKeepingMachineMenu(int containerId, Inventory playerInventory, XPKeepingMachineBlockEntity machine) {
         this(containerId, playerInventory, machine.getInventory(), machine.getDataAccess(),
-            ContainerLevelAccess.create(machine.getLevel(), machine.getBlockPos()), machine);
+            ContainerLevelAccess.create(machine.getLevel(), machine.getBlockPos()));
     }
 
     private XPKeepingMachineMenu(int containerId, Inventory playerInventory, IItemHandler machineInventory,
-                                 ContainerData data, ContainerLevelAccess access, @Nullable XPKeepingMachineBlockEntity machine) {
+                                 ContainerData data, ContainerLevelAccess access) {
         super(XPMagic.XP_KEEPING_MACHINE_MENU.get(), containerId);
         this.data = data;
         this.access = access;
         this.level = playerInventory.player.level();
-        this.machine = machine;
+        this.player = playerInventory.player;
 
         this.addSlot(new SlotItemHandler(machineInventory, SLOT_BOTTLE, 67, 19) {
             @Override
@@ -79,6 +79,21 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                 return false;
             }
         });
+        this.addSlot(new SlotItemHandler(machineInventory, SLOT_KEY, 9, 9) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return isOwnKey(stack);
+            }
+
+            @Override
+            public int getMaxStackSize(ItemStack stack) {
+                // The handler reports isItemValid=false for the key slot (to block hopper
+                // insertion), which would make SlotItemHandler simulate a capacity of 0 and
+                // refuse GUI placement. Ownership is already enforced by mayPlace, so report
+                // the real capacity here.
+                return stack.getMaxStackSize();
+            }
+        });
 
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 9; ++col)
@@ -93,13 +108,6 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return stillValid(this.access, player, XPMagic.XP_KEEPING_MACHINE.get());
-    }
-
-    @Override
-    public void removed(Player player) {
-        super.removed(player);
-        if (this.machine != null)
-            this.machine.onMenuClosed(player);
     }
 
     @Override
@@ -118,7 +126,10 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                 if (!this.moveItemStackTo(stack, INV_START, SLOTS_END, false))
                     return ItemStack.EMPTY;
             } else {
-                if (isBottle(stack)) {
+                if (isOwnKey(stack)) {
+                    if (!this.moveItemStackTo(stack, SLOT_KEY, SLOT_KEY + 1, false))
+                        return ItemStack.EMPTY;
+                } else if (isBottle(stack)) {
                     if (!this.moveItemStackTo(stack, SLOT_BOTTLE, SLOT_BOTTLE + 1, false))
                         return ItemStack.EMPTY;
                 } else if (isFuel(stack)) {
@@ -159,6 +170,12 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
 
     private boolean isPowder(ItemStack stack) {
         return stack.is(XPMagic.MEMORY_POWDER.get());
+    }
+
+    /** Only the player viewing the menu may place their own bound key. */
+    private boolean isOwnKey(ItemStack stack) {
+        PlayerOwner owner = stack.get(XPMagic.PLAYER_OWNER.get());
+        return owner != null && owner.id().equals(this.player.getUUID());
     }
 
     public boolean isLit() {
