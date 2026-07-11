@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -83,6 +84,7 @@ public final class XPMagic {
                                                                  .sound(SoundType.METAL)
                                                                  .requiresCorrectToolForDrops()
                                                                  .strength(15.0F)
+                                                                 .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0)
         ));
 
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",

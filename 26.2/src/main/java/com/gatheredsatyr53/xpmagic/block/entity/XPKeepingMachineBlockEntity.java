@@ -1,5 +1,6 @@
 package com.gatheredsatyr53.xpmagic.block.entity;
 
+import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -48,10 +50,10 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     private final MachineInventory inventory = new MachineInventory();
     private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
 
-    int burnTime;
-    int burnTimeTotal;
-    int cookTime;
-    int cookTimeTotal;
+    private int burnTime;
+    private int burnTimeTotal;
+    private int cookTime;
+    private int cookTimeTotal;
 
     private final ContainerData dataAccess = new ContainerData() {
         @Override
@@ -123,9 +125,16 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, XPKeepingMachineBlockEntity machine) {
         boolean changed = false;
-
-        if (machine.isBurning())
-            --machine.burnTime;
+        boolean isLit;
+        boolean wasLit;
+        if (machine.isBurning()) {
+            wasLit = true;
+            machine.burnTime--;
+            isLit = machine.burnTime > 0;
+        } else {
+            wasLit = false;
+            isLit = false;
+        }
 
         Player owner = machine.resolveOwner(level);
         boolean ownerReady = owner != null && owner.totalExperience >= PUSH_EXP;
@@ -141,6 +150,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
                     machine.burnTimeTotal = burnDuration;
                     machine.cookTimeTotal = COOK_TIME;
                     machine.consumeFuel();
+                    isLit = true;
                     changed = true;
                 }
             }
@@ -162,8 +172,15 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
             machine.cookTime = Mth.clamp(machine.cookTime - 2, 0, machine.cookTimeTotal);
         }
 
-        if (changed)
-            machine.setChanged();
+        if (wasLit != isLit) {
+            changed = true;
+            state = state.setValue(XPKeepingMachineBlock.LIT, isLit);
+            level.setBlock(pos, state, 3);
+        }
+
+        if (changed) {
+            setChanged(level, pos, state);
+        }
     }
 
     public boolean isBurning() {

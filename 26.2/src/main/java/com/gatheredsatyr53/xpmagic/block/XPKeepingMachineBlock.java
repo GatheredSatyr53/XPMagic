@@ -6,10 +6,16 @@ import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -29,10 +35,11 @@ public class XPKeepingMachineBlock extends BaseEntityBlock {
 
     public static final MapCodec<XPKeepingMachineBlock> CODEC = simpleCodec(XPKeepingMachineBlock::new);
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
+    public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public XPKeepingMachineBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, false));
     }
 
     @Override
@@ -42,7 +49,7 @@ public class XPKeepingMachineBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, LIT);
     }
 
     @Override
@@ -76,5 +83,22 @@ public class XPKeepingMachineBlock extends BaseEntityBlock {
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide() ? null
             : createTickerHelper(type, XPMagic.XP_KEEPING_MACHINE_BLOCK_ENTITY.get(), XPKeepingMachineBlockEntity::serverTick);
+    }
+
+    @Override
+    public void animateTick(final BlockState state, final Level level, final BlockPos pos, final RandomSource random) {
+        if (state.getValue(LIT)) {
+            double x = pos.getX() + 0.5;
+            double y = pos.getY();
+            double z = pos.getZ() + 0.5;
+            if (random.nextDouble() < 0.1) {
+                level.playLocalSound(x, y, z, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+            }
+
+            double ss = (random.nextDouble() * 0.7) - 0.35;
+            double dy = random.nextDouble() * 3.0 / 16.0 + 0.95;
+            level.addParticle(ParticleTypes.SMOKE, x + ss, y + dy, z + ss, 0.0, 0.0, 0.0);
+            level.addParticle(ParticleTypes.COPPER_FIRE_FLAME, x + ss, y + dy, z + ss, 0.0, 0.0, 0.0);
+        }
     }
 }
