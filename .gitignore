@@ -22,3 +22,6 @@ run-data/
 
 # old 1.12 project — has its own git repo and history
 /1.12/
+
+# art sources (not shipped)
+/raw/

@@ -44,7 +44,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
         this.access = access;
         this.level = playerInventory.player.level();
 
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_BOTTLE, 49, 19) {
+        this.addSlot(new SlotItemHandler(machineInventory, SLOT_BOTTLE, 67, 19) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return isBottle(stack);
@@ -56,7 +56,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                 return isFuel(stack);
             }
         });
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_POWDER, 49, 59) {
+        this.addSlot(new SlotItemHandler(machineInventory, SLOT_POWDER, 67, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return isPowder(stack);
