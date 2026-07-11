@@ -68,7 +68,9 @@ public final class XPMagic {
         ));
 
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
-        () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties().setId(ITEMS.key("xp_keeping_machine"))));
+        () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
+            .setId(ITEMS.key("xp_keeping_machine"))
+            .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<BlockEntityType<XPKeepingMachineBlockEntity>> XP_KEEPING_MACHINE_BLOCK_ENTITY =
         BLOCK_ENTITIES.register("xp_keeping_machine",
