@@ -19,3 +19,6 @@ eclipse/
 # minecraft run dirs
 run/
 run-data/
+
+# old 1.12 project — has its own git repo and history
+/1.12/
