@@ -7,6 +7,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
@@ -31,6 +33,7 @@ public final class XPMagic {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
 
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
     public static final RegistryObject<DataComponentType<StoredExp>> STORED_EXP = DATA_COMPONENTS.register("stored_exp",
@@ -71,6 +74,10 @@ public final class XPMagic {
         BLOCK_ENTITIES.register("xp_keeping_machine",
             () -> new BlockEntityType<>(XPKeepingMachineBlockEntity::new, java.util.Set.of(XP_KEEPING_MACHINE.get())));
 
+    public static final RegistryObject<MenuType<XPKeepingMachineMenu>> XP_KEEPING_MACHINE_MENU =
+        MENU_TYPES.register("xp_keeping_machine",
+            () -> new MenuType<>(XPKeepingMachineMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final RegistryObject<CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.xpmagic"))
@@ -91,6 +98,7 @@ public final class XPMagic {
         CREATIVE_MODE_TABS.register(modBusGroup);
         DATA_COMPONENTS.register(modBusGroup);
         BLOCK_ENTITIES.register(modBusGroup);
+        MENU_TYPES.register(modBusGroup);
 
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

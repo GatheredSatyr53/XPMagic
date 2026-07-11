@@ -1,0 +1,17 @@
+package com.gatheredsatyr53.xpmagic;
+
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+
+@Mod.EventBusSubscriber(modid = XPMagic.MODID, value = Dist.CLIENT)
+public final class XPMagicClient {
+
+    @SubscribeEvent
+    static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() ->
+            MenuScreens.register(XPMagic.XP_KEEPING_MACHINE_MENU.get(), XPKeepingMachineScreen::new));
+    }
+}
