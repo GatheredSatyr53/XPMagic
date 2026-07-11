@@ -1,0 +1,21 @@
+# gradle
+build/
+.gradle/
+
+# ide
+.idea/
+.settings/
+.classpath
+.project
+bin/
+out/
+*.iml
+*.ipr
+*.iws
+*.launch
+.metadata/
+eclipse/
+
+# minecraft run dirs
+run/
+run-data/
