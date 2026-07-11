@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "X": "xpmagic:memory_chip",
+    "Y": "minecraft:paper"
+  },
+  "pattern": [
+    " X ",
+    "YYY"
+  ],
+  "result": {
+    "id": "xpmagic:player_key"
+  }
+}

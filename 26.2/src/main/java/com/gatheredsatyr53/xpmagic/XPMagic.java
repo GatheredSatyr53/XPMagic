@@ -57,6 +57,9 @@ public final class XPMagic {
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
 
+    public static final RegistryObject<Item> MEMORY_CHIP = ITEMS.register("memory_chip",
+        () -> new Item(new Item.Properties().setId(ITEMS.key("memory_chip"))));
+
     // Owner recorded on a Player Key; the machine drains XP from this player
     public static final RegistryObject<DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
         () -> DataComponentType.<PlayerOwner>builder()
@@ -107,6 +110,7 @@ public final class XPMagic {
             .displayItems((params, output) -> {
                 output.accept(MEMORY_POWDER.get());
                 output.accept(PROCESSING_CHIP.get());
+                output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
                 output.accept(PLAYER_KEY.get());
                 output.accept(XP_KEEPING_MACHINE_ITEM.get());

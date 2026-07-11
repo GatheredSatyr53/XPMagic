@@ -2,6 +2,7 @@
   "itemGroup.xpmagic": "XPMagic",
   "item.xpmagic.memory_powder": "Порошок памяти",
   "item.xpmagic.processing_chip": "Чип обработки",
+  "item.xpmagic.memory_chip": "Чип памяти",
   "item.xpmagic.xp_cocktail": "Коктейль опыта",
   "item.xpmagic.xp_cocktail.stored_exp": "Сохранено опыта: %s",
   "item.xpmagic.player_key": "Именная бирка",

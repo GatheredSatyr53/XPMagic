@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "Y": "xpmagic:processing_chip",
+    "Z": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "YZY"
+  ],
+  "result": {
+    "id": "xpmagic:memory_chip"
+  }
+}

@@ -41,6 +41,21 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_redstone", this.has(Items.REDSTONE))
             .save(this.output);
 
+        this.shaped(RecipeCategory.MISC, XPMagic.MEMORY_CHIP.get())
+            .pattern("YZY")
+            .define('Y', XPMagic.PROCESSING_CHIP.get())
+            .define('Z', Items.COPPER_INGOT)
+            .unlockedBy("has_processing_chip", this.has(XPMagic.PROCESSING_CHIP.get()))
+            .save(this.output);
+
+        this.shaped(RecipeCategory.MISC, XPMagic.PLAYER_KEY.get())
+            .pattern(" X ")
+            .pattern("YYY")
+            .define('X', XPMagic.MEMORY_CHIP.get())
+            .define('Y', Items.PAPER)
+            .unlockedBy("has_memory_chip", this.has(XPMagic.MEMORY_CHIP.get()))
+            .save(this.output);
+
         this.shaped(RecipeCategory.MISC, XPMagic.XP_KEEPING_MACHINE.get())
             .pattern("GXG")
             .pattern("XYX")
