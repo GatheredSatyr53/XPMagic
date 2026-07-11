@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GXG",
+    "XYX",
+    "XGX"
+  ],
+  "key": {
+    "X": "minecraft:iron_ingot",
+    "Y": "xpmagic:processing_chip",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "xpmagic:xp_keeping_machine"
+  }
+}

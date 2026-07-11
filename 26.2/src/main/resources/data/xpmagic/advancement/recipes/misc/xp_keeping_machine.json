@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_processing_chip": {
+      "conditions": {
+        "items": [
+          {
+            "items": "xpmagic:processing_chip"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "xpmagic:xp_keeping_machine"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_processing_chip"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "xpmagic:xp_keeping_machine"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " # ",
+    "XYZ",
+    " $ "
+  ],
+  "key": {
+    "#": "minecraft:redstone",
+    "X": "minecraft:iron_ingot",
+    "Y": "minecraft:lapis_lazuli",
+    "Z": "minecraft:gold_ingot",
+    "$": "minecraft:gunpowder"
+  },
+  "result": {
+    "id": "xpmagic:memory_powder",
+    "count": 4
+  }
+}
