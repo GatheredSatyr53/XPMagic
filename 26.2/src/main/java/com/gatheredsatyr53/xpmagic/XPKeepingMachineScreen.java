@@ -33,15 +33,6 @@ public class XPKeepingMachineScreen extends AbstractContainerScreen<XPKeepingMac
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
     }
 
-    /**
-     * Title only: the texture's machine area reaches y=76 and the inventory grid
-     * starts at y=83, so there is no room for the standard inventory label.
-     */
-    @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
-    }
-
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractBackground(graphics, mouseX, mouseY, a);
