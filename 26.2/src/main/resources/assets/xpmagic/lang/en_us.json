@@ -1,0 +1,7 @@
+{
+  "itemGroup.xpmagic": "XPMagic",
+  "item.xpmagic.memory_powder": "Memory Powder",
+  "item.xpmagic.processing_chip": "Processing Chip",
+  "item.xpmagic.xp_cocktail": "XP Cocktail",
+  "item.xpmagic.xp_cocktail.stored_exp": "Stored XP: %s"
+}
