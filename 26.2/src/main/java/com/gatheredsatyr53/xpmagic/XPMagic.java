@@ -17,6 +17,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -47,6 +49,7 @@ public final class XPMagic {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
 
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
@@ -164,6 +167,10 @@ public final class XPMagic {
         BLOCK_ENTITIES.register("vibration_stand",
             () -> new BlockEntityType<>(VibrationStandBlockEntity::new, java.util.Set.of(VIBRATION_STAND.get())));
 
+    // Custom looping vibration sound played by the running Vibration Stand
+    public static final RegistryObject<SoundEvent> VIBRATION_SOUND = SOUND_EVENTS.register("vibration",
+        () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MODID, "vibration")));
+
     public static final RegistryObject<MenuType<XPKeepingMachineMenu>> XP_KEEPING_MACHINE_MENU =
         MENU_TYPES.register("xp_keeping_machine",
             () -> new MenuType<>(XPKeepingMachineMenu::new, FeatureFlags.DEFAULT_FLAGS));
@@ -199,6 +206,7 @@ public final class XPMagic {
         CREATIVE_MODE_TABS.register(modBusGroup);
         DATA_COMPONENTS.register(modBusGroup);
         BLOCK_ENTITIES.register(modBusGroup);
+        SOUND_EVENTS.register(modBusGroup);
         MENU_TYPES.register(modBusGroup);
 
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

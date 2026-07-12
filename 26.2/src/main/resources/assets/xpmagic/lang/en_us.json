@@ -14,5 +14,6 @@
   "tooltip.xpmagic.xp_capacity": "XP Capacity: %s",
   "block.xpmagic.xp_keeping_machine": "XP Keeping Machine",
   "block.xpmagic.powder_separator": "Powder Separator",
-  "block.xpmagic.vibration_stand": "Vibration Stand"
+  "block.xpmagic.vibration_stand": "Vibration Stand",
+  "subtitles.xpmagic.vibration": "Stand vibrates"
 }

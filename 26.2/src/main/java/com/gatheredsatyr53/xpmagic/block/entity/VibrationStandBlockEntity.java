@@ -3,6 +3,7 @@ package com.gatheredsatyr53.xpmagic.block.entity;
 import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -19,6 +20,12 @@ public class VibrationStandBlockEntity extends BlockEntity {
     /** Peak per-tick jitter added to entities on top. Symmetric, so it trembles in place. */
     private static final double SHAKE_HORIZONTAL = 0.06;
     private static final double SHAKE_VERTICAL = 0.04;
+
+    /** Fuel burned per vibrating tick (~13 separator cycles per coal). */
+    private static final int FUEL_PER_TICK = 3;
+
+    /** Ticks between plays of the 1.0s vibration clip, so it loops back-to-back. */
+    private static final int SOUND_INTERVAL = 20;
 
     /** Remaining burn time; spent while the stand is powered by redstone. */
     private int burnTime;
@@ -39,9 +46,12 @@ public class VibrationStandBlockEntity extends BlockEntity {
         boolean vibrating = stand.burnTime > 0 && level.hasNeighborSignal(pos);
 
         if (vibrating) {
-            --stand.burnTime;
+            stand.burnTime = Math.max(0, stand.burnTime - FUEL_PER_TICK);
             stand.setChanged();
             shakeEntitiesAbove(level, pos);
+
+            if (level.getGameTime() % SOUND_INTERVAL == 0)
+                level.playSound(null, pos, XPMagic.VIBRATION_SOUND.get(), SoundSource.BLOCKS, 1.2F, 1.0F);
         }
 
         // Flags 3 = notify neighbours (1) + sync to clients (2).

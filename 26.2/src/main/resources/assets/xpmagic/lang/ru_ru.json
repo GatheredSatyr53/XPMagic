@@ -14,5 +14,6 @@
   "tooltip.xpmagic.xp_capacity": "Ёмкость опыта: %s",
   "block.xpmagic.xp_keeping_machine": "Хранитель опыта",
   "block.xpmagic.powder_separator": "Сепаратор порошка",
-  "block.xpmagic.vibration_stand": "Виброподставка"
+  "block.xpmagic.vibration_stand": "Виброподставка",
+  "subtitles.xpmagic.vibration": "Виброподставка гудит"
 }
