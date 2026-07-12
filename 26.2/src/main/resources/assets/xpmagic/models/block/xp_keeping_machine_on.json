@@ -3,6 +3,6 @@
   "textures": {
     "top": "xpmagic:block/xp_keeping_machine_top_on",
     "front": "xpmagic:block/xp_keeping_machine_front",
-    "side": "xpmagic:block/xp_keeping_machine"
+    "side": "xpmagic:block/machine_side"
   }
 }

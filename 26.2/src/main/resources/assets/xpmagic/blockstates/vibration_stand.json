@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "xpmagic:block/vibration_stand" },
+    "lit=true": { "model": "xpmagic:block/vibration_stand" }
+  }
+}

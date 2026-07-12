@@ -1,5 +1,6 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.gui.PowderSeparatorScreen;
 import com.gatheredsatyr53.xpmagic.gui.XPKeepingMachineScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,7 +13,9 @@ public final class XPMagicClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() ->
-            MenuScreens.register(XPMagic.XP_KEEPING_MACHINE_MENU.get(), XPKeepingMachineScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(XPMagic.XP_KEEPING_MACHINE_MENU.get(), XPKeepingMachineScreen::new);
+            MenuScreens.register(XPMagic.POWDER_SEPARATOR_MENU.get(), PowderSeparatorScreen::new);
+        });
     }
 }

@@ -22,7 +22,13 @@ public final class XPMagicBlockTagsProvider extends TagsProvider<Block> {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(XPMagic.XP_KEEPING_MACHINE.getKey());
-        this.tag(BlockTags.NEEDS_STONE_TOOL).add(XPMagic.XP_KEEPING_MACHINE.getKey());
+        this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .add(XPMagic.XP_KEEPING_MACHINE.getKey())
+            .add(XPMagic.POWDER_SEPARATOR.getKey())
+            .add(XPMagic.VIBRATION_STAND.getKey());
+        this.tag(BlockTags.NEEDS_STONE_TOOL)
+            .add(XPMagic.XP_KEEPING_MACHINE.getKey())
+            .add(XPMagic.POWDER_SEPARATOR.getKey())
+            .add(XPMagic.VIBRATION_STAND.getKey());
     }
 }

@@ -65,6 +65,28 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .define('G', Items.GLASS)
             .unlockedBy("has_processing_chip", this.has(XPMagic.PROCESSING_CHIP.get()))
             .save(this.output);
+
+        // Mesh-bodied separator (string = filter mesh, matching its cobweb sound)
+        this.shaped(RecipeCategory.MISC, XPMagic.POWDER_SEPARATOR.get())
+            .pattern("ISI")
+            .pattern("SYS")
+            .pattern("ISI")
+            .define('I', Items.IRON_INGOT)
+            .define('S', Items.STRING)
+            .define('Y', XPMagic.PROCESSING_CHIP.get())
+            .unlockedBy("has_processing_chip", this.has(XPMagic.PROCESSING_CHIP.get()))
+            .save(this.output);
+
+        // Piston-driven vibration stand
+        this.shaped(RecipeCategory.MISC, XPMagic.VIBRATION_STAND.get())
+            .pattern("III")
+            .pattern("RPR")
+            .pattern("III")
+            .define('I', Items.IRON_INGOT)
+            .define('R', Items.REDSTONE)
+            .define('P', Items.PISTON)
+            .unlockedBy("has_redstone", this.has(Items.REDSTONE))
+            .save(this.output);
     }
 
     public static final class Runner extends RecipeProvider.Runner {

@@ -1,7 +1,12 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.block.PowderSeparatorBlock;
+import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
+import com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity;
+import com.gatheredsatyr53.xpmagic.block.entity.VibrationStandBlockEntity;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
+import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
@@ -65,6 +70,16 @@ public final class XPMagic {
             .setId(ITEMS.key("memory_powder"))
             .component(XP_CAPACITY.get(), 10)));
 
+    // Fractions produced by the Powder Separator; capacity lives in the recipe, not on the item
+    public static final RegistryObject<Item> COARSE_POWDER = ITEMS.register("coarse_powder",
+        () -> new Item(new Item.Properties().setId(ITEMS.key("coarse_powder"))));
+
+    public static final RegistryObject<Item> MEDIUM_POWDER = ITEMS.register("medium_powder",
+        () -> new Item(new Item.Properties().setId(ITEMS.key("medium_powder"))));
+
+    public static final RegistryObject<Item> FINE_POWDER = ITEMS.register("fine_powder",
+        () -> new Item(new Item.Properties().setId(ITEMS.key("fine_powder"))));
+
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
 
@@ -101,18 +116,59 @@ public final class XPMagic {
                                                                  .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0)
         ));
 
+    public static final RegistryObject<Block> POWDER_SEPARATOR = BLOCKS.register("powder_separator",
+        () -> new PowderSeparatorBlock(BlockBehaviour.Properties.of()
+                                                                 .setId(BLOCKS.key("powder_separator"))
+                                                                 .mapColor(MapColor.METAL)
+                                                                 .sound(SoundType.COBWEB)
+                                                                 .requiresCorrectToolForDrops()
+                                                                 .strength(15.0F)
+        ));
+
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
         () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
             .setId(ITEMS.key("xp_keeping_machine"))
+            .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Item> POWDER_SEPARATOR_ITEM = ITEMS.register("powder_separator",
+        () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
+            .setId(ITEMS.key("powder_separator"))
+            .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Block> VIBRATION_STAND = BLOCKS.register("vibration_stand",
+        () -> new VibrationStandBlock(BlockBehaviour.Properties.of()
+                                                              .setId(BLOCKS.key("vibration_stand"))
+                                                              .mapColor(MapColor.METAL)
+                                                              .sound(SoundType.METAL)
+                                                              .requiresCorrectToolForDrops()
+                                                              .strength(15.0F)
+                                                              .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0)
+        ));
+
+    public static final RegistryObject<Item> VIBRATION_STAND_ITEM = ITEMS.register("vibration_stand",
+        () -> new BlockItem(VIBRATION_STAND.get(), new Item.Properties()
+            .setId(ITEMS.key("vibration_stand"))
             .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<BlockEntityType<XPKeepingMachineBlockEntity>> XP_KEEPING_MACHINE_BLOCK_ENTITY =
         BLOCK_ENTITIES.register("xp_keeping_machine",
             () -> new BlockEntityType<>(XPKeepingMachineBlockEntity::new, java.util.Set.of(XP_KEEPING_MACHINE.get())));
 
+    public static final RegistryObject<BlockEntityType<PowderSeparatorBlockEntity>> POWDER_SEPARATOR_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("powder_separator",
+            () -> new BlockEntityType<>(PowderSeparatorBlockEntity::new, java.util.Set.of(POWDER_SEPARATOR.get())));
+
+    public static final RegistryObject<BlockEntityType<VibrationStandBlockEntity>> VIBRATION_STAND_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("vibration_stand",
+            () -> new BlockEntityType<>(VibrationStandBlockEntity::new, java.util.Set.of(VIBRATION_STAND.get())));
+
     public static final RegistryObject<MenuType<XPKeepingMachineMenu>> XP_KEEPING_MACHINE_MENU =
         MENU_TYPES.register("xp_keeping_machine",
             () -> new MenuType<>(XPKeepingMachineMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final RegistryObject<MenuType<PowderSeparatorMenu>> POWDER_SEPARATOR_MENU =
+        MENU_TYPES.register("powder_separator",
+            () -> new MenuType<>(PowderSeparatorMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     public static final RegistryObject<CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
@@ -120,11 +176,16 @@ public final class XPMagic {
             .icon(() -> XP_COCKTAIL.get().getDefaultInstance())
             .displayItems((params, output) -> {
                 output.accept(MEMORY_POWDER.get());
+                output.accept(COARSE_POWDER.get());
+                output.accept(MEDIUM_POWDER.get());
+                output.accept(FINE_POWDER.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
                 output.accept(PLAYER_KEY.get());
                 output.accept(XP_KEEPING_MACHINE_ITEM.get());
+                output.accept(POWDER_SEPARATOR_ITEM.get());
+                output.accept(VIBRATION_STAND_ITEM.get());
             })
             .build());
 

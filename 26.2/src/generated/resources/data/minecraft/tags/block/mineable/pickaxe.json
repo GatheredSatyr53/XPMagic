@@ -1,5 +1,7 @@
 {
   "values": [
-    "xpmagic:xp_keeping_machine"
+    "xpmagic:xp_keeping_machine",
+    "xpmagic:powder_separator",
+    "xpmagic:vibration_stand"
   ]
 }

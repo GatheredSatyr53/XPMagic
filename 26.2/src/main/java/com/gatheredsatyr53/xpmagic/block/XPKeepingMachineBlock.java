@@ -31,10 +31,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jspecify.annotations.Nullable;
 
-public class XPKeepingMachineBlock extends BaseEntityBlock {
+public class XPKeepingMachineBlock extends OrientedMachineBlock {
 
     public static final MapCodec<XPKeepingMachineBlock> CODEC = simpleCodec(XPKeepingMachineBlock::new);
-    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public XPKeepingMachineBlock(BlockBehaviour.Properties properties) {
@@ -49,22 +48,8 @@ public class XPKeepingMachineBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LIT);
-    }
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-    }
-
-    @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+        super.createBlockStateDefinition(builder);
+        builder.add(LIT);
     }
 
     @Override

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:string",
+    "Y": "xpmagic:processing_chip"
+  },
+  "pattern": [
+    "ISI",
+    "SYS",
+    "ISI"
+  ],
+  "result": {
+    "id": "xpmagic:powder_separator"
+  }
+}
