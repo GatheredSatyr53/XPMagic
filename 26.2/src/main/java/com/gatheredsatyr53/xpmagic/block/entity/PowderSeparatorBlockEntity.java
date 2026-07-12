@@ -14,6 +14,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -52,9 +53,38 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
     /** Vibration accumulated from the stand below; one portion is processed per PROCESS_INTERVAL. */
     private int vibrationTicks;
+    private int vibrationTicksTotal = PROCESS_INTERVAL;
+
+    private final ContainerData dataAccess = new ContainerData() {
+        @Override
+        public int get(int dataId) {
+            return switch (dataId) {
+                case PowderSeparatorMenu.DATA_VIBRATION_TICKS -> PowderSeparatorBlockEntity.this.vibrationTicks;
+                case PowderSeparatorMenu.DATA_VIBRATION_TICKS_TOTAL -> PowderSeparatorBlockEntity.this.vibrationTicksTotal;
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int dataId, int value) {
+            switch (dataId) {
+                case PowderSeparatorMenu.DATA_VIBRATION_TICKS -> PowderSeparatorBlockEntity.this.vibrationTicks = value;
+                case PowderSeparatorMenu.DATA_VIBRATION_TICKS_TOTAL -> PowderSeparatorBlockEntity.this.vibrationTicksTotal = value;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return PowderSeparatorMenu.DATA_COUNT;
+        }
+    };
 
     public PowderSeparatorBlockEntity(BlockPos worldPosition, BlockState blockState) {
         super(XPMagic.POWDER_SEPARATOR_BLOCK_ENTITY.get(), worldPosition, blockState);
+    }
+
+    public ContainerData getDataAccess() {
+        return this.dataAccess;
     }
 
     public ItemStackHandler getInventory() {
@@ -80,8 +110,16 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         // Powered only by a running vibration stand directly below.
         BlockState below = level.getBlockState(pos.below());
         boolean vibrating = below.getBlock() instanceof VibrationStandBlock && below.getValue(VibrationStandBlock.LIT);
-        if (!vibrating)
+
+        // Only advance the sifting cycle when there is actually something to sift; otherwise
+        // hold it at zero so a full cycle can't be pre-charged while the input is empty.
+        if (!vibrating || !be.canProcess()) {
+            if (be.vibrationTicks != 0) {
+                be.vibrationTicks = 0;
+                setChanged(level, pos, state);
+            }
             return;
+        }
 
         if (++be.vibrationTicks >= PROCESS_INTERVAL) {
             be.vibrationTicks = 0;

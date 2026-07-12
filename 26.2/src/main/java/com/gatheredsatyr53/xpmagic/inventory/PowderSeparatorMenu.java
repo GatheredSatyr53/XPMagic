@@ -5,7 +5,9 @@ import com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -16,30 +18,37 @@ import static com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntit
 
 public class PowderSeparatorMenu extends AbstractContainerMenu {
 
+    public static final int DATA_VIBRATION_TICKS = 0;
+    public static final int DATA_VIBRATION_TICKS_TOTAL = 1;
+    public static final int DATA_COUNT = 2;
+
     private static final int INV_START = SLOT_COUNT;
     private static final int HOTBAR_START = INV_START + 27;
     private static final int SLOTS_END = HOTBAR_START + 9;
 
     private final ContainerLevelAccess access;
+    private final ContainerData data;
 
     public PowderSeparatorMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), ContainerLevelAccess.NULL);
+        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
+            ContainerLevelAccess.NULL);
     }
 
     public PowderSeparatorMenu(int containerId, Inventory playerInventory, PowderSeparatorBlockEntity separator) {
-        this(containerId, playerInventory, separator.getInventory(),
+        this(containerId, playerInventory, separator.getInventory(), separator.getDataAccess(),
             ContainerLevelAccess.create(separator.getLevel(), separator.getBlockPos()));
     }
 
     private PowderSeparatorMenu(int containerId, Inventory playerInventory, IItemHandler inventory,
-                                ContainerLevelAccess access) {
+                                ContainerData data, ContainerLevelAccess access) {
         super(XPMagic.POWDER_SEPARATOR_MENU.get(), containerId);
         this.access = access;
+        this.data = data;
 
-        this.addSlot(new SlotItemHandler(inventory, SLOT_INPUT, 44, 35));
-        this.addSlot(new OutputSlot(inventory, SLOT_COARSE, 98, 17));
-        this.addSlot(new OutputSlot(inventory, SLOT_MEDIUM, 98, 35));
-        this.addSlot(new OutputSlot(inventory, SLOT_FINE, 98, 53));
+        this.addSlot(new SlotItemHandler(inventory, SLOT_INPUT, 80, 21));
+        this.addSlot(new OutputSlot(inventory, SLOT_COARSE, 62, 61));
+        this.addSlot(new OutputSlot(inventory, SLOT_MEDIUM, 80, 61));
+        this.addSlot(new OutputSlot(inventory, SLOT_FINE, 98, 61));
 
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 9; ++col)
@@ -47,6 +56,8 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
 
         for (int col = 0; col < 9; ++col)
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
+
+        this.addDataSlots(data);
     }
 
     @Override
@@ -92,6 +103,12 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
         }
 
         return moved;
+    }
+
+    public int getSeparationProgressScaled(int maxPixels) {
+        int separation = this.data.get(DATA_VIBRATION_TICKS);
+        int total = this.data.get(DATA_VIBRATION_TICKS_TOTAL);
+        return total != 0 && separation != 0 ? separation * maxPixels / total : 0;
     }
 
     /** Output-only: players may take fractions but never insert into a result slot. */
