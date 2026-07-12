@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
@@ -41,9 +42,19 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
     /** XP capacity of one source portion; the fraction budget for rule B. */
     private static final int SOURCE_CAPACITY = 10;
 
-    /** Output slots and the capacity of the fraction produced there. Ordered largest-first for rule B. */
+    /** Output slots, ordered largest-capacity-first for rule B. */
     private static final int[] FRACTION_SLOTS = {SLOT_COARSE, SLOT_MEDIUM, SLOT_FINE};
-    private static final int[] FRACTION_CAPS = {5, 2, 1};
+
+    /** Fraction capacities, cached from the items' xp_capacity so the budget rule and the XP Keeping
+     *  Machine can never disagree on a fraction's worth (keeps the sum &le; source: no XP dupe). */
+    private static int[] fractionCaps;
+
+    /** Independent drop chance for each fraction (coarse, medium, fine). */
+    private static final float[] FRACTION_CHANCES = {0.90F, 0.70F, 0.40F};
+
+    /** Each portion yields at least this much fraction capacity; only coarse (cap 5) can reach it,
+     *  so a short cycle is topped up with a coarse fraction. */
+    private static final int MIN_YIELD = 5;
 
     /** Ticks of vibration needed to process one portion. */
     private static final int PROCESS_INTERVAL = 40;
@@ -123,7 +134,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
         if (++be.vibrationTicks >= PROCESS_INTERVAL) {
             be.vibrationTicks = 0;
-            if (be.processPortion()) {
+            if (be.processPortion(level.getRandom())) {
                 SoundType sound = state.getSoundType();
                 level.playSound(null, pos, sound.getHitSound(), SoundSource.BLOCKS,
                     0.6F, 0.9F + level.getRandom().nextFloat() * 0.2F);
@@ -134,12 +145,13 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
     /** Which fractions are emitted, walking largest-first while capacity fits the budget (rule B). */
     private static boolean[] computeEmissions() {
+        int[] caps = fractionCaps();
         int budget = SOURCE_CAPACITY;
         boolean[] emit = new boolean[FRACTION_SLOTS.length];
         for (int i = 0; i < FRACTION_SLOTS.length; ++i) {
-            if (FRACTION_CAPS[i] <= budget) {
+            if (caps[i] <= budget) {
                 emit[i] = true;
-                budget -= FRACTION_CAPS[i];
+                budget -= caps[i];
             }
         }
         return emit;
@@ -147,6 +159,19 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
     private static Item[] fractionItems() {
         return new Item[]{XPMagic.COARSE_POWDER.get(), XPMagic.MEDIUM_POWDER.get(), XPMagic.FINE_POWDER.get()};
+    }
+
+    /** Each fraction's capacity, read once from its item's xp_capacity component, then cached. */
+    private static int[] fractionCaps() {
+        int[] caps = fractionCaps;
+        if (caps == null) {
+            Item[] items = fractionItems();
+            caps = new int[items.length];
+            for (int i = 0; i < items.length; ++i)
+                caps[i] = items[i].getDefaultInstance().getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
+            fractionCaps = caps;
+        }
+        return caps;
     }
 
     /** True if the input holds powder and every fraction that would be produced has room. */
@@ -167,25 +192,44 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         return true;
     }
 
-    /** Consumes one source portion and emits the fractions. No-op unless {@link #canProcess()}. */
-    private boolean processPortion() {
+    /**
+     * Consumes one source portion and rolls each fraction independently: a fraction drops only if
+     * it still fits the remaining budget (rule B) and passes its {@link #FRACTION_CHANCES} roll.
+     * If the rolled fractions fall short of {@link #MIN_YIELD} capacity, a coarse fraction is added
+     * so every portion yields at least that much.
+     * No-op unless {@link #canProcess()}.
+     */
+    private boolean processPortion(RandomSource random) {
         if (!canProcess())
             return false;
 
-        boolean[] emit = computeEmissions();
         Item[] fractions = fractionItems();
-
+        int[] caps = fractionCaps();
         this.inventory.getStackInSlot(SLOT_INPUT).shrink(1);
+
+        int budget = SOURCE_CAPACITY;
+        int yield = 0;
         for (int i = 0; i < FRACTION_SLOTS.length; ++i) {
-            if (!emit[i])
+            if (caps[i] > budget || random.nextFloat() >= FRACTION_CHANCES[i])
                 continue;
-            ItemStack out = this.inventory.getStackInSlot(FRACTION_SLOTS[i]);
-            if (out.isEmpty())
-                this.inventory.setStackInSlot(FRACTION_SLOTS[i], new ItemStack(fractions[i]));
-            else
-                out.grow(1);
+            putFraction(i, fractions[i]);   // canProcess() guaranteed room this cycle
+            budget -= caps[i];
+            yield += caps[i];
         }
+
+        // Guarantee the minimum yield: coarse (index 0, cap 5) is the only fraction big enough.
+        if (yield < MIN_YIELD)
+            putFraction(0, fractions[0]);
         return true;
+    }
+
+    /** Adds one of the given fraction to its output slot (room is assumed, checked by canProcess). */
+    private void putFraction(int index, Item fraction) {
+        ItemStack out = this.inventory.getStackInSlot(FRACTION_SLOTS[index]);
+        if (out.isEmpty())
+            this.inventory.setStackInSlot(FRACTION_SLOTS[index], new ItemStack(fraction));
+        else
+            out.grow(1);
     }
 
     @Override

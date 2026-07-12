@@ -70,15 +70,17 @@ public final class XPMagic {
             .setId(ITEMS.key("memory_powder"))
             .component(XP_CAPACITY.get(), 10)));
 
-    // Fractions produced by the Powder Separator; capacity lives in the recipe, not on the item
+    // Fractions produced by the Powder Separator. Their xp_capacity is both what the XP Keeping
+    // Machine drains and what the separator's budget spends; the three must sum to <= MEMORY_POWDER's
+    // capacity (10) so separating a portion can never create XP — no dupe.
     public static final RegistryObject<Item> COARSE_POWDER = ITEMS.register("coarse_powder",
-        () -> new Item(new Item.Properties().setId(ITEMS.key("coarse_powder"))));
+        () -> new Item(new Item.Properties().setId(ITEMS.key("coarse_powder")).component(XP_CAPACITY.get(), 5)));
 
     public static final RegistryObject<Item> MEDIUM_POWDER = ITEMS.register("medium_powder",
-        () -> new Item(new Item.Properties().setId(ITEMS.key("medium_powder"))));
+        () -> new Item(new Item.Properties().setId(ITEMS.key("medium_powder")).component(XP_CAPACITY.get(), 2)));
 
     public static final RegistryObject<Item> FINE_POWDER = ITEMS.register("fine_powder",
-        () -> new Item(new Item.Properties().setId(ITEMS.key("fine_powder"))));
+        () -> new Item(new Item.Properties().setId(ITEMS.key("fine_powder")).component(XP_CAPACITY.get(), 1)));
 
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));

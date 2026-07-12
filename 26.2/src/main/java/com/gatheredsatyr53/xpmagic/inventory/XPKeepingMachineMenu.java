@@ -70,7 +70,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
         this.addSlot(new SlotItemHandler(machineInventory, SLOT_MATRIX, 67, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return isPowder(stack);
+                return isMatrix(stack);
             }
         });
         this.addSlot(new SlotItemHandler(machineInventory, SLOT_OUTPUT, 116, 39) {
@@ -135,7 +135,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                 } else if (isFuel(stack)) {
                     if (!this.moveItemStackTo(stack, SLOT_FUEL, SLOT_FUEL + 1, false))
                         return ItemStack.EMPTY;
-                } else if (isPowder(stack)) {
+                } else if (isMatrix(stack)) {
                     if (!this.moveItemStackTo(stack, SLOT_MATRIX, SLOT_MATRIX + 1, false))
                         return ItemStack.EMPTY;
                 } else if (slotIndex < HOTBAR_START) {
@@ -168,8 +168,9 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
         return this.level.fuelValues().isFuel(stack);
     }
 
-    private boolean isPowder(ItemStack stack) {
-        return stack.is(XPMagic.MEMORY_POWDER.get());
+    /** Any XP-bearing item works as a matrix — memory powder and its separator fractions. */
+    private boolean isMatrix(ItemStack stack) {
+        return stack.has(XPMagic.XP_CAPACITY.get());
     }
 
     /** Only the player viewing the menu may place their own bound key. */
