@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
  * Experience stored inside an XP Cocktail. Replaces the 1.12 "StoredExp" NBT tag.
  * Grants the experience back when the cocktail is drunk and shows the amount in the tooltip.
  */
-public record StoredExp(int amount) implements ConsumableListener, TooltipProvider {
+public record StoredExp(int amount) implements ConsumableListener {
 
     public static final Codec<StoredExp> CODEC = ExtraCodecs.NON_NEGATIVE_INT.xmap(StoredExp::new, StoredExp::amount);
     public static final StreamCodec<RegistryFriendlyByteBuf, StoredExp> STREAM_CODEC = StreamCodec.composite(
@@ -38,7 +38,7 @@ public record StoredExp(int amount) implements ConsumableListener, TooltipProvid
     }
 
     @Override
-    public void addToTooltip(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag, DataComponentGetter components) {
-        consumer.accept(Component.translatable("item.xpmagic.xp_cocktail.stored_exp", this.amount));
+    public int amount() {
+        return amount;
     }
 }

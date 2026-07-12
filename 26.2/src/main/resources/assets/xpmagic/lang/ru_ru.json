@@ -8,5 +8,6 @@
   "item.xpmagic.player_key": "Именная бирка",
   "item.xpmagic.player_key.owner": "Владелец: %s",
   "item.xpmagic.player_key.unbound": "Не подписана — ПКМ, чтобы подписать",
+  "tooltip.xpmagic.xp_capacity": "Ёмкость опыта: %s",
   "block.xpmagic.xp_keeping_machine": "Хранитель опыта"
 }

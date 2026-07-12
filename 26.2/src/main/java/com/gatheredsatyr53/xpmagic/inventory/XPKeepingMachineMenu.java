@@ -67,7 +67,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                 return isFuel(stack);
             }
         });
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_POWDER, 67, 59) {
+        this.addSlot(new SlotItemHandler(machineInventory, SLOT_MATRIX, 67, 59) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return isPowder(stack);
@@ -136,7 +136,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
                     if (!this.moveItemStackTo(stack, SLOT_FUEL, SLOT_FUEL + 1, false))
                         return ItemStack.EMPTY;
                 } else if (isPowder(stack)) {
-                    if (!this.moveItemStackTo(stack, SLOT_POWDER, SLOT_POWDER + 1, false))
+                    if (!this.moveItemStackTo(stack, SLOT_MATRIX, SLOT_MATRIX + 1, false))
                         return ItemStack.EMPTY;
                 } else if (slotIndex < HOTBAR_START) {
                     if (!this.moveItemStackTo(stack, HOTBAR_START, SLOTS_END, false))

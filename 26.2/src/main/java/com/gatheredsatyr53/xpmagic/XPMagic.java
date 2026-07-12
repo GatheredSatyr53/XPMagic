@@ -4,11 +4,12 @@ import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
-import com.gatheredsatyr53.xpmagic.item.XPCocktailItem;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -51,8 +52,18 @@ public final class XPMagic {
             .build()
     );
 
+    // Fixed XP capacity of a matrix item; baked in as a default component below
+    public static final RegistryObject<DataComponentType<Integer>> XP_CAPACITY = DATA_COMPONENTS.register("xp_capacity",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
     public static final RegistryObject<Item> MEMORY_POWDER = ITEMS.register("memory_powder",
-        () -> new Item(new Item.Properties().setId(ITEMS.key("memory_powder"))));
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("memory_powder"))
+            .component(XP_CAPACITY.get(), 10)));
 
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
@@ -72,7 +83,7 @@ public final class XPMagic {
         () -> new PlayerKeyItem(new Item.Properties().setId(ITEMS.key("player_key")).stacksTo(1)));
 
     public static final RegistryObject<Item> XP_COCKTAIL = ITEMS.register("xp_cocktail",
-        () -> new XPCocktailItem(new Item.Properties()
+        () -> new Item(new Item.Properties()
             .setId(ITEMS.key("xp_cocktail"))
             .stacksTo(1)
             .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)

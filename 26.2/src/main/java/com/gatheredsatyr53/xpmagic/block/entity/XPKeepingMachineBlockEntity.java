@@ -22,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -38,13 +37,12 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     public static final int SLOT_BOTTLE = 0;
     public static final int SLOT_FUEL = 1;
-    public static final int SLOT_POWDER = 2;
+    public static final int SLOT_MATRIX = 2;
     public static final int SLOT_OUTPUT = 3;
     public static final int SLOT_KEY = 4;
     public static final int SLOT_COUNT = 5;
 
     /** Experience points drained per cocktail, as in 1.12 */
-    public static final int PUSH_EXP = 10;
     public static final int COOK_TIME = 200;
 
     private final MachineInventory inventory = new MachineInventory();
@@ -95,7 +93,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         return switch (slot) {
             case SLOT_BOTTLE -> stack.is(Items.GLASS_BOTTLE);
             case SLOT_FUEL -> this.level != null && this.level.fuelValues().isFuel(stack);
-            case SLOT_POWDER -> stack.is(XPMagic.MEMORY_POWDER.get());
+            case SLOT_MATRIX -> stack.has(XPMagic.XP_CAPACITY.get());
             default -> false;
         };
     }
@@ -123,6 +121,10 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         return server == null ? null : server.getPlayerList().getPlayer(owner.id());
     }
 
+    public static int getMatrixXPCapacity(XPKeepingMachineBlockEntity machine) {
+        return machine.inventory.getStackInSlot(SLOT_MATRIX).getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, XPKeepingMachineBlockEntity machine) {
         boolean changed = false;
         boolean isLit;
@@ -137,7 +139,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         }
 
         Player owner = machine.resolveOwner(level);
-        boolean ownerReady = owner != null && owner.totalExperience >= PUSH_EXP;
+        boolean ownerReady = owner != null && owner.totalExperience >= getMatrixXPCapacity(machine);
 
         if (machine.isBurning() || machine.allInputsPresent()) {
             boolean canWork = machine.canProduce() && ownerReady;
@@ -196,10 +198,10 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     private boolean canProduce() {
         ItemStack bottle = this.inventory.getStackInSlot(SLOT_BOTTLE);
-        ItemStack powder = this.inventory.getStackInSlot(SLOT_POWDER);
-        if (bottle.isEmpty() || powder.isEmpty())
+        ItemStack matrix = this.inventory.getStackInSlot(SLOT_MATRIX);
+        if (bottle.isEmpty() || matrix.isEmpty())
             return false;
-        if (!isItemValid(SLOT_BOTTLE, bottle) || !isItemValid(SLOT_POWDER, powder))
+        if (!isItemValid(SLOT_BOTTLE, bottle) || !isItemValid(SLOT_MATRIX, matrix))
             return false;
         return this.inventory.getStackInSlot(SLOT_OUTPUT).isEmpty();
     }
@@ -216,14 +218,14 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     private void produce(Player owner) {
         // Safeguard: never charge more XP than the owner actually has; store what was taken.
-        int charged = Math.min(PUSH_EXP, Math.max(0, owner.totalExperience));
+        int charged = Math.clamp(owner.totalExperience, 0, getMatrixXPCapacity(this));
         owner.giveExperiencePoints(-charged);
 
         ItemStack cocktail = new ItemStack(XPMagic.XP_COCKTAIL.get());
         cocktail.set(XPMagic.STORED_EXP.get(), new StoredExp(charged));
         this.inventory.setStackInSlot(SLOT_OUTPUT, cocktail);
         this.inventory.getStackInSlot(SLOT_BOTTLE).shrink(1);
-        this.inventory.getStackInSlot(SLOT_POWDER).shrink(1);
+        this.inventory.getStackInSlot(SLOT_MATRIX).shrink(1);
     }
 
     @Override

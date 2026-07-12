@@ -8,5 +8,6 @@
   "item.xpmagic.player_key": "Player Key",
   "item.xpmagic.player_key.owner": "Owner: %s",
   "item.xpmagic.player_key.unbound": "Unbound — right-click to bind",
+  "tooltip.xpmagic.xp_capacity": "XP Capacity: %s",
   "block.xpmagic.xp_keeping_machine": "XP Keeping Machine"
 }
