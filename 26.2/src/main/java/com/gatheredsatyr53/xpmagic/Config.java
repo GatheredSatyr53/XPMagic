@@ -59,6 +59,17 @@ public class Config {
             .comment("Maximum xp_capacity a Memory Crystal can reach by lightning charging.")
             .defineInRange("lightningMaxCapacity", 40, 0, 4096);
 
+    // Anvil crushing: a Memory Crystal an anvil lands on is shattered back into Memory Powder.
+    // Compaction (and any lightning charge) scatters on impact, so this is deliberately lossy — the
+    // reverse of the explosion's clean compaction — which keeps crystals worth fusing in the first place.
+    private static final ForgeConfigSpec.BooleanValue CRUSH_CRYSTALS = BUILDER
+            .comment("Whether an anvil landing on a Memory Crystal shatters it back into Memory Powder.")
+            .define("crushCrystals", true);
+
+    private static final ForgeConfigSpec.IntValue SHATTER_CAPACITY = BUILDER
+            .comment("xp_capacity budget released per Memory Crystal an anvil shatters, then broken at random into powder fractions (largest favoured). Keep below a crystal's own xp_capacity so crushing stays a lossy recycle, never a dupe.")
+            .defineInRange("shatterCapacity", 10, 0, 4096);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
@@ -70,6 +81,8 @@ public class Config {
     public static int crystalBonusMax;
     public static int lightningChargePerStrike;
     public static int lightningMaxCapacity;
+    public static boolean crushCrystals;
+    public static int shatterCapacity;
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(Identifier.tryParse(itemName));
@@ -85,6 +98,8 @@ public class Config {
         crystalBonusMax = CRYSTAL_BONUS_MAX.get();
         lightningChargePerStrike = LIGHTNING_CHARGE_PER_STRIKE.get();
         lightningMaxCapacity = LIGHTNING_MAX_CAPACITY.get();
+        crushCrystals = CRUSH_CRYSTALS.get();
+        shatterCapacity = SHATTER_CAPACITY.get();
 
         // convert the list of strings into a set of items
         items = ITEM_STRINGS.get().stream()
