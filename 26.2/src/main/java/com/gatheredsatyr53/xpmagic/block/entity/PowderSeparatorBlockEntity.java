@@ -50,7 +50,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
     private static int[] fractionCaps;
 
     /** Independent drop chance for each fraction (coarse, medium, fine). */
-    private static final float[] FRACTION_CHANCES = {0.90F, 0.70F, 0.40F};
+    private static final float[] FRACTION_CHANCES = {0.80F, 0.60F, 0.40F};
 
     /** Each portion yields at least this much fraction capacity; only coarse (cap 5) can reach it,
      *  so a short cycle is topped up with a coarse fraction. */
