@@ -87,6 +87,11 @@ public final class XPMagic {
     public static final RegistryObject<Item> FINE_POWDER = ITEMS.register("fine_powder",
         () -> new Item(new Item.Properties().setId(ITEMS.key("fine_powder")).component(XP_CAPACITY.get(), 1)));
 
+    public static final RegistryObject<Item> MEMORY_CRYSTAL = ITEMS.register("memory_crystal",
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("memory_crystal"))
+            .component(XP_CAPACITY.get(), 20)));
+
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
 
@@ -208,6 +213,7 @@ public final class XPMagic {
                 output.accept(COARSE_POWDER.get());
                 output.accept(MEDIUM_POWDER.get());
                 output.accept(FINE_POWDER.get());
+                output.accept(MEMORY_CRYSTAL.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());

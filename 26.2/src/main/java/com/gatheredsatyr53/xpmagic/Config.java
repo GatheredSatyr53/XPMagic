@@ -35,12 +35,28 @@ public class Config {
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
 
+    // Explosion crafting: Memory Powders caught in a blast fuse into Memory Crystals.
+    private static final ForgeConfigSpec.DoubleValue EXPLOSION_MIN_RADIUS = BUILDER
+            .comment("Minimum explosion radius that can fuse Memory Crystals (TNT is 4.0, a creeper is 3.0).")
+            .defineInRange("explosionMinRadius", 4.0, 0.0, 128.0);
+
+    private static final ForgeConfigSpec.IntValue POWDER_PER_CRYSTAL = BUILDER
+            .comment("Memory Powders consumed per Memory Crystal produced in an explosion.")
+            .defineInRange("powderPerCrystal", 2, 1, 64);
+
+    private static final ForgeConfigSpec.IntValue CRYSTAL_BONUS_MAX = BUILDER
+            .comment("Maximum random bonus xp_capacity added to a fused Memory Crystal, rolled 0..max on top of its base capacity.")
+            .defineInRange("crystalBonusMax", 4, 0, 64);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
     public static int magicNumber;
     public static String magicNumberIntroduction;
     public static Set<Item> items;
+    public static double explosionMinRadius;
+    public static int powderPerCrystal;
+    public static int crystalBonusMax;
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(Identifier.tryParse(itemName));
@@ -51,6 +67,9 @@ public class Config {
         logDirtBlock = LOG_DIRT_BLOCK.get();
         magicNumber = MAGIC_NUMBER.get();
         magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();
+        explosionMinRadius = EXPLOSION_MIN_RADIUS.get();
+        powderPerCrystal = POWDER_PER_CRYSTAL.get();
+        crystalBonusMax = CRYSTAL_BONUS_MAX.get();
 
         // convert the list of strings into a set of items
         items = ITEM_STRINGS.get().stream()

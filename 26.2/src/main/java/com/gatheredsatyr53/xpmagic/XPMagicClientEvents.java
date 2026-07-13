@@ -20,6 +20,15 @@ public final class XPMagicClientEvents {
         if (capacity != null) {
             event.getToolTip().add(Component.translatable("tooltip.xpmagic.xp_capacity", capacity)
                                             .withStyle(ChatFormatting.GRAY));
+
+            // Capacity above the item's baked-in base means the powder was compacted (e.g. fused
+            // by an explosion) — surface the surplus so the denser crystal reads as such.
+            int base = stack.getItem().getDefaultInstance().getOrDefault(XPMagic.XP_CAPACITY.get(), capacity);
+            int bonus = capacity - base;
+            if (bonus > 0) {
+                event.getToolTip().add(Component.translatable("tooltip.xpmagic.compaction_bonus", bonus)
+                                                .withStyle(ChatFormatting.AQUA));
+            }
         }
         StoredExp storedExp = stack.get(XPMagic.STORED_EXP.get());
         if (storedExp != null) {
