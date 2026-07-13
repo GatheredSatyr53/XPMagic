@@ -16,5 +16,19 @@
   "block.xpmagic.powder_separator": "Сепаратор порошка",
   "block.xpmagic.powder_mixer": "Смешиватель порошка",
   "block.xpmagic.vibration_stand": "Виброподставка",
-  "subtitles.xpmagic.vibration": "Виброподставка гудит"
+  "subtitles.xpmagic.vibration": "Виброподставка гудит",
+  "tooltip.xpmagic.mixer.coarse_surplus": "Рыхлая: -25%% на %s сверх мелкой",
+  "tooltip.xpmagic.mixer.coarse_balanced": "Рыхлая: скомпенсирована мелкой",
+  "tooltip.xpmagic.mixer.fine_surplus": "Плотная: +25%% на %s сверх грубой",
+  "tooltip.xpmagic.mixer.fine_balanced": "Плотная: скомпенсирована грубой",
+  "tooltip.xpmagic.mixer.medium": "Наполнитель: номинальная ёмкость",
+  "tooltip.xpmagic.mixer.pairs": "Скомпенсированных пар: %s",
+  "tooltip.xpmagic.mixer.surplus_coarse": "Избыток грубой: %s (-25%%)",
+  "tooltip.xpmagic.mixer.surplus_fine": "Избыток мелкой: %s (+25%%)",
+  "tooltip.xpmagic.mixer.filler": "Наполнитель (средняя): %s",
+  "tooltip.xpmagic.mixer.mix_capacity": "Ёмкость смеси: %s",
+  "tooltip.xpmagic.mixer.catalyst": "Катализатор: +%s%%",
+  "tooltip.xpmagic.mixer.units": "Единиц на выходе: %s",
+  "tooltip.xpmagic.mixer.exceeded": "Ёмкость единицы %s > потолка %s",
+  "tooltip.xpmagic.mixer.blocked": "Выход заблокирован"
 }

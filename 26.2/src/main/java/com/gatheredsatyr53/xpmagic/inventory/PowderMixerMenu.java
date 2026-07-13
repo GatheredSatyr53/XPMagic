@@ -28,6 +28,9 @@ public class PowderMixerMenu extends AbstractContainerMenu {
     private static final int HOTBAR_START = INV_START + 27;
     private static final int SLOTS_END = HOTBAR_START + 9;
 
+    /** Hard ceiling on a single output unit's capacity; above it the mix yields nothing. */
+    public static final int MAX_OUTPUT_CAPACITY = 20;
+
     private final Player player;
     private final ContainerLevelAccess access;
     protected final MachineShapelessCraftingContainer craftSlots = new MachineShapelessCraftingContainer(this, INPUT_COUNT);
@@ -45,18 +48,18 @@ public class PowderMixerMenu extends AbstractContainerMenu {
         IItemHandler inputs = new InvWrapper(this.craftSlots);
 
         // Three interchangeable component slots (top row) + one fixed catalyst slot below, per the GUI texture.
-        this.addSlot(new ConditionalInputSlot(inputs, 0, 26, 26, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 1, 44, 26, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 2, 62, 26, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 3, 44, 44, PowderMixerMenu::isCatalyst));
-        this.addSlot(new MixingResultSlot(this.resultSlots, 0, 124, 35, this));
+        this.addSlot(new ConditionalInputSlot(inputs, 0, 25, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(inputs, 1, 43, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(inputs, 2, 61, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(inputs, 3, 43, 43, PowderMixerMenu::isCatalyst));
+        this.addSlot(new MixingResultSlot(this.resultSlots, 0, 123, 34, this));
 
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 9; ++col)
-                this.addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlot(new Slot(inventory, col + row * 9 + 9, 7 + col * 18, 83 + row * 18));
 
         for (int col = 0; col < 9; ++col)
-            this.addSlot(new Slot(inventory, col, 8 + col * 18, 142));
+            this.addSlot(new Slot(inventory, col, 7 + col * 18, 141));
     }
 
     private static boolean isFraction(ItemStack stack) {
@@ -110,6 +113,26 @@ public class PowderMixerMenu extends AbstractContainerMenu {
      * Everything floors, so a fine premium must be accumulated before it materialises.
      */
     private ItemStack computeResult() {
+        MixSummary mix = this.summarize();
+        if (!mix.hasOutput()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack result = new ItemStack(XPMagic.MEMORY_POWDER.get(), mix.outputCount());
+        // Only override the baked default so full-capacity output still stacks with ordinary powder.
+        Integer defaultCapacity = result.get(XPMagic.XP_CAPACITY.get());
+        if (defaultCapacity == null || defaultCapacity != mix.outputCapacity()) {
+            result.set(XPMagic.XP_CAPACITY.get(), mix.outputCapacity());
+        }
+        return result;
+    }
+
+    /** The current mix as read from the (synced) component and modifier slots. Safe on the client. */
+    public MixSummary currentMix() {
+        return this.summarize();
+    }
+
+    private MixSummary summarize() {
         int coarse = 0, medium = 0, fine = 0;
         for (int slot = 0; slot < COMPONENT_SLOTS; slot++) {
             ItemStack stack = this.craftSlots.getItem(slot);
@@ -122,12 +145,12 @@ public class PowderMixerMenu extends AbstractContainerMenu {
             } else if (stack.is(XPMagic.FINE_POWDER.get())) {
                 fine += stack.getCount();
             } else {
-                return ItemStack.EMPTY; // an unexpected component blocks the mix
+                return MixSummary.EMPTY; // an unexpected component blocks the mix (slots filter this anyway)
             }
         }
 
         if (coarse == 0 && medium == 0 && fine == 0) {
-            return ItemStack.EMPTY;
+            return MixSummary.EMPTY;
         }
 
         int pairs = Math.min(coarse, fine);
@@ -143,14 +166,27 @@ public class PowderMixerMenu extends AbstractContainerMenu {
 
         // Per-item capacity, catalyst applied, floored: floor( totalTimes4 / (4*count) * (100+percent)/100 ).
         int capacity = Math.max(1, (totalTimes4 * (100 + percent)) / (400 * count));
+        boolean exceeded = capacity > MAX_OUTPUT_CAPACITY;
 
-        ItemStack result = new ItemStack(XPMagic.MEMORY_POWDER.get(), count);
-        // Only override the baked default so full-capacity output still stacks with ordinary powder.
-        Integer defaultCapacity = result.get(XPMagic.XP_CAPACITY.get());
-        if (defaultCapacity == null || defaultCapacity != capacity) {
-            result.set(XPMagic.XP_CAPACITY.get(), capacity);
+        return new MixSummary(coarse, medium, fine, pairs, surplusCoarse, surplusFine,
+            totalTimes4, percent, count, capacity, exceeded);
+    }
+
+    /** Breakdown of the current mix, shared by result computation and the screen's tooltips. */
+    public record MixSummary(int coarse, int medium, int fine, int pairs, int surplusCoarse, int surplusFine,
+                             int mixCapacityTimes4, int catalystPercent, int outputCount, int outputCapacity,
+                             boolean exceeded) {
+        public static final MixSummary EMPTY = new MixSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false);
+
+        /** True when fractions are present, regardless of the ceiling. */
+        public boolean present() {
+            return this.outputCount > 0;
         }
-        return result;
+
+        /** True when there is a valid result (present and within the capacity ceiling). */
+        public boolean hasOutput() {
+            return this.present() && !this.exceeded;
+        }
     }
 
     private static int gcd(int a, int b) {
