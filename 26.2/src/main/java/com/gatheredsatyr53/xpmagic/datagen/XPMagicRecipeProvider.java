@@ -1,25 +1,15 @@
 package com.gatheredsatyr53.xpmagic.datagen;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.gatheredsatyr53.xpmagic.XPMagic;
-import com.gatheredsatyr53.xpmagic.item.mixing.ShapelessMixingRecipe;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 
 public final class XPMagicRecipeProvider extends RecipeProvider {
 
@@ -98,23 +88,8 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_redstone", this.has(Items.REDSTONE))
             .save(this.output);
 
-        // Powder Mixer recipes (memory_powder_mixing type). Components are quantity-based and
-        // non-positional: a repeated ingredient means that many required items, pooled across the
-        // component slots (order/slot doesn't matter); only the modifier slot is fixed.
-        // Example / placeholder — recombine fractions into full powder: 2x coarse + 1x medium + a
-        // blaze rod. XP capacity in (5+5+2=12) must stay >= the result's (memory_powder = 10) so
-        // mixing never creates XP. Tune freely.
-        this.mixing("recombine_memory_powder",
-            new ItemStackTemplate(XPMagic.MEMORY_POWDER.get()),
-            Optional.of(Ingredient.of(Items.BLAZE_ROD)),
-            Ingredient.of(XPMagic.COARSE_POWDER.get()),
-            Ingredient.of(XPMagic.COARSE_POWDER.get()),
-            Ingredient.of(XPMagic.MEDIUM_POWDER.get()));
-    }
-
-    private void mixing(String name, ItemStackTemplate result, Optional<Ingredient> modifier, Ingredient... components) {
-        ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(XPMagic.MODID, name));
-        this.output.accept(key, new ShapelessMixingRecipe("", CraftingBookCategory.MISC, result, List.of(components), modifier), null);
+        // Note: powder mixing is not a data recipe — it's a fixed proportional formula computed
+        // directly in PowderMixerMenu (N x 1:2:1 fractions -> N memory powder).
     }
 
     public static final class Runner extends RecipeProvider.Runner {

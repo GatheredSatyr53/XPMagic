@@ -30,8 +30,5 @@ public final class XPMagicDataGen {
 
         generator.addProvider(event.includeServer(),
             (DataProvider.Factory<XPMagicBlockTagsProvider>) output -> new XPMagicBlockTagsProvider(output, lookup, event.getExistingFileHelper()));
-
-        generator.addProvider(event.includeServer(),
-            (DataProvider.Factory<XPMagicItemTagsProvider>) output -> new XPMagicItemTagsProvider(output, lookup, event.getExistingFileHelper()));
     }
 }
