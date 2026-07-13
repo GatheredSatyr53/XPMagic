@@ -48,6 +48,17 @@ public class Config {
             .comment("Maximum random bonus xp_capacity added to a fused Memory Crystal, rolled 0..max on top of its base capacity.")
             .defineInRange("crystalBonusMax", 4, 0, 64);
 
+    // Lightning charging: a Memory Crystal struck by lightning absorbs the bolt's energy, gaining
+    // xp_capacity up to a cap. Like the explosion's compaction, this is genuine external energy —
+    // so the crystal legitimately ends up holding more than it did.
+    private static final ForgeConfigSpec.IntValue LIGHTNING_CHARGE_PER_STRIKE = BUILDER
+            .comment("xp_capacity a Memory Crystal gains from a single lightning strike.")
+            .defineInRange("lightningChargePerStrike", 10, 0, 1024);
+
+    private static final ForgeConfigSpec.IntValue LIGHTNING_MAX_CAPACITY = BUILDER
+            .comment("Maximum xp_capacity a Memory Crystal can reach by lightning charging.")
+            .defineInRange("lightningMaxCapacity", 40, 0, 4096);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
@@ -57,6 +68,8 @@ public class Config {
     public static double explosionMinRadius;
     public static int powderPerCrystal;
     public static int crystalBonusMax;
+    public static int lightningChargePerStrike;
+    public static int lightningMaxCapacity;
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(Identifier.tryParse(itemName));
@@ -70,6 +83,8 @@ public class Config {
         explosionMinRadius = EXPLOSION_MIN_RADIUS.get();
         powderPerCrystal = POWDER_PER_CRYSTAL.get();
         crystalBonusMax = CRYSTAL_BONUS_MAX.get();
+        lightningChargePerStrike = LIGHTNING_CHARGE_PER_STRIKE.get();
+        lightningMaxCapacity = LIGHTNING_MAX_CAPACITY.get();
 
         // convert the list of strings into a set of items
         items = ITEM_STRINGS.get().stream()

@@ -70,6 +70,15 @@ public final class XPMagic {
             .build()
     );
 
+    // xp_capacity a Memory Crystal gained from absorbing lightning, tracked apart from the
+    // explosion's compaction so both contributions can be shown separately. Also drives the glint.
+    public static final RegistryObject<DataComponentType<Integer>> LIGHTNING_CHARGE = DATA_COMPONENTS.register("lightning_charge",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
     public static final RegistryObject<Item> MEMORY_POWDER = ITEMS.register("memory_powder",
         () -> new Item(new Item.Properties()
             .setId(ITEMS.key("memory_powder"))

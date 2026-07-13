@@ -21,13 +21,19 @@ public final class XPMagicClientEvents {
             event.getToolTip().add(Component.translatable("tooltip.xpmagic.xp_capacity", capacity)
                                             .withStyle(ChatFormatting.GRAY));
 
-            // Capacity above the item's baked-in base means the powder was compacted (e.g. fused
-            // by an explosion) — surface the surplus so the denser crystal reads as such.
+            // Capacity above the item's baked-in base comes from two separate sources: an explosion's
+            // compaction and a lightning charge. The lightning share is tracked on its own component;
+            // whatever remains over base is compaction. Show each contribution as its own line.
             int base = stack.getItem().getDefaultInstance().getOrDefault(XPMagic.XP_CAPACITY.get(), capacity);
-            int bonus = capacity - base;
-            if (bonus > 0) {
-                event.getToolTip().add(Component.translatable("tooltip.xpmagic.compaction_bonus", bonus)
+            int lightning = stack.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
+            int compaction = capacity - base - lightning;
+            if (compaction > 0) {
+                event.getToolTip().add(Component.translatable("tooltip.xpmagic.compaction_bonus", compaction)
                                                 .withStyle(ChatFormatting.AQUA));
+            }
+            if (lightning > 0) {
+                event.getToolTip().add(Component.translatable("tooltip.xpmagic.lightning_charge", lightning)
+                                                .withStyle(ChatFormatting.YELLOW));
             }
         }
         StoredExp storedExp = stack.get(XPMagic.STORED_EXP.get());
