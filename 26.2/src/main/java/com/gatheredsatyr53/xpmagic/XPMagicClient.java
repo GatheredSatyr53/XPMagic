@@ -1,6 +1,6 @@
 package com.gatheredsatyr53.xpmagic;
 
-import com.gatheredsatyr53.xpmagic.gui.PowderMixingScreen;
+import com.gatheredsatyr53.xpmagic.gui.PowderMixerScreen;
 import com.gatheredsatyr53.xpmagic.gui.PowderSeparatorScreen;
 import com.gatheredsatyr53.xpmagic.gui.XPKeepingMachineScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -17,7 +17,7 @@ public final class XPMagicClient {
         event.enqueueWork(() -> {
             MenuScreens.register(XPMagic.XP_KEEPING_MACHINE_MENU.get(), XPKeepingMachineScreen::new);
             MenuScreens.register(XPMagic.POWDER_SEPARATOR_MENU.get(), PowderSeparatorScreen::new);
-            MenuScreens.register(XPMagic.POWDER_MIXER_MENU.get(), PowderMixingScreen::new);
+            MenuScreens.register(XPMagic.POWDER_MIXER_MENU.get(), PowderMixerScreen::new);
         });
     }
 }

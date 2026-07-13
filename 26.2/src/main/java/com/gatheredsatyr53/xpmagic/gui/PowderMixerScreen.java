@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PowderMixingScreen extends AbstractContainerScreen<PowderMixerMenu> {
+public class PowderMixerScreen extends AbstractContainerScreen<PowderMixerMenu> {
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(XPMagic.MODID, "textures/gui/powder_mixer.png");
     private static final int PANEL_WIDTH = 174;
@@ -31,7 +31,7 @@ public class PowderMixingScreen extends AbstractContainerScreen<PowderMixerMenu>
     private static final int WARN_X = 123;
     private static final int WARN_Y = 60;
 
-    public PowderMixingScreen(final PowderMixerMenu menu, final Inventory inventory, final Component title) {
+    public PowderMixerScreen(final PowderMixerMenu menu, final Inventory inventory, final Component title) {
         super(menu, inventory, title, PANEL_WIDTH, PANEL_HEIGHT);
     }
 
