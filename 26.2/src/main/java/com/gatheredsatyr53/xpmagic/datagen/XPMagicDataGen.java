@@ -1,10 +1,6 @@
 package com.gatheredsatyr53.xpmagic.datagen;
 
-import java.util.List;
-import java.util.Set;
-
 import com.gatheredsatyr53.xpmagic.XPMagic;
-
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.loot.LootTableProvider;
@@ -12,6 +8,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = XPMagic.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class XPMagicDataGen {
@@ -31,5 +30,8 @@ public final class XPMagicDataGen {
 
         generator.addProvider(event.includeServer(),
             (DataProvider.Factory<XPMagicBlockTagsProvider>) output -> new XPMagicBlockTagsProvider(output, lookup, event.getExistingFileHelper()));
+
+        generator.addProvider(event.includeServer(),
+            (DataProvider.Factory<XPMagicItemTagsProvider>) output -> new XPMagicItemTagsProvider(output, lookup, event.getExistingFileHelper()));
     }
 }

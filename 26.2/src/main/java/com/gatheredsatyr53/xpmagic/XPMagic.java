@@ -1,31 +1,38 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.block.PowderMixerBlock;
 import com.gatheredsatyr53.xpmagic.block.PowderSeparatorBlock;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
 import com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity;
 import com.gatheredsatyr53.xpmagic.block.entity.VibrationStandBlockEntity;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
+import com.gatheredsatyr53.xpmagic.inventory.PowderMixerMenu;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
+import com.gatheredsatyr53.xpmagic.item.mixing.MixingRecipe;
+import com.gatheredsatyr53.xpmagic.item.mixing.ShapelessMixingRecipe;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -51,6 +58,8 @@ public final class XPMagic {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
+    public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(ForgeRegistries.RECIPE_TYPES, MODID);
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
 
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
     public static final RegistryObject<DataComponentType<StoredExp>> STORED_EXP = DATA_COMPONENTS.register("stored_exp",
@@ -130,6 +139,15 @@ public final class XPMagic {
                                                                  .strength(15.0F)
         ));
 
+    public static final RegistryObject<Block> POWDER_MIXER = BLOCKS.register("powder_mixer",
+        () -> new PowderMixerBlock(BlockBehaviour.Properties.of()
+                                                            .setId(BLOCKS.key("powder_mixer"))
+                                                            .mapColor(MapColor.METAL)
+                                                            .sound(SoundType.METAL)
+                                                            .requiresCorrectToolForDrops()
+                                                            .strength(15.0F)
+        ));
+
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
         () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
             .setId(ITEMS.key("xp_keeping_machine"))
@@ -138,6 +156,11 @@ public final class XPMagic {
     public static final RegistryObject<Item> POWDER_SEPARATOR_ITEM = ITEMS.register("powder_separator",
         () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
             .setId(ITEMS.key("powder_separator"))
+            .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Item> POWDER_MIXER_ITEM = ITEMS.register("powder_mixer",
+        () -> new BlockItem(POWDER_MIXER.get(), new Item.Properties()
+            .setId(ITEMS.key("powder_mixer"))
             .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<Block> VIBRATION_STAND = BLOCKS.register("vibration_stand",
@@ -179,6 +202,10 @@ public final class XPMagic {
         MENU_TYPES.register("powder_separator",
             () -> new MenuType<>(PowderSeparatorMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    public static final RegistryObject<MenuType<PowderMixerMenu>> POWDER_MIXER_MENU =
+            MENU_TYPES.register("powder_mixer",
+                                () -> new MenuType<>(PowderMixerMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     public static final RegistryObject<CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.xpmagic"))
@@ -195,8 +222,17 @@ public final class XPMagic {
                 output.accept(XP_KEEPING_MACHINE_ITEM.get());
                 output.accept(POWDER_SEPARATOR_ITEM.get());
                 output.accept(VIBRATION_STAND_ITEM.get());
+                output.accept(POWDER_MIXER_ITEM.get());
             })
             .build());
+
+    public static final TagKey<Item> POWDER_COMPONENT = TagKey.create(ITEMS.getRegistryKey(), Identifier.fromNamespaceAndPath("xpmagic", "powder/component"));
+    public static final TagKey<Item> POWDER_MODIFIER = TagKey.create(ITEMS.getRegistryKey(), Identifier.fromNamespaceAndPath("xpmagic", "powder/modifier"));
+
+    public static final RegistryObject<RecipeType<MixingRecipe>> MIXING_RECIPE = RegistrationHelper.registerRecipeType("memory_powder_mixing");
+
+    public static final RegistryObject<RecipeSerializer<ShapelessMixingRecipe>> MIXING_SERIALIZER =
+        RECIPE_SERIALIZERS.register("memory_powder_mixing", () -> ShapelessMixingRecipe.SERIALIZER);
 
     public XPMagic(FMLJavaModLoadingContext context) {
         var modBusGroup = context.getModBusGroup();
@@ -208,6 +244,8 @@ public final class XPMagic {
         BLOCK_ENTITIES.register(modBusGroup);
         SOUND_EVENTS.register(modBusGroup);
         MENU_TYPES.register(modBusGroup);
+        RECIPE_TYPES.register(modBusGroup);
+        RECIPE_SERIALIZERS.register(modBusGroup);
 
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

@@ -21,10 +21,12 @@ public final class XPMagicBlockLoot extends BlockLootSubProvider {
         this.dropSelf(XPMagic.XP_KEEPING_MACHINE.get());
         this.dropSelf(XPMagic.POWDER_SEPARATOR.get());
         this.dropSelf(XPMagic.VIBRATION_STAND.get());
+        this.dropSelf(XPMagic.POWDER_MIXER.get());
     }
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return List.of(XPMagic.XP_KEEPING_MACHINE.get(), XPMagic.POWDER_SEPARATOR.get(), XPMagic.VIBRATION_STAND.get());
+        return List.of(XPMagic.XP_KEEPING_MACHINE.get(), XPMagic.POWDER_SEPARATOR.get(), XPMagic.VIBRATION_STAND.get(),
+            XPMagic.POWDER_MIXER.get());
     }
 }

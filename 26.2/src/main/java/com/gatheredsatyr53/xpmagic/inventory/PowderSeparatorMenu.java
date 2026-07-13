@@ -110,16 +110,4 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
         int total = this.data.get(DATA_VIBRATION_TICKS_TOTAL);
         return total != 0 && separation != 0 ? separation * maxPixels / total : 0;
     }
-
-    /** Output-only: players may take fractions but never insert into a result slot. */
-    private static final class OutputSlot extends SlotItemHandler {
-        OutputSlot(IItemHandler handler, int index, int x, int y) {
-            super(handler, index, x, y);
-        }
-
-        @Override
-        public boolean mayPlace(ItemStack stack) {
-            return false;
-        }
-    }
 }

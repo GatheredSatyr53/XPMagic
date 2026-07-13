@@ -55,30 +55,10 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
         this.level = playerInventory.player.level();
         this.player = playerInventory.player;
 
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_BOTTLE, 67, 19) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return isBottle(stack);
-            }
-        });
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_FUEL, 49, 39) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return isFuel(stack);
-            }
-        });
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_MATRIX, 67, 59) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return isMatrix(stack);
-            }
-        });
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_OUTPUT, 116, 39) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return false;
-            }
-        });
+        this.addSlot(new ConditionalInputSlot(machineInventory, SLOT_BOTTLE, 67, 19, this::isBottle));
+        this.addSlot(new ConditionalInputSlot(machineInventory, SLOT_FUEL, 49, 39, this::isFuel));
+        this.addSlot(new ConditionalInputSlot(machineInventory, SLOT_MATRIX, 67, 59, this::isMatrix));
+        this.addSlot(new OutputSlot(machineInventory, SLOT_OUTPUT, 116, 39));
         this.addSlot(new SlotItemHandler(machineInventory, SLOT_KEY, 9, 9) {
             @Override
             public boolean mayPlace(ItemStack stack) {
