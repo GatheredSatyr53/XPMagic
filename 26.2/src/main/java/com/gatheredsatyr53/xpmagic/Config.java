@@ -70,6 +70,13 @@ public class Config {
             .comment("xp_capacity budget released per Memory Crystal an anvil shatters, then broken at random into powder fractions (largest favoured). Keep below a crystal's own xp_capacity so crushing stays a lossy recycle, never a dupe.")
             .defineInRange("shatterCapacity", 10, 0, 4096);
 
+    // Soul-fire transformation: a Memory Crystal left in soul fire (blue flame) has its xp_capacity
+    // burned away one point at a time; when it hits 0 the crystal transforms into a Time Crystal. The
+    // soul_fire_time component also marks any item that has touched blue flame, for detection elsewhere.
+    private static final ForgeConfigSpec.IntValue SOUL_FIRE_TICKS_PER_CAPACITY = BUILDER
+            .comment("Ticks in soul fire to burn one point of xp_capacity off a Memory Crystal; at 0 capacity it becomes a Time Crystal (20 ticks = 1 second).")
+            .defineInRange("soulFireTicksPerCapacity", 20, 1, 72000);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
@@ -83,6 +90,7 @@ public class Config {
     public static int lightningMaxCapacity;
     public static boolean crushCrystals;
     public static int shatterCapacity;
+    public static int soulFireTicksPerCapacity;
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(Identifier.tryParse(itemName));
@@ -100,6 +108,7 @@ public class Config {
         lightningMaxCapacity = LIGHTNING_MAX_CAPACITY.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
+        soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();
 
         // convert the list of strings into a set of items
         items = ITEM_STRINGS.get().stream()

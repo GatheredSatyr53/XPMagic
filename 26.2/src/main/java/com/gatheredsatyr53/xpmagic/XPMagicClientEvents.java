@@ -36,6 +36,13 @@ public final class XPMagicClientEvents {
                                                 .withStyle(ChatFormatting.YELLOW));
             }
         }
+        // Soul fire burns one point of capacity per soulFireTicksPerCapacity ticks in the flame, so
+        // total time / interval is how much this crystal has lost to it.
+        int burned = stack.getOrDefault(XPMagic.SOUL_FIRE_TIME.get(), 0) / Config.soulFireTicksPerCapacity;
+        if (burned > 0) {
+            event.getToolTip().add(Component.translatable("tooltip.xpmagic.burned_away", burned)
+                                            .withStyle(ChatFormatting.DARK_AQUA));
+        }
         StoredExp storedExp = stack.get(XPMagic.STORED_EXP.get());
         if (storedExp != null) {
             event.getToolTip().add(Component.translatable("item.xpmagic.xp_cocktail.stored_exp", storedExp.amount())

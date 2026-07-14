@@ -85,6 +85,16 @@ public final class XPMagic {
             .build()
     );
 
+    // Ticks an item has spent sitting in soul fire (blue flame), accumulated by SoulFireHandler to pace
+    // how fast it burns xp_capacity off a transforming crystal. Doubles as the "this item was touched by
+    // blue flame" flag: any stack carrying a non-zero value has been in soul fire.
+    public static final RegistryObject<DataComponentType<Integer>> SOUL_FIRE_TIME = DATA_COMPONENTS.register("soul_fire_time",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
     // Owner recorded on a Player Key; the machine drains XP from this player
     public static final RegistryObject<DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
                                                                                                                () -> DataComponentType.<PlayerOwner>builder()
@@ -114,10 +124,20 @@ public final class XPMagic {
     public static final RegistryObject<Item> FINE_POWDER = ITEMS.register("fine_powder",
         () -> new Item(new Item.Properties().setId(ITEMS.key("fine_powder")).component(XP_CAPACITY.get(), 1)));
 
+    // fireResistant so soul fire neither burns nor ignites it: SoulFireHandler transforms a crystal
+    // that sits in soul fire, and vanilla fire mechanics would otherwise destroy it long before the
+    // transformation finishes (also means it survives lava).
     public static final RegistryObject<Item> MEMORY_CRYSTAL = ITEMS.register("memory_crystal",
         () -> new Item(new Item.Properties()
             .setId(ITEMS.key("memory_crystal"))
+            .fireResistant()
             .component(XP_CAPACITY.get(), 20)));
+
+    // Also fireResistant so the finished crystal doesn't burn up while still lying in the soul fire.
+    public static final RegistryObject<Item> TIME_CRYSTAL = ITEMS.register("time_crystal",
+                                                                             () -> new Item(new Item.Properties()
+                                                                                                    .setId(ITEMS.key("time_crystal"))
+                                                                                                    .fireResistant()));
 
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
@@ -286,6 +306,7 @@ public final class XPMagic {
                 output.accept(MEDIUM_POWDER.get());
                 output.accept(FINE_POWDER.get());
                 output.accept(MEMORY_CRYSTAL.get());
+                output.accept(TIME_CRYSTAL.get());
                 output.accept(MEMORY_CRYSTAL_SWORD.get());
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());
