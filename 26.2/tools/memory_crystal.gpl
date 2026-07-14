@@ -1,6 +1,6 @@
 GIMP Palette
 Name: Memory Crystal
-Columns: 7
+Columns: 8
 #
   1   0  68	outline
 131   1  67	deep_shadow
@@ -9,3 +9,4 @@ Columns: 7
 221 153 171	light
 215 209 250	highlight
 219 241 255	spec
+125  94  49	accent_gold
