@@ -5,11 +5,13 @@
 modLoader="javafml"
 loaderVersion="[65,)"
 license="All Rights Reserved"
+issueTrackerURL="https://github.com/Avvros/XPMagic/issues"
 
 [[mods]]
 modId="xpmagic"
 version="1.0.1"
 displayName="XPMagic"
+displayURL="https://github.com/Avvros/XPMagic"
 authors="GatheredSatyr53"
 credits="Created by GatheredSatyr53"
 
