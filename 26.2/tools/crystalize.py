@@ -20,10 +20,16 @@ features one colour:
     blade-rev  t = y - x   (same axis, gold at pommel)
 Rotated axes are stretched onto the learned gradient range; diag stays raw.
 
+Each crystal is one baked transform table (--table, default crystal_transform.json
+= Memory Crystal). Bake a new one per crystal with --learn, then reuse the same
+script to apply any of them -- e.g. time_transform.json for the Time Crystal.
+
 Usage:
     python crystalize.py <diamond_sprite.png> <out.png> [--axis diag|blade|blade-rev]
-    python crystalize.py --learn <diamond.png> <crystal.png>   # rebuild the JSON
-                                                                 # (inputs stay local)
+                                                         [--table <transform.json>]
+    python crystalize.py --learn <diamond.png> <crystal.png> [<out_table.json>]
+                                                 # inputs stay local, only the
+                                                 # colour+position table is written
 Requires Pillow + numpy.
 """
 import sys, json
@@ -33,11 +39,17 @@ import numpy as np
 from collections import defaultdict
 
 HERE = Path(__file__).parent
-TABLE = HERE / "crystal_transform.json"
+DEFAULT_TABLE = "crystal_transform.json"
 
 
-def load_table():
-    raw = json.loads(TABLE.read_text())
+def resolve_table(name):
+    """Accept a path as given, else look for it next to this script."""
+    p = Path(name)
+    return p if p.exists() else HERE / name
+
+
+def load_table(name=DEFAULT_TABLE):
+    raw = json.loads(resolve_table(name).read_text())
     per = {}
     for col, td in raw.items():
         key = tuple(int(v) for v in col.split(","))
@@ -45,7 +57,7 @@ def load_table():
     return per
 
 
-def learn(diamond_png, crystal_png):
+def learn(diamond_png, crystal_png, out_table=DEFAULT_TABLE):
     d = np.array(Image.open(diamond_png).convert("RGBA"))
     c = np.array(Image.open(crystal_png).convert("RGBA"))
     both = (d[:, :, 3] > 0) & (c[:, :, 3] > 0)
@@ -55,8 +67,9 @@ def learn(diamond_png, crystal_png):
         acc[f"{dr},{dg},{db}"][int(t)].append([int(v) for v in cr])
     out = {col: {str(t): [int(round(v)) for v in np.mean(vs, 0)] for t, vs in td.items()}
            for col, td in acc.items()}
-    TABLE.write_text(json.dumps(out, separators=(",", ":"), sort_keys=True))
-    print("wrote", TABLE, f"({len(out)} diamond colours)")
+    dest = Path(out_table) if Path(out_table).parent != Path(".") else HERE / out_table
+    dest.write_text(json.dumps(out, separators=(",", ":"), sort_keys=True))
+    print("wrote", dest, f"({len(out)} diamond colours)")
 
 
 def make_predict(per):
@@ -100,8 +113,8 @@ def axis_field(a, axis, per):
     return tmin + (proj - lo) / max(hi - lo, 1) * (tmax - tmin)
 
 
-def apply(inp, outp, axis="diag"):
-    per = load_table()
+def apply(inp, outp, axis="diag", table=DEFAULT_TABLE):
+    per = load_table(table)
     predict = make_predict(per)
     a = np.array(Image.open(inp).convert("RGBA"))
     tmap = axis_field(a, axis, per)
@@ -116,9 +129,14 @@ def apply(inp, outp, axis="diag"):
 
 
 def main(argv):
-    if len(argv) == 3 and argv[0] == "--learn":
-        return learn(argv[1], argv[2])
-    axis = "diag"
+    if argv and argv[0] == "--learn":
+        rest = argv[1:]
+        if len(rest) == 2:
+            return learn(rest[0], rest[1])
+        if len(rest) == 3:
+            return learn(rest[0], rest[1], rest[2])
+        sys.exit(__doc__)
+    axis, table = "diag", DEFAULT_TABLE
     pos = []
     i = 0
     while i < len(argv):
@@ -127,9 +145,13 @@ def main(argv):
             axis = argv[i + 1]; i += 2; continue
         if a.startswith("--axis="):
             axis = a.split("=", 1)[1]; i += 1; continue
+        if a == "--table" and i + 1 < len(argv):
+            table = argv[i + 1]; i += 2; continue
+        if a.startswith("--table="):
+            table = a.split("=", 1)[1]; i += 1; continue
         pos.append(a); i += 1
     if len(pos) == 2 and axis in ("diag", "blade", "blade-rev"):
-        apply(pos[0], pos[1], axis)
+        apply(pos[0], pos[1], axis, table)
     else:
         sys.exit(__doc__)
 
