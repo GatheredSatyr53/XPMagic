@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal",
+    "xpmagic:time_crystal"
+  ],
+  "result": {
+    "id": "xpmagic:time_crystal_block"
+  }
+}

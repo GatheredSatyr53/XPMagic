@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "xpmagic:block/time_crystal_block" }
+  }
+}

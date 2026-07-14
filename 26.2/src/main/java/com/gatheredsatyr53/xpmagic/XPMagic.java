@@ -135,9 +135,19 @@ public final class XPMagic {
 
     // Also fireResistant so the finished crystal doesn't burn up while still lying in the soul fire.
     public static final RegistryObject<Item> TIME_CRYSTAL = ITEMS.register("time_crystal",
-                                                                             () -> new Item(new Item.Properties()
-                                                                                                    .setId(ITEMS.key("time_crystal"))
-                                                                                                    .fireResistant()));
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("time_crystal"))
+            .fireResistant()));
+
+    public static final RegistryObject<Item> TIME_CRYSTAL_WAFER = ITEMS.register("time_crystal_wafer",
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("time_crystal_wafer"))
+            .fireResistant()));
+
+    public static final RegistryObject<Item> TIME_CRYSTAL_ROD = ITEMS.register("time_crystal_rod",
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("time_crystal_rod"))
+            .fireResistant()));
 
     public static final RegistryObject<Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("processing_chip"))));
@@ -179,18 +189,21 @@ public final class XPMagic {
     public static final RegistryObject<Item> MEMORY_CRYSTAL_SWORD = ITEMS.register("memory_crystal_sword",
         () -> new Item(new Item.Properties()
             .setId(ITEMS.key("memory_crystal_sword"))
-            .sword(MEMORY_CRYSTAL_MATERIAL, 4.75F, -2.4F)));
+            .sword(MEMORY_CRYSTAL_MATERIAL, 4.75F, -2.4F)
+            .fireResistant()));
 
     public static final RegistryObject<Item> MEMORY_CRYSTAL_PICKAXE = ITEMS.register("memory_crystal_pickaxe",
         () -> new Item(new Item.Properties()
             .setId(ITEMS.key("memory_crystal_pickaxe"))
-            .pickaxe(MEMORY_CRYSTAL_MATERIAL, 2.25F, -2.8F)));
+            .pickaxe(MEMORY_CRYSTAL_MATERIAL, 2.25F, -2.8F)
+            .fireResistant()));
 
     // AxeItem (not a plain Item) for the strip/scrape/wax-off behaviour; its constructor applies
     // .axe(...) to the Properties itself, so we pass bare Properties here.
     public static final RegistryObject<Item> MEMORY_CRYSTAL_AXE = ITEMS.register("memory_crystal_axe",
         () -> new AxeItem(MEMORY_CRYSTAL_MATERIAL, 7.25F, -3.0F, new Item.Properties()
-            .setId(ITEMS.key("memory_crystal_axe"))));
+            .setId(ITEMS.key("memory_crystal_axe"))
+            .fireResistant()));
 
     //</editor-fold>
 
@@ -234,28 +247,40 @@ public final class XPMagic {
                                                               .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0)
         ));
 
+    public static final RegistryObject<Block> TIME_CRYSTAL_BLOCK = BLOCKS.register("time_crystal_block",
+        () -> new Block(BlockBehaviour.Properties.of()
+                                                 .setId(BLOCKS.key("time_crystal_block"))
+                                                 .mapColor(MapColor.DIAMOND)
+                                                 .requiresCorrectToolForDrops()
+                                                 .strength(6.25F, 7.5F)
+                                                 .sound(SoundType.METAL)));
+
     //</editor-fold>
 
     //<editor-fold desc="BlockItems">
 
     public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
-                                                                                      () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
-                                                                                              .setId(ITEMS.key("xp_keeping_machine"))
-                                                                                              .useBlockDescriptionPrefix()));
+        () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties().setId(ITEMS.key("xp_keeping_machine"))
+                                                                           .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<Item> POWDER_SEPARATOR_ITEM = ITEMS.register("powder_separator",
-                                                                                    () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
-                                                                                            .setId(ITEMS.key("powder_separator"))
-                                                                                            .useBlockDescriptionPrefix()));
+        () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
+            .setId(ITEMS.key("powder_separator"))
+            .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<Item> POWDER_MIXER_ITEM = ITEMS.register("powder_mixer",
-                                                                                () -> new BlockItem(POWDER_MIXER.get(), new Item.Properties()
-                                                                                        .setId(ITEMS.key("powder_mixer"))
-                                                                                        .useBlockDescriptionPrefix()));
+        () -> new BlockItem(POWDER_MIXER.get(), new Item.Properties()
+            .setId(ITEMS.key("powder_mixer"))
+            .useBlockDescriptionPrefix()));
 
     public static final RegistryObject<Item> VIBRATION_STAND_ITEM = ITEMS.register("vibration_stand",
         () -> new BlockItem(VIBRATION_STAND.get(), new Item.Properties()
             .setId(ITEMS.key("vibration_stand"))
+            .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Item> TIME_CRYSTAL_BLOCK_ITEM = ITEMS.register("time_crystal_block",
+         () -> new BlockItem(TIME_CRYSTAL_BLOCK.get(), new Item.Properties()
+            .setId(ITEMS.key("time_crystal_block"))
             .useBlockDescriptionPrefix()));
 
     //</editor-fold>
@@ -307,6 +332,8 @@ public final class XPMagic {
                 output.accept(FINE_POWDER.get());
                 output.accept(MEMORY_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL.get());
+                output.accept(TIME_CRYSTAL_WAFER.get());
+                output.accept(TIME_CRYSTAL_ROD.get());
                 output.accept(MEMORY_CRYSTAL_SWORD.get());
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());
@@ -318,6 +345,7 @@ public final class XPMagic {
                 output.accept(POWDER_SEPARATOR_ITEM.get());
                 output.accept(VIBRATION_STAND_ITEM.get());
                 output.accept(POWDER_MIXER_ITEM.get());
+                output.accept(TIME_CRYSTAL_BLOCK_ITEM.get());
             })
             .build());
 

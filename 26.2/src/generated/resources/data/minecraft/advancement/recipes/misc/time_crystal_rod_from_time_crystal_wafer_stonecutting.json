@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "minecraft:time_crystal_rod_from_time_crystal_wafer_stonecutting"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_time_crystal_wafer": {
+      "conditions": {
+        "items": [
+          {
+            "items": "xpmagic:time_crystal_wafer"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_time_crystal_wafer"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:time_crystal_rod_from_time_crystal_wafer_stonecutting"
+    ]
+  }
+}

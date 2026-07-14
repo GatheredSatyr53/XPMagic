@@ -39,7 +39,7 @@ import numpy as np
 from collections import defaultdict
 
 HERE = Path(__file__).parent
-DEFAULT_TABLE = "crystal_transform.json"
+DEFAULT_TABLE = "memory_crystal_transform.json"
 
 
 def resolve_table(name):

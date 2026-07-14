@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "xpmagic:time_crystal_wafer",
+  "result": {
+    "count": 4,
+    "id": "xpmagic:time_crystal_rod"
+  }
+}
