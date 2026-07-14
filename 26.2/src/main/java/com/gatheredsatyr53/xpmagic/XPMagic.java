@@ -21,12 +21,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -54,6 +58,8 @@ public final class XPMagic {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
 
+    //<editor-fold desc="Data Components">
+
     // Experience stored inside an XP Cocktail; written by the XP Keeping Machine
     public static final RegistryObject<DataComponentType<StoredExp>> STORED_EXP = DATA_COMPONENTS.register("stored_exp",
                                                                                                            () -> DataComponentType.<StoredExp>builder()
@@ -78,6 +84,18 @@ public final class XPMagic {
             .networkSynchronized(ByteBufCodecs.VAR_INT)
             .build()
     );
+
+    // Owner recorded on a Player Key; the machine drains XP from this player
+    public static final RegistryObject<DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
+                                                                                                               () -> DataComponentType.<PlayerOwner>builder()
+                                                                                                                                      .persistent(PlayerOwner.CODEC)
+                                                                                                                                      .networkSynchronized(PlayerOwner.STREAM_CODEC)
+                                                                                                                                      .build()
+    );
+
+    //</editor-fold>
+
+    //<editor-fold desc="Items">
 
     public static final RegistryObject<Item> MEMORY_POWDER = ITEMS.register("memory_powder",
         () -> new Item(new Item.Properties()
@@ -107,14 +125,6 @@ public final class XPMagic {
     public static final RegistryObject<Item> MEMORY_CHIP = ITEMS.register("memory_chip",
         () -> new Item(new Item.Properties().setId(ITEMS.key("memory_chip"))));
 
-    // Owner recorded on a Player Key; the machine drains XP from this player
-    public static final RegistryObject<DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
-        () -> DataComponentType.<PlayerOwner>builder()
-            .persistent(PlayerOwner.CODEC)
-            .networkSynchronized(PlayerOwner.STREAM_CODEC)
-            .build()
-    );
-
     public static final RegistryObject<Item> PLAYER_KEY = ITEMS.register("player_key",
         () -> new PlayerKeyItem(new Item.Properties().setId(ITEMS.key("player_key")).stacksTo(1)));
 
@@ -126,6 +136,45 @@ public final class XPMagic {
             .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
             .usingConvertsTo(Items.GLASS_BOTTLE)
         ));
+
+    // Tools carved from a Memory Crystal. Repaired by the crystal itself (tag below).
+    public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "memory_crystal_tool_materials"));
+
+    // Diamond-grade material, but half the durability (780 vs 1561) — see attackDamageBaseline
+    // per tool below for the +25% damage over diamond. attackDamageBonus stays at diamond's 3.0F;
+    // the extra damage is added through each tool's baseline instead.
+    public static final ToolMaterial MEMORY_CRYSTAL_MATERIAL = new ToolMaterial(
+        BlockTags.INCORRECT_FOR_DIAMOND_TOOL, // mines everything diamond can
+        780,                                  // durability: half of diamond's 1561
+        8.0F,                                 // mining speed (diamond)
+        3.0F,                                 // attackDamageBonus (diamond)
+        10,                                   // enchantment value (diamond)
+        MEMORY_CRYSTAL_TOOL_MATERIALS         // repair items
+    );
+
+    // Damage tooltip = 1 (player base) + baseline + material bonus (3.0). Targets are diamond +25%:
+    //   sword 7 -> 8.75 (baseline 4.75), pickaxe 5 -> 6.25 (2.25), axe 9 -> 11.25 (7.25).
+    // Attack speed baselines are the vanilla per-type values (-2.4 / -2.8 / -3.0).
+    public static final RegistryObject<Item> MEMORY_CRYSTAL_SWORD = ITEMS.register("memory_crystal_sword",
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("memory_crystal_sword"))
+            .sword(MEMORY_CRYSTAL_MATERIAL, 4.75F, -2.4F)));
+
+    public static final RegistryObject<Item> MEMORY_CRYSTAL_PICKAXE = ITEMS.register("memory_crystal_pickaxe",
+        () -> new Item(new Item.Properties()
+            .setId(ITEMS.key("memory_crystal_pickaxe"))
+            .pickaxe(MEMORY_CRYSTAL_MATERIAL, 2.25F, -2.8F)));
+
+    // AxeItem (not a plain Item) for the strip/scrape/wax-off behaviour; its constructor applies
+    // .axe(...) to the Properties itself, so we pass bare Properties here.
+    public static final RegistryObject<Item> MEMORY_CRYSTAL_AXE = ITEMS.register("memory_crystal_axe",
+        () -> new AxeItem(MEMORY_CRYSTAL_MATERIAL, 7.25F, -3.0F, new Item.Properties()
+            .setId(ITEMS.key("memory_crystal_axe"))));
+
+    //</editor-fold>
+
+    //<editor-fold desc="Blocks">
 
     public static final RegistryObject<Block> XP_KEEPING_MACHINE = BLOCKS.register("xp_keeping_machine",
         () -> new XPKeepingMachineBlock(BlockBehaviour.Properties.of()
@@ -155,21 +204,6 @@ public final class XPMagic {
                                                             .strength(15.0F)
         ));
 
-    public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
-        () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
-            .setId(ITEMS.key("xp_keeping_machine"))
-            .useBlockDescriptionPrefix()));
-
-    public static final RegistryObject<Item> POWDER_SEPARATOR_ITEM = ITEMS.register("powder_separator",
-        () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
-            .setId(ITEMS.key("powder_separator"))
-            .useBlockDescriptionPrefix()));
-
-    public static final RegistryObject<Item> POWDER_MIXER_ITEM = ITEMS.register("powder_mixer",
-        () -> new BlockItem(POWDER_MIXER.get(), new Item.Properties()
-            .setId(ITEMS.key("powder_mixer"))
-            .useBlockDescriptionPrefix()));
-
     public static final RegistryObject<Block> VIBRATION_STAND = BLOCKS.register("vibration_stand",
         () -> new VibrationStandBlock(BlockBehaviour.Properties.of()
                                                               .setId(BLOCKS.key("vibration_stand"))
@@ -180,10 +214,33 @@ public final class XPMagic {
                                                               .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0)
         ));
 
+    //</editor-fold>
+
+    //<editor-fold desc="BlockItems">
+
+    public static final RegistryObject<Item> XP_KEEPING_MACHINE_ITEM = ITEMS.register("xp_keeping_machine",
+                                                                                      () -> new BlockItem(XP_KEEPING_MACHINE.get(), new Item.Properties()
+                                                                                              .setId(ITEMS.key("xp_keeping_machine"))
+                                                                                              .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Item> POWDER_SEPARATOR_ITEM = ITEMS.register("powder_separator",
+                                                                                    () -> new BlockItem(POWDER_SEPARATOR.get(), new Item.Properties()
+                                                                                            .setId(ITEMS.key("powder_separator"))
+                                                                                            .useBlockDescriptionPrefix()));
+
+    public static final RegistryObject<Item> POWDER_MIXER_ITEM = ITEMS.register("powder_mixer",
+                                                                                () -> new BlockItem(POWDER_MIXER.get(), new Item.Properties()
+                                                                                        .setId(ITEMS.key("powder_mixer"))
+                                                                                        .useBlockDescriptionPrefix()));
+
     public static final RegistryObject<Item> VIBRATION_STAND_ITEM = ITEMS.register("vibration_stand",
         () -> new BlockItem(VIBRATION_STAND.get(), new Item.Properties()
             .setId(ITEMS.key("vibration_stand"))
             .useBlockDescriptionPrefix()));
+
+    //</editor-fold>
+
+    //<editor-fold desc="BlockEntities">
 
     public static final RegistryObject<BlockEntityType<XPKeepingMachineBlockEntity>> XP_KEEPING_MACHINE_BLOCK_ENTITY =
         BLOCK_ENTITIES.register("xp_keeping_machine",
@@ -197,9 +254,13 @@ public final class XPMagic {
         BLOCK_ENTITIES.register("vibration_stand",
             () -> new BlockEntityType<>(VibrationStandBlockEntity::new, java.util.Set.of(VIBRATION_STAND.get())));
 
+    //</editor-fold>
+
     // Custom looping vibration sound played by the running Vibration Stand
     public static final RegistryObject<SoundEvent> VIBRATION_SOUND = SOUND_EVENTS.register("vibration",
         () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MODID, "vibration")));
+
+    //<editor-fold desc="Menus">
 
     public static final RegistryObject<MenuType<XPKeepingMachineMenu>> XP_KEEPING_MACHINE_MENU =
         MENU_TYPES.register("xp_keeping_machine",
@@ -213,6 +274,8 @@ public final class XPMagic {
             MENU_TYPES.register("powder_mixer",
                                 () -> new MenuType<>(PowderMixerMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
+    //</editor-fold>
+
     public static final RegistryObject<CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.xpmagic"))
@@ -223,6 +286,9 @@ public final class XPMagic {
                 output.accept(MEDIUM_POWDER.get());
                 output.accept(FINE_POWDER.get());
                 output.accept(MEMORY_CRYSTAL.get());
+                output.accept(MEMORY_CRYSTAL_SWORD.get());
+                output.accept(MEMORY_CRYSTAL_PICKAXE.get());
+                output.accept(MEMORY_CRYSTAL_AXE.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
