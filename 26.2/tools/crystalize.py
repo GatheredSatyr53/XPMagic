@@ -11,8 +11,17 @@ NOT the vanilla texture itself, so no Mojang asset ships in the repo. Feed your
 own local diamond tool sprites in; the gold accents fall out of position
 (bottom-right of the diagonal), exactly as on the crystal.
 
+The gradient axis is a per-tool choice (--axis), because a fixed x+y sweep cuts
+across features that run parallel to it (e.g. a sword crossguard splits into two
+colours). Aligning the axis with the tool's long dimension keeps perpendicular
+features one colour:
+    diag       t = x + y   (default; raw canvas coords -- exact crystal repro)
+    blade      t = x - y   (along a bottom-left->top-right blade; gold at tip)
+    blade-rev  t = y - x   (same axis, gold at pommel)
+Rotated axes are stretched onto the learned gradient range; diag stays raw.
+
 Usage:
-    python crystalize.py <diamond_sprite.png> <out.png>
+    python crystalize.py <diamond_sprite.png> <out.png> [--axis diag|blade|blade-rev]
     python crystalize.py --learn <diamond.png> <crystal.png>   # rebuild the JSON
                                                                  # (inputs stay local)
 Requires Pillow + numpy.
@@ -74,23 +83,56 @@ def make_predict(per):
     return predict
 
 
-def apply(inp, outp):
-    predict = make_predict(load_table())
+def axis_field(a, axis, per):
+    """Return a per-pixel t map for the chosen gradient axis.
+
+    diag keeps raw x+y (exact crystal repro); rotated axes are stretched onto
+    the learned t-range so the same navy->gold sweep spans the sprite."""
+    h, w = a.shape[:2]
+    yy, xx = np.mgrid[0:h, 0:w]
+    if axis == "diag":
+        return (xx + yy).astype(float)
+    proj = (xx - yy) if axis == "blade" else (yy - xx)  # blade-rev
+    opaque = a[:, :, 3] > 0
+    lo, hi = proj[opaque].min(), proj[opaque].max()
+    ts = [t for tbl in per.values() for t in tbl]
+    tmin, tmax = min(ts), max(ts)
+    return tmin + (proj - lo) / max(hi - lo, 1) * (tmax - tmin)
+
+
+def apply(inp, outp, axis="diag"):
+    per = load_table()
+    predict = make_predict(per)
     a = np.array(Image.open(inp).convert("RGBA"))
+    tmap = axis_field(a, axis, per)
     h, w = a.shape[:2]
     for y in range(h):
         for x in range(w):
             if a[y, x, 3] == 0:
                 continue
-            a[y, x, :3] = np.clip(predict(tuple(int(v) for v in a[y, x, :3]), x + y), 0, 255)
+            a[y, x, :3] = np.clip(predict(tuple(int(v) for v in a[y, x, :3]), tmap[y, x]), 0, 255)
     Image.fromarray(a, "RGBA").save(outp)
-    print("wrote", outp)
+    print("wrote", outp, f"(axis={axis})")
+
+
+def main(argv):
+    if len(argv) == 3 and argv[0] == "--learn":
+        return learn(argv[1], argv[2])
+    axis = "diag"
+    pos = []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "--axis" and i + 1 < len(argv):
+            axis = argv[i + 1]; i += 2; continue
+        if a.startswith("--axis="):
+            axis = a.split("=", 1)[1]; i += 1; continue
+        pos.append(a); i += 1
+    if len(pos) == 2 and axis in ("diag", "blade", "blade-rev"):
+        apply(pos[0], pos[1], axis)
+    else:
+        sys.exit(__doc__)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4 and sys.argv[1] == "--learn":
-        learn(sys.argv[2], sys.argv[3])
-    elif len(sys.argv) == 3:
-        apply(sys.argv[1], sys.argv[2])
-    else:
-        sys.exit(__doc__)
+    main(sys.argv[1:])
