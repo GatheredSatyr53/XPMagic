@@ -123,6 +123,15 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
+        this.shaped(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_SHOVEL.get())
+            .pattern(" X ")
+            .pattern(" Y ")
+            .pattern(" Y ")
+            .define('X', XPMagic.MEMORY_CRYSTAL.get())
+            .define('Y', XPMagic.TIME_CRYSTAL_ROD.get())
+            .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
+            .save(this.output);
+
         // Note: powder mixing is not a data recipe — it's a fixed proportional formula computed
         // directly in PowderMixerMenu (N x 1:2:1 fractions -> N memory powder).
     }

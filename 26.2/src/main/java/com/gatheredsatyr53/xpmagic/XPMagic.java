@@ -31,6 +31,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
@@ -198,7 +199,8 @@ public final class XPMagic {
     );
 
     // Damage tooltip = 1 (player base) + baseline + material bonus (3.0). Targets are diamond +25%:
-    //   sword 7 -> 8.75 (baseline 4.75), pickaxe 5 -> 6.25 (2.25), axe 9 -> 11.25 (7.25).
+    //   sword 7 -> 8.75 (baseline 4.75), pickaxe 5 -> 6.25 (2.25), axe 9 -> 11.25 (7.25),
+    //   shovel 5.5 -> 6.875 (2.875).
     // Attack speed baselines are the vanilla per-type values (-2.4 / -2.8 / -3.0).
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_SWORD = ITEMS.register("memory_crystal_sword",
         () -> new Item(new Item.Properties()
@@ -217,6 +219,14 @@ public final class XPMagic {
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_AXE = ITEMS.register("memory_crystal_axe",
         () -> new AxeItem(MEMORY_CRYSTAL_MATERIAL, 7.25F, -3.0F, new Item.Properties()
             .setId(itemKey("memory_crystal_axe"))
+            .fireResistant()));
+
+    // ShovelItem for the same reason as AxeItem: the path-flattening and campfire-dousing
+    // behaviour lives in the class, and its constructor applies .shovel(...) itself.
+    // The +25% damage is dead weight on a shovel; fireResistant is what earns it its place.
+    public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_SHOVEL = ITEMS.register("memory_crystal_shovel",
+        () -> new ShovelItem(MEMORY_CRYSTAL_MATERIAL, 2.875F, -3.0F, new Item.Properties()
+            .setId(itemKey("memory_crystal_shovel"))
             .fireResistant()));
 
     //</editor-fold>
@@ -351,6 +361,7 @@ public final class XPMagic {
                 output.accept(MEMORY_CRYSTAL_SWORD.get());
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());
+                output.accept(MEMORY_CRYSTAL_SHOVEL.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
