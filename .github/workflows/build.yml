@@ -17,12 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Mojang ships Java 25 to end users in 26.1+, so the mod targets Java 25
-      - name: Set up JDK 25
+      # The mod targets Java 25 (Mojang ships it in 26.1+), but ModDevGradle runs its
+      # NeoForm/asset tooling (e.g. downloadAssets) under Java 21, so both toolchains are needed.
+      - name: Set up JDK 21 and 25
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: |
+            21
+            25
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6

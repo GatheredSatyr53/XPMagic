@@ -13,8 +13,6 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
 
 public class PowderMixerMenu extends AbstractContainerMenu {
 
@@ -45,13 +43,11 @@ public class PowderMixerMenu extends AbstractContainerMenu {
         this.access = access;
         this.player = inventory.player;
 
-        IItemHandler inputs = new InvWrapper(this.craftSlots);
-
         // Three interchangeable component slots (top row) + one fixed catalyst slot below, per the GUI texture.
-        this.addSlot(new ConditionalInputSlot(inputs, 0, 25, 25, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 1, 43, 25, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 2, 61, 25, PowderMixerMenu::isFraction));
-        this.addSlot(new ConditionalInputSlot(inputs, 3, 43, 43, PowderMixerMenu::isCatalyst));
+        this.addSlot(new ConditionalInputSlot(this.craftSlots, 0, 25, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(this.craftSlots, 1, 43, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(this.craftSlots, 2, 61, 25, PowderMixerMenu::isFraction));
+        this.addSlot(new ConditionalInputSlot(this.craftSlots, 3, 43, 43, PowderMixerMenu::isCatalyst));
         this.addSlot(new MixingResultSlot(this.resultSlots, 0, 123, 34, this));
 
         for (int row = 0; row < 3; ++row)

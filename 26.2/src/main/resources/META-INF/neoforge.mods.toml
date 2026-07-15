@@ -1,9 +1,8 @@
-# See https://docs.minecraftforge.net/en/1.21.x/gettingstarted/modfiles/#modstoml
-# There are lots of things you can do with the mods.toml, and not all fields are included with this MDK
-# References: https://github.com/MinecraftForge/MDKExamples
+# See https://docs.neoforged.net/docs/gettingstarted/modfiles/#neoforgemodstoml
+# There are lots of things you can do with the neoforge.mods.toml, and not all fields are included with this MDK
 
 modLoader="javafml"
-loaderVersion="[65,)"
+loaderVersion="[1,)"
 license="All Rights Reserved"
 issueTrackerURL="https://github.com/Avvros/XPMagic/issues"
 
@@ -19,16 +18,16 @@ description='''Store, refine, and reclaim experience. Bottle your XP through a k
 separate memory powder into fractions and mix it back, fuse it into crystals with explosions and
 lightning, transform them in soul fire, and carve crystal tools.'''
 
-[[dependencies.xpmagic]] #recommended
-    modId="forge"
-    mandatory=true
-    versionRange="[65,)"
+[[dependencies.xpmagic]]
+    modId="neoforge"
+    type="required"
+    versionRange="[26.2,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.xpmagic]] #recommended
+[[dependencies.xpmagic]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[26.2,26.3,)"
+    type="required"
+    versionRange="[26.2,26.3)"
     ordering="NONE"
     side="BOTH"

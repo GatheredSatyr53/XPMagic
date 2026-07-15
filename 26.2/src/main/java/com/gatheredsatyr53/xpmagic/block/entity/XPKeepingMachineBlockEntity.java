@@ -6,14 +6,14 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,11 +26,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import org.jspecify.annotations.Nullable;
 
 public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProvider {
@@ -46,7 +41,6 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     public static final int COOK_TIME = 200;
 
     private final MachineInventory inventory = new MachineInventory();
-    private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
 
     private int burnTime;
     private int burnTimeTotal;
@@ -85,7 +79,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         super(XPMagic.XP_KEEPING_MACHINE_BLOCK_ENTITY.get(), pos, state);
     }
 
-    public ItemStackHandler getInventory() {
+    public Container getInventory() {
         return this.inventory;
     }
 
@@ -114,7 +108,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     /** The online player whose key is in the machine, or null if no key / owner offline. */
     private @Nullable Player resolveOwner(Level level) {
-        PlayerOwner owner = this.inventory.getStackInSlot(SLOT_KEY).get(XPMagic.PLAYER_OWNER.get());
+        PlayerOwner owner = this.inventory.getItem(SLOT_KEY).get(XPMagic.PLAYER_OWNER.get());
         if (owner == null)
             return null;
         MinecraftServer server = level.getServer();
@@ -122,7 +116,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     }
 
     public static int getMatrixXPCapacity(XPKeepingMachineBlockEntity machine) {
-        return machine.inventory.getStackInSlot(SLOT_MATRIX).getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
+        return machine.inventory.getItem(SLOT_MATRIX).getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, XPKeepingMachineBlockEntity machine) {
@@ -145,7 +139,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
             boolean canWork = machine.canProduce() && ownerReady;
 
             if (!machine.isBurning() && canWork) {
-                ItemStack fuel = machine.inventory.getStackInSlot(SLOT_FUEL);
+                ItemStack fuel = machine.inventory.getItem(SLOT_FUEL);
                 int burnDuration = level.fuelValues().burnDuration(fuel);
                 if (burnDuration > 0) {
                     machine.burnTime = burnDuration;
@@ -191,26 +185,26 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
     private boolean allInputsPresent() {
         for (int slot = 0; slot < SLOT_OUTPUT; ++slot)
-            if (this.inventory.getStackInSlot(slot).isEmpty())
+            if (this.inventory.getItem(slot).isEmpty())
                 return false;
         return true;
     }
 
     private boolean canProduce() {
-        ItemStack bottle = this.inventory.getStackInSlot(SLOT_BOTTLE);
-        ItemStack matrix = this.inventory.getStackInSlot(SLOT_MATRIX);
+        ItemStack bottle = this.inventory.getItem(SLOT_BOTTLE);
+        ItemStack matrix = this.inventory.getItem(SLOT_MATRIX);
         if (bottle.isEmpty() || matrix.isEmpty())
             return false;
         if (!isItemValid(SLOT_BOTTLE, bottle) || !isItemValid(SLOT_MATRIX, matrix))
             return false;
-        return this.inventory.getStackInSlot(SLOT_OUTPUT).isEmpty();
+        return this.inventory.getItem(SLOT_OUTPUT).isEmpty();
     }
 
     private void consumeFuel() {
-        ItemStack fuel = this.inventory.getStackInSlot(SLOT_FUEL);
+        ItemStack fuel = this.inventory.getItem(SLOT_FUEL);
         if (fuel.getCount() == 1) {
             ItemStackTemplate remainder = fuel.getCraftingRemainder();
-            this.inventory.setStackInSlot(SLOT_FUEL, remainder != null ? remainder.create() : ItemStack.EMPTY);
+            this.inventory.setItem(SLOT_FUEL, remainder != null ? remainder.create() : ItemStack.EMPTY);
         } else {
             fuel.shrink(1);
         }
@@ -223,15 +217,15 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
 
         ItemStack cocktail = new ItemStack(XPMagic.XP_COCKTAIL.get());
         cocktail.set(XPMagic.STORED_EXP.get(), new StoredExp(charged));
-        this.inventory.setStackInSlot(SLOT_OUTPUT, cocktail);
-        this.inventory.getStackInSlot(SLOT_BOTTLE).shrink(1);
-        this.inventory.getStackInSlot(SLOT_MATRIX).shrink(1);
+        this.inventory.setItem(SLOT_OUTPUT, cocktail);
+        this.inventory.getItem(SLOT_BOTTLE).shrink(1);
+        this.inventory.getItem(SLOT_MATRIX).shrink(1);
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, this.inventory.items());
+        ContainerHelper.saveAllItems(output, this.inventory.getItems());
         output.putInt("burn_time", this.burnTime);
         output.putInt("burn_time_total", this.burnTimeTotal);
         output.putInt("cook_time", this.cookTime);
@@ -241,8 +235,10 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        this.inventory.setSize(SLOT_COUNT);
-        ContainerHelper.loadAllItems(input, this.inventory.items());
+        ContainerHelper.loadAllItems(input, this.inventory.getItems());
+        // Seed the key snapshot from the loaded contents so the first post-load inventory change
+        // (e.g. a hopper topping up fuel) isn't mistaken for a key swap and doesn't wipe cook progress.
+        this.inventory.captureKeySnapshot();
         this.burnTime = input.getIntOr("burn_time", 0);
         this.burnTimeTotal = input.getIntOr("burn_time_total", 0);
         this.cookTime = input.getIntOr("cook_time", 0);
@@ -253,44 +249,41 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
         if (this.level != null)
-            Containers.dropContents(this.level, pos, this.inventory.items());
+            Containers.dropContents(this.level, pos, this.inventory.getItems());
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER)
-            return this.itemHandlerCap.cast();
-        return super.getCapability(cap, side);
-    }
+    private final class MachineInventory extends SimpleContainer {
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        this.itemHandlerCap.invalidate();
-    }
-
-    private final class MachineInventory extends ItemStackHandler {
+        private ItemStack lastKey = ItemStack.EMPTY;
 
         MachineInventory() {
             super(SLOT_COUNT);
         }
 
-        NonNullList<ItemStack> items() {
-            return this.stacks;
+        /** Re-baseline the key snapshot to the current key slot (called after NBT load). */
+        void captureKeySnapshot() {
+            this.lastKey = this.getItem(SLOT_KEY).copy();
         }
 
+        // Gates hopper insertion (VanillaContainerWrapper.isValid consults this) and vanilla
+        // container insertion; the output and key slots reject insertion (default false below).
         @Override
-        protected void onContentsChanged(int slot) {
-            // Removing (or swapping) the key resets cooking, so a half-done cycle
-            // started by one owner can't be finished on — and charged to — another.
-            if (slot == SLOT_KEY)
-                XPKeepingMachineBlockEntity.this.cookTime = 0;
-            XPKeepingMachineBlockEntity.this.setChanged();
-        }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
+        public boolean canPlaceItem(int slot, ItemStack stack) {
             return XPKeepingMachineBlockEntity.this.isItemValid(slot, stack);
+        }
+
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            // Removing (or swapping) the key resets cooking, so a half-done cycle started by one
+            // owner can't be finished on — and charged to — another. setChanged() carries no slot,
+            // so detect a key change by comparing against the last seen key stack.
+            ItemStack key = this.getItem(SLOT_KEY);
+            if (!ItemStack.matches(key, this.lastKey)) {
+                XPKeepingMachineBlockEntity.this.cookTime = 0;
+                this.lastKey = key.copy();
+            }
+            XPKeepingMachineBlockEntity.this.setChanged();
         }
     }
 }

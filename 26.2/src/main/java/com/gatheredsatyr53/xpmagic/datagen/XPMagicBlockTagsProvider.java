@@ -10,14 +10,11 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import org.jspecify.annotations.Nullable;
 
 public final class XPMagicBlockTagsProvider extends TagsProvider<Block> {
 
-    public XPMagicBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
-                                    @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, Registries.BLOCK, lookupProvider, XPMagic.MODID, existingFileHelper);
+    public XPMagicBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, Registries.BLOCK, lookupProvider, XPMagic.MODID);
     }
 
     @Override

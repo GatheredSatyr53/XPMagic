@@ -1,12 +1,11 @@
-// This is a minimal setup of a Forge mod workspace.
-// For complex examples (including AccessTransformers, Jar-in-Jar, and Mixin), see our examples repository.
-// https://github.com/MinecraftForge/MDKExamples
+// NeoForge mod workspace, migrated from MinecraftForge.
+// Build system: ModDevGradle (net.neoforged.moddev).
 
 plugins {
     id 'java'
     id 'idea'
     id 'eclipse'
-    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 version = '1.0.1'
@@ -18,41 +17,47 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 // Include generated resources
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft {
-    runs {
-        configureEach {
-            workingDir = layout.projectDirectory.dir('run')
-
-            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
-            systemProperty 'forge.enabledGameTestNamespaces', 'xpmagic'
-        }
-
-        register('client')
-
-        register('server') {
-            args '--nogui'
-        }
-
-        register('gameTestServer')
-
-        register('data') {
-            workingDir = layout.projectDirectory.dir('run-data')
-
-            args '--mod', 'xpmagic', '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
-        }
-    }
-}
-
 repositories {
-    minecraft.mavenizer(it) // In Kotlin, it = this
-    maven fg.forgeMaven
-    maven fg.minecraftLibsMaven
     mavenCentral()
 }
 
-dependencies {
-    implementation minecraft.dependency('net.minecraftforge:forge:26.2-65.0.3')
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
+neoForge {
+    version = '26.2.0.15-beta'
+
+    // Declares the mod so runs know what to load and datagen knows which namespace to generate for.
+    mods {
+        xpmagic {
+            sourceSet sourceSets.main
+        }
+    }
+
+    runs {
+        configureEach {
+            gameDirectory = layout.projectDirectory.dir('run')
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'xpmagic'
+        }
+
+        client {
+            client()
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+        }
+
+        gameTestServer {
+            type = 'gameTestServer'
+        }
+
+        data {
+            serverData()
+            gameDirectory = layout.projectDirectory.dir('run-data')
+            programArguments.addAll('--mod', 'xpmagic',
+                '--output', file('src/generated/resources').absolutePath,
+                '--existing', file('src/main/resources').absolutePath)
+        }
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

@@ -4,15 +4,14 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 import static com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity.*;
 
@@ -30,7 +29,7 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     public PowderSeparatorMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
+        this(containerId, playerInventory, new SimpleContainer(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
             ContainerLevelAccess.NULL);
     }
 
@@ -39,13 +38,13 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
             ContainerLevelAccess.create(separator.getLevel(), separator.getBlockPos()));
     }
 
-    private PowderSeparatorMenu(int containerId, Inventory playerInventory, IItemHandler inventory,
+    private PowderSeparatorMenu(int containerId, Inventory playerInventory, Container inventory,
                                 ContainerData data, ContainerLevelAccess access) {
         super(XPMagic.POWDER_SEPARATOR_MENU.get(), containerId);
         this.access = access;
         this.data = data;
 
-        this.addSlot(new SlotItemHandler(inventory, SLOT_INPUT, 80, 21));
+        this.addSlot(new Slot(inventory, SLOT_INPUT, 80, 21));
         this.addSlot(new OutputSlot(inventory, SLOT_COARSE, 62, 61));
         this.addSlot(new OutputSlot(inventory, SLOT_MEDIUM, 80, 61));
         this.addSlot(new OutputSlot(inventory, SLOT_FINE, 98, 61));
