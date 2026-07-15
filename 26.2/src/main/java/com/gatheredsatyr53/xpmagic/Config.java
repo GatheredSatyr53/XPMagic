@@ -59,6 +59,17 @@ public class Config {
             .comment("Maximum xp_capacity a Memory Crystal can reach by lightning charging.")
             .defineInRange("lightningMaxCapacity", 40, 0, 4096);
 
+    // Charged weapons: a tool forged from charged crystals pools their lightning_charge and spends it
+    // on attack damage. A crystal tops out near 20 charge (base capacity 20 against a 40 cap), so a
+    // two-crystal sword reaches roughly +2.0 damage and a three-crystal axe runs into the cap below.
+    private static final ModConfigSpec.DoubleValue LIGHTNING_DAMAGE_PER_CHARGE = BUILDER
+            .comment("Attack damage a weapon gains per point of lightning_charge carried over from the Memory Crystals it was forged from.")
+            .defineInRange("lightningDamagePerCharge", 0.05, 0.0, 100.0);
+
+    private static final ModConfigSpec.DoubleValue LIGHTNING_MAX_DAMAGE_BONUS = BUILDER
+            .comment("Ceiling on the attack damage lightning_charge can buy a single weapon, however much charge went into it.")
+            .defineInRange("lightningMaxDamageBonus", 3.0, 0.0, 1024.0);
+
     // Anvil crushing: a Memory Crystal an anvil lands on is shattered back into Memory Powder.
     // Compaction (and any lightning charge) scatters on impact, so this is deliberately lossy — the
     // reverse of the explosion's clean compaction — which keeps crystals worth fusing in the first place.
@@ -88,6 +99,8 @@ public class Config {
     public static int crystalBonusMax;
     public static int lightningChargePerStrike;
     public static int lightningMaxCapacity;
+    public static double lightningDamagePerCharge;
+    public static double lightningMaxDamageBonus;
     public static boolean crushCrystals;
     public static int shatterCapacity;
     public static int soulFireTicksPerCapacity;
@@ -106,6 +119,8 @@ public class Config {
         crystalBonusMax = CRYSTAL_BONUS_MAX.get();
         lightningChargePerStrike = LIGHTNING_CHARGE_PER_STRIKE.get();
         lightningMaxCapacity = LIGHTNING_MAX_CAPACITY.get();
+        lightningDamagePerCharge = LIGHTNING_DAMAGE_PER_CHARGE.get();
+        lightningMaxDamageBonus = LIGHTNING_MAX_DAMAGE_BONUS.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();

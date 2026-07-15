@@ -10,6 +10,7 @@ import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import com.gatheredsatyr53.xpmagic.inventory.PowderMixerMenu;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
+import com.gatheredsatyr53.xpmagic.item.ChargedToolRecipe;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
@@ -34,6 +35,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -62,6 +64,7 @@ public final class XPMagic {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, MODID);
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
 
     // Loader-agnostic ResourceKey builders for the vanilla Properties.setId(...) calls below,
     // replacing Forge's DeferredRegister.key(String) convenience.
@@ -345,6 +348,11 @@ public final class XPMagic {
 
     //</editor-fold>
 
+    // Shaped crafting that carries lightning_charge from the crystals onto the weapon. No RecipeType of
+    // our own: it is ordinary crafting-table crafting (RecipeType.CRAFTING), only the serializer is ours.
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ChargedToolRecipe>> CHARGED_TOOL_RECIPE =
+        RECIPE_SERIALIZERS.register("charged_tool", () -> ChargedToolRecipe.SERIALIZER);
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> XPMAGIC_TAB = CREATIVE_MODE_TABS.register("xpmagic",
         () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.xpmagic"))
@@ -382,6 +390,7 @@ public final class XPMagic {
         BLOCK_ENTITIES.register(modEventBus);
         SOUND_EVENTS.register(modEventBus);
         MENU_TYPES.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
 
