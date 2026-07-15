@@ -51,9 +51,9 @@ neoForge {
         }
 
         data {
-            data()
+            serverData()
             gameDirectory = layout.projectDirectory.dir('run-data')
-            programArguments.addAll('--mod', 'xpmagic', '--all',
+            programArguments.addAll('--mod', 'xpmagic',
                 '--output', file('src/generated/resources').absolutePath,
                 '--existing', file('src/main/resources').absolutePath)
         }

@@ -4,7 +4,6 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -24,9 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import org.jspecify.annotations.Nullable;
 
 public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvider {
 

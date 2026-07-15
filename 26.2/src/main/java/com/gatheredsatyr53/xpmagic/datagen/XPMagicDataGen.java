@@ -1,37 +1,35 @@
 package com.gatheredsatyr53.xpmagic.datagen;
 
 import com.gatheredsatyr53.xpmagic.XPMagic;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DataProvider;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.List;
 import java.util.Set;
 
-@EventBusSubscriber(modid = XPMagic.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = XPMagic.MODID)
 public final class XPMagicDataGen {
 
+    // NeoForge 26.2 reworked GatherDataEvent: providers are added through createProvider(...) factories
+    // (given the PackOutput and lookup) instead of generator.addProvider(includeServer(), ...), and
+    // ExistingFileHelper is gone, so the tag providers no longer take it.
     @SubscribeEvent
-    static void gatherData(GatherDataEvent event) {
-        DataGenerator generator = event.getGenerator();
-        var lookup = event.getLookupProvider();
+    static void gatherData(GatherDataEvent.Server event) {
+        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicRecipeProvider.Runner>)
+            XPMagicRecipeProvider.Runner::new);
 
-        generator.addProvider(event.includeServer(),
-            (DataProvider.Factory<XPMagicRecipeProvider.Runner>) output -> new XPMagicRecipeProvider.Runner(output, lookup));
-
-        generator.addProvider(event.includeServer(),
-            (DataProvider.Factory<LootTableProvider>) output -> new LootTableProvider(output, Set.of(),
+        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<LootTableProvider>)
+            (output, lookup) -> new LootTableProvider(output, Set.of(),
                 List.of(new LootTableProvider.SubProviderEntry(XPMagicBlockLoot::new, LootContextParamSets.BLOCK)),
                 lookup));
 
-        generator.addProvider(event.includeServer(),
-            (DataProvider.Factory<XPMagicBlockTagsProvider>) output -> new XPMagicBlockTagsProvider(output, lookup, event.getExistingFileHelper()));
+        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicBlockTagsProvider>)
+            XPMagicBlockTagsProvider::new);
 
-        generator.addProvider(event.includeServer(),
-            (DataProvider.Factory<XPMagicItemTagsProvider>) output -> new XPMagicItemTagsProvider(output, lookup, event.getExistingFileHelper()));
+        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicItemTagsProvider>)
+            XPMagicItemTagsProvider::new);
     }
 }

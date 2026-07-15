@@ -43,8 +43,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -371,18 +369,14 @@ public final class XPMagic {
         SOUND_EVENTS.register(modEventBus);
         MENU_TYPES.register(modEventBus);
 
-        modEventBus.addListener(this::registerCapabilities);
+        // TODO(neoforge-transfer): NeoForge 26.2 replaced the old IItemHandler capability
+        // (Capabilities.ItemHandler.BLOCK) with the resource-based transfer API
+        // (Capabilities.Item.BLOCK exposing ResourceHandler<ItemResource>). The machines still work
+        // through their GUIs, which read the inventory directly; only external automation (hoppers
+        // piping items in/out) needs the block capability. Restoring it means backing the machine
+        // inventories with the new ResourceHandler API instead of the (now deprecated) ItemStackHandler,
+        // which is a follow-up beyond this mechanical Forge->NeoForge migration.
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-    }
-
-    // NeoForge exposes block-entity capabilities through RegisterCapabilitiesEvent instead of the
-    // old getCapability override. Both machines expose their internal ItemStackHandler as an
-    // IItemHandler on every side, matching the previous ForgeCapabilities.ITEM_HANDLER behaviour.
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, XP_KEEPING_MACHINE_BLOCK_ENTITY.get(),
-            (blockEntity, side) -> blockEntity.getInventory());
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, POWDER_SEPARATOR_BLOCK_ENTITY.get(),
-            (blockEntity, side) -> blockEntity.getInventory());
     }
 }

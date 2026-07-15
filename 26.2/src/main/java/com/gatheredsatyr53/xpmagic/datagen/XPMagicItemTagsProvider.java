@@ -9,14 +9,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jspecify.annotations.Nullable;
 
 public final class XPMagicItemTagsProvider extends TagsProvider<Item> {
 
-    public XPMagicItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
-                                   @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, Registries.ITEM, lookupProvider, XPMagic.MODID, existingFileHelper);
+    public XPMagicItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, Registries.ITEM, lookupProvider, XPMagic.MODID);
     }
 
     @Override
