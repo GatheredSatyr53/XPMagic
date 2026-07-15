@@ -1,8 +1,8 @@
 package com.gatheredsatyr53.xpmagic.inventory;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 /** Output-only: players may take fractions but never insert into a result slot. */
 public final class OutputSlot extends SlotItemHandler {

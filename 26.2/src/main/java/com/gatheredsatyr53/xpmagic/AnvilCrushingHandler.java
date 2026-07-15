@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import java.util.List;
  * Items never block or absorb a falling anvil — it drops straight through them onto the floor — so
  * any crystals it "crushed" are still sitting in the block cell it settled into.
  */
-@Mod.EventBusSubscriber(modid = XPMagic.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = XPMagic.MODID)
 public final class AnvilCrushingHandler {
 
     /** Coarse, medium, fine — largest first. Draw weights favour the coarse grains so fine stays rare. */

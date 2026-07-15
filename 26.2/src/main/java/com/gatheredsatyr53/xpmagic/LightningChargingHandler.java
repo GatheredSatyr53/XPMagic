@@ -9,9 +9,9 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,24 +27,27 @@ import java.util.WeakHashMap;
  * {@code tick()} several more times), so the event fires many times per bolt. We dedupe per bolt —
  * one bolt charges a given item entity exactly once — via a weak map keyed on the bolt.
  */
-@Mod.EventBusSubscriber(modid = XPMagic.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = XPMagic.MODID)
 public final class LightningChargingHandler {
 
     /** Item-entity ids each live bolt has already charged. Weakly keyed so bolts clear on discard. */
     private static final WeakHashMap<LightningBolt, Set<Integer>> CHARGED_BY_BOLT = new WeakHashMap<>();
 
     @SubscribeEvent
-    static boolean onStruck(EntityStruckByLightningEvent event) {
-        if (!(event.getEntity() instanceof ItemEntity item)) return false; // don't touch mobs/players
-        if (!item.isAlive() || !item.getItem().is(XPMagic.MEMORY_CRYSTAL.get())) return false;
+    static void onStruck(EntityStruckByLightningEvent event) {
+        if (!(event.getEntity() instanceof ItemEntity item)) return; // don't touch mobs/players
+        if (!item.isAlive() || !item.getItem().is(XPMagic.MEMORY_CRYSTAL.get())) return;
 
         Level level = item.level();
-        if (level.isClientSide()) return false; // fires server-side only, but stay defensive
+        if (level.isClientSide()) return; // fires server-side only, but stay defensive
 
         // One bolt = one charge per item entity. Skip if this bolt already charged this entity,
         // but still cancel so the repeated strikes never set the crystal on fire.
         Set<Integer> already = CHARGED_BY_BOLT.computeIfAbsent(event.getLightning(), b -> new HashSet<>());
-        if (!already.add(item.getId())) return true;
+        if (!already.add(item.getId())) {
+            event.setCanceled(true);
+            return;
+        }
 
         ItemStack struck = item.getItem();
         int capacity = struck.getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
@@ -52,7 +55,8 @@ public final class LightningChargingHandler {
         // Already saturated: swallow the bolt without changing anything.
         if (capacity >= Config.lightningMaxCapacity || Config.lightningChargePerStrike == 0) {
             playChargeEffects(level, item);
-            return true;
+            event.setCanceled(true);
+            return;
         }
 
         int newCapacity = Math.min(capacity + Config.lightningChargePerStrike, Config.lightningMaxCapacity);
@@ -77,7 +81,7 @@ public final class LightningChargingHandler {
         }
 
         playChargeEffects(level, item);
-        return true; // cancel the strike: the crystal absorbed it
+        event.setCanceled(true); // cancel the strike: the crystal absorbed it
     }
 
     /** Crystalline chime plus a burst of electric sparks marking a successful charge. */

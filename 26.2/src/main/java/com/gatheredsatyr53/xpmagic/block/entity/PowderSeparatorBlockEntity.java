@@ -24,11 +24,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jspecify.annotations.Nullable;
 
 public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvider {
@@ -60,7 +57,6 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
     private static final int PROCESS_INTERVAL = 40;
 
     private final SeparatorInventory inventory = new SeparatorInventory();
-    private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
 
     /** Vibration accumulated from the stand below; one portion is processed per PROCESS_INTERVAL. */
     private int vibrationTicks;
@@ -252,19 +248,6 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         super.preRemoveSideEffects(pos, state);
         if (this.level != null)
             Containers.dropContents(this.level, pos, this.inventory.items());
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER)
-            return this.itemHandlerCap.cast();
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        this.itemHandlerCap.invalidate();
     }
 
     private final class SeparatorInventory extends ItemStackHandler {

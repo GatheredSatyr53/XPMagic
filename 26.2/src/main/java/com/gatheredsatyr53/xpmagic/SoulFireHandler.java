@@ -10,9 +10,9 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
  * Soul-fire transformation: a Memory Crystal item entity resting in soul fire (blue flame) has its
@@ -29,12 +29,12 @@ import net.minecraftforge.fml.common.Mod;
  * <p>{@code soul_fire_time} paces the drain (ticks accrued toward the next point) and doubles as the
  * "this item was touched by blue flame" flag: any stack carrying it has spent time in soul fire.
  */
-@Mod.EventBusSubscriber(modid = XPMagic.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = XPMagic.MODID)
 public final class SoulFireHandler {
 
     @SubscribeEvent
-    static void onLevelTick(TickEvent.LevelTickEvent.Post event) {
-        if (!(event.level() instanceof ServerLevel level)) return; // server-authoritative
+    static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return; // server-authoritative
 
         // getEntities collects into a fresh list, so mutating the entity while iterating is safe.
         for (ItemEntity item : level.getEntities(EntityTypes.ITEM, SoulFireHandler::isTransforming)) {

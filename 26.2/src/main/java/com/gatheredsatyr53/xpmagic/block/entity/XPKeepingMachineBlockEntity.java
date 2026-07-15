@@ -26,11 +26,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jspecify.annotations.Nullable;
 
 public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProvider {
@@ -46,7 +43,6 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     public static final int COOK_TIME = 200;
 
     private final MachineInventory inventory = new MachineInventory();
-    private final LazyOptional<IItemHandler> itemHandlerCap = LazyOptional.of(() -> this.inventory);
 
     private int burnTime;
     private int burnTimeTotal;
@@ -254,19 +250,6 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         super.preRemoveSideEffects(pos, state);
         if (this.level != null)
             Containers.dropContents(this.level, pos, this.inventory.items());
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER)
-            return this.itemHandlerCap.cast();
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        this.itemHandlerCap.invalidate();
     }
 
     private final class MachineInventory extends ItemStackHandler {
