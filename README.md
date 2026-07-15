@@ -3,7 +3,7 @@
 Мод для Minecraft про хранение и переработку опыта: опыт запасается в бутыли, кристаллизуется во
 взрыве, огранивается в инструменты и возвращается обратно.
 
-[Начат](https://github.com/Avvros/XPMagic-Legacy) для Minecraft 1.12.2 на Forge, портирован на Minecraft 26.2,
+[Начат](https://github.com/GatheredSatyr53/XPMagic-Legacy) для Minecraft 1.12.2 на Forge, портирован на Minecraft 26.2,
 затем переведён на **NeoForge**.
 
 ## Содержимое мода
