@@ -3,7 +3,8 @@
 Мод для Minecraft про хранение и переработку опыта: опыт запасается в бутыли, кристаллизуется во
 взрыве, огранивается в инструменты и возвращается обратно.
 
-[Начат](https://github.com/Avvros/XPMagic-Legacy) для Minecraft 1.12.2, портирован на Minecraft 26.2 (Forge).
+[Начат](https://github.com/Avvros/XPMagic-Legacy) для Minecraft 1.12.2 на Forge, портирован на Minecraft 26.2,
+затем переведён на **NeoForge**.
 
 ## Содержимое мода
 
@@ -59,7 +60,7 @@
 
 | Папка | Что это |
 |---|---|
-| `26.2/` | Актуальная версия мода: Minecraft 26.2, Forge 65+, Java 25 |
+| `26.2/` | Актуальная версия мода: Minecraft 26.2, NeoForge 26.2, Java 25 |
 
 ## Сборка и запуск
 
@@ -70,6 +71,10 @@ gradlew build      # собрать jar в build/libs
 gradlew runClient  # запустить клиент с модом
 gradlew runData    # перегенерировать данные (рецепты, loot tables, теги)
 ```
+
+Сборка — на [ModDevGradle](https://github.com/neoforged/ModDevGradle). Сам мод собирается под Java 25,
+но инструментарий ModDevGradle (NeoForm, загрузка ассетов) работает под Java 21, поэтому нужны оба JDK —
+локально Gradle обычно скачивает недостающий сам.
 
 Рецепты, loot tables и теги генерируются кодом (`src/main/java/.../datagen/`) в
 `src/generated/resources` — после изменения провайдеров запустите `runData` и закоммитьте
