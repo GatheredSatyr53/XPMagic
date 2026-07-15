@@ -45,6 +45,9 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> RECOMPUTE_IS_PURE =
         register("recompute_is_pure", EvolutionTests.RECOMPUTE_IS_PURE);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> CEILING_IS_WHOLE_STEPS =
+        register("ceiling_is_whole_steps", EvolutionTests.CEILING_IS_WHOLE_STEPS);
+
     private static final ResourceKey<Consumer<GameTestHelper>> KILL_GROWS_WEAPON =
         register("kill_grows_weapon", EvolutionTests.KILL_GROWS_WEAPON);
 
@@ -72,6 +75,7 @@ public final class XPMagicGameTests {
         registerTest(event, environment, CAP_EXCLUDES_LIGHTNING);
         registerTest(event, environment, STEPS_RAISE_DAMAGE);
         registerTest(event, environment, RECOMPUTE_IS_PURE);
+        registerTest(event, environment, CEILING_IS_WHOLE_STEPS);
         registerTest(event, environment, KILL_GROWS_WEAPON);
         registerTest(event, environment, MINING_GROWS_DIGGER);
     }

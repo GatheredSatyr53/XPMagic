@@ -78,6 +78,19 @@ public final class ToolStats {
     }
 
     /**
+     * The ceiling a summed crystal capacity buys, trimmed down to whole steps.
+     *
+     * <p>The trim is what keeps the tooltip honest. Capacity rarely divides evenly — three crystals
+     * that an explosion compacted to 67 between them are worth 1340 points, but the thirteenth and last
+     * step lands at 1300, and a player mining out that remaining 40 would be earning nothing while the
+     * numbers still climbed. Rounding down means potential and growth run out together.
+     */
+    public static int ceilingFrom(int capacity) {
+        int raw = capacity * Config.evolutionPerCapacity;
+        return raw - (raw % Config.evolutionStepCost);
+    }
+
+    /**
      * Rewrites the tool's attribute modifiers from its two components. Always rebuilds from the item's
      * prototype rather than from whatever the stack currently carries, so repeated calls neither stack
      * a bonus on top of itself nor drift; the stack's stats are a pure function of its components.

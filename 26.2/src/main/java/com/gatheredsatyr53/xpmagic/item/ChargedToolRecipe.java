@@ -2,7 +2,6 @@ package com.gatheredsatyr53.xpmagic.item;
 
 import java.util.List;
 
-import com.gatheredsatyr53.xpmagic.Config;
 import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -103,7 +102,7 @@ public class ChargedToolRecipe extends NormalCraftingRecipe {
         if (charge > 0) {
             tool.set(XPMagic.LIGHTNING_CHARGE.get(), charge);
         }
-        tool.set(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), totalCapacity(input) * Config.evolutionPerCapacity);
+        tool.set(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), ToolStats.ceilingFrom(totalCapacity(input)));
 
         ToolStats.recompute(tool);
         return tool;

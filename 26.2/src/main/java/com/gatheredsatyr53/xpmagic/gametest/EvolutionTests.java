@@ -51,11 +51,14 @@ public final class EvolutionTests {
 
         ItemStack sword = craftSword(helper, plain, charged);
 
-        // Only density buys the ceiling: (24 - 0) + (30 - 10) = 44.
-        int expectedCap = 44 * Config.evolutionPerCapacity;
+        // Only density buys the ceiling: (24 - 0) + (30 - 10) = 44 capacity, worth 880 points — which
+        // is then trimmed to whole steps, and 880 is deliberately not a round number of them.
+        int expectedCap = ToolStats.ceilingFrom(44);
         int actualCap = sword.getOrDefault(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), 0);
         helper.assertTrue(actualCap == expectedCap,
             "ceiling should exclude the lightning share: expected " + expectedCap + ", got " + actualCap);
+        helper.assertTrue(actualCap < 44 * Config.evolutionPerCapacity,
+            "this case is meant to have a remainder to trim; if it no longer does, it stops testing the trim");
 
         // The charge itself still crosses over whole, and still pays out at once.
         int charge = sword.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
@@ -139,6 +142,40 @@ public final class EvolutionTests {
             "a bonus whose source is gone must not survive recompute, got " + bonusDamage(sword));
         helper.assertTrue(hasBaseDamage(sword),
             "recompute must keep the weapon's own base damage from Properties.sword(...)");
+
+        helper.succeed();
+    };
+
+    /**
+     * Potential and growth must run out together. A ceiling that is not a whole number of steps would
+     * leave a tail of points that buy nothing: the tooltip would keep counting up while the tool had
+     * quietly stopped growing, which reads as the mechanic being broken rather than finished.
+     *
+     * <p>Uses crystals compacted to 67 between them — 1340 points, the case from the bug report where
+     * the last 40 were dead — and checks the tool is spending its very last point on its last step.
+     */
+    public static final Consumer<GameTestHelper> CEILING_IS_WHOLE_STEPS = helper -> {
+        ItemStack pickaxe = craft(helper, "Memory Crystal Pickaxe",
+            crystal(23, 0),  crystal(22, 0), crystal(22, 0), // 67 capacity -> 1340 raw
+            ItemStack.EMPTY, rod(),          ItemStack.EMPTY,
+            ItemStack.EMPTY, rod(),          ItemStack.EMPTY);
+
+        int ceiling = pickaxe.getOrDefault(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), 0);
+        helper.assertTrue(ceiling % Config.evolutionStepCost == 0,
+            "a ceiling of " + ceiling + " is not a whole number of "
+            + Config.evolutionStepCost + "-point steps");
+
+        // Grind it out completely: the last point of potential must land the last step.
+        ToolStats.addPotential(pickaxe, 100_000);
+        int potential = pickaxe.getOrDefault(XPMagic.EVOLUTION_POTENTIAL.get(), 0);
+
+        helper.assertTrue(potential == ceiling,
+            "a fully ground tool should sit exactly on its ceiling: " + potential + " of " + ceiling);
+        helper.assertTrue(ToolStats.steps(pickaxe) == ToolStats.maxSteps(pickaxe),
+            "the last point of potential should buy the last step");
+        helper.assertTrue(potential == ToolStats.maxSteps(pickaxe) * Config.evolutionStepCost,
+            "no potential may be left over that buys nothing: " + potential + " points against "
+            + ToolStats.maxSteps(pickaxe) + " steps");
 
         helper.succeed();
     };
