@@ -18,18 +18,20 @@ public final class XPMagicDataGen {
     // ExistingFileHelper is gone, so the tag providers no longer take it.
     @SubscribeEvent
     static void gatherData(GatherDataEvent.Server event) {
-        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicRecipeProvider.Runner>)
-            XPMagicRecipeProvider.Runner::new);
+        event.createProvider(XPMagicRecipeProvider.Runner::new);
 
-        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<LootTableProvider>)
-            (output, lookup) -> new LootTableProvider(output, Set.of(),
-                List.of(new LootTableProvider.SubProviderEntry(XPMagicBlockLoot::new, LootContextParamSets.BLOCK)),
-                lookup));
+        event.createProvider((output, lookup) -> new LootTableProvider(output, Set.of(),
+                                                                   List.of(new LootTableProvider.SubProviderEntry(XPMagicBlockLoot::new, LootContextParamSets.BLOCK)),
+                                                                   lookup));
 
-        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicBlockTagsProvider>)
-            XPMagicBlockTagsProvider::new);
+        event.createProvider(XPMagicBlockTagsProvider::new);
 
-        event.createProvider((GatherDataEvent.DataProviderFromOutputLookup<XPMagicItemTagsProvider>)
-            XPMagicItemTagsProvider::new);
+        event.createProvider(XPMagicItemTagsProvider::new);
+
+        // Order matters: createDatapackRegistryObjects swaps in a lookup provider that knows about our
+        // generated enchantments, and only providers created after it receive that lookup. The loot
+        // modifiers resolve xpmagic:saturation through it, so they must come second.
+        event.createDatapackRegistryObjects(XPMagicEnchantmentProvider.provideEnchantments());
+        event.createProvider(XPMagicGlobalLootModifiers::new);
     }
 }

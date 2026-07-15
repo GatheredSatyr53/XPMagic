@@ -54,6 +54,15 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> MINING_GROWS_DIGGER =
         register("mining_grows_digger", EvolutionTests.MINING_GROWS_DIGGER);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> SATURATION_SWAPS_DROP =
+        register("saturation_swaps_drop", LootTests.SATURATION_SWAPS_DROP);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_WEAPON_KEEPS_DROP =
+        register("plain_weapon_keeps_drop", LootTests.PLAIN_WEAPON_KEEPS_DROP);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> PEARL_IS_AN_XP_STORE =
+        register("pearl_is_an_xp_store", LootTests.PEARL_IS_AN_XP_STORE);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -78,16 +87,29 @@ public final class XPMagicGameTests {
         registerTest(event, environment, CEILING_IS_WHOLE_STEPS);
         registerTest(event, environment, KILL_GROWS_WEAPON);
         registerTest(event, environment, MINING_GROWS_DIGGER);
+
+        // The loot tests kill a hundred endermen apiece to sample a 50% swap, so they need room to run.
+        registerTest(event, environment, SATURATION_SWAPS_DROP, 200);
+        registerTest(event, environment, PLAIN_WEAPON_KEEPS_DROP, 200);
+        registerTest(event, environment, PEARL_IS_AN_XP_STORE);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,
                                      Holder<TestEnvironmentDefinition<?>> environment,
                                      ResourceKey<Consumer<GameTestHelper>> function) {
+        // maxTicks 1: these run to completion in the first tick
+        registerTest(event, environment, function, 1);
+    }
+
+    private static void registerTest(RegisterGameTestsEvent event,
+                                     Holder<TestEnvironmentDefinition<?>> environment,
+                                     ResourceKey<Consumer<GameTestHelper>> function,
+                                     int maxTicks) {
         Identifier name = function.identifier();
         event.registerTest(name, new FunctionGameTestInstance(function, new TestData<>(
             environment,
             Identifier.withDefaultNamespace("empty"), // nothing to build: these are item-stack tests
-            1,             // maxTicks: they run to completion in the first tick
+            maxTicks,
             1,             // setupTicks
             true,          // required: a failure should fail the run
             Rotation.NONE)));

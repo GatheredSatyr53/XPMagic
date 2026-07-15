@@ -1,6 +1,7 @@
 {
   "itemGroup.xpmagic": "XPMagic",
   "item.xpmagic.memory_powder": "Memory Powder",
+  "item.xpmagic.memory_pearl": "Memory Pearl",
   "item.xpmagic.coarse_powder": "Coarse-Fraction Powder",
   "item.xpmagic.medium_powder": "Medium-Fraction Powder",
   "item.xpmagic.fine_powder": "Fine-Fraction Powder",
@@ -44,5 +45,6 @@
   "tooltip.xpmagic.mixer.catalyst": "Catalyst: +%s%%",
   "tooltip.xpmagic.mixer.units": "Output units: %s",
   "tooltip.xpmagic.mixer.exceeded": "Unit capacity %s exceeds cap %s",
-  "tooltip.xpmagic.mixer.blocked": "Output blocked"
+  "tooltip.xpmagic.mixer.blocked": "Output blocked",
+  "enchantment.xpmagic.saturation": "Saturation"
 }

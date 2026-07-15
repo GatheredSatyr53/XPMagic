@@ -12,9 +12,11 @@ import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.item.ChargedToolRecipe;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
+import com.gatheredsatyr53.xpmagic.loot.MemoryDropModifier;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -48,8 +50,10 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 
 @Mod(XPMagic.MODID)
@@ -65,6 +69,13 @@ public final class XPMagic {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+
+    // Global loot modifiers live in a NeoForge registry, not a vanilla one.
+    public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS =
+        DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
+
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<MemoryDropModifier>> MEMORY_DROP_MODIFIER =
+        LOOT_MODIFIERS.register("memory_drop", () -> MemoryDropModifier.CODEC);
 
     // Loader-agnostic ResourceKey builders for the vanilla Properties.setId(...) calls below,
     // replacing Forge's DeferredRegister.key(String) convenience.
@@ -167,6 +178,20 @@ public final class XPMagic {
 
     public static final DeferredHolder<Item, Item> FINE_POWDER = ITEMS.register("fine_powder",
         () -> new Item(new Item.Properties().setId(itemKey("fine_powder")).component(XP_CAPACITY.get(), 1)));
+
+    // The third fundamental XP store, after powder (10) and crystal (20) — hence 40, continuing the
+    // doubling. xp_capacity is all it takes: the XP Keeping Machine accepts any item carrying the
+    // component as a matrix (see XPKeepingMachineBlockEntity#isItemValid), so the pearl needs no code
+    // of its own to hold experience. Capacity is a vessel, not a supply: the machine fills it from
+    // the player's own XP, so dropping pearls never mints experience.
+    //
+    // An Enderman struck by a Memory Crystal weapon is what transforms the pearl it carries; the
+    // Saturation enchantment marks the weapon, and loot/MemoryDropModifier performs the swap.
+    // Unlike the crystal, the pearl does not grow: lightning and soul fire deliberately ignore it.
+    public static final DeferredHolder<Item, Item> MEMORY_PEARL = ITEMS.register("memory_pearl",
+        () -> new Item(new Item.Properties()
+            .setId(itemKey("memory_pearl"))
+            .component(XP_CAPACITY.get(), 40)));
 
     // fireResistant so soul fire neither burns nor ignites it: SoulFireHandler transforms a crystal
     // that sits in soul fire, and vanilla fire mechanics would otherwise destroy it long before the
@@ -408,6 +433,7 @@ public final class XPMagic {
                 output.accept(COARSE_POWDER.get());
                 output.accept(MEDIUM_POWDER.get());
                 output.accept(FINE_POWDER.get());
+                output.accept(MEMORY_PEARL.get());
                 output.accept(MEMORY_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
@@ -437,6 +463,7 @@ public final class XPMagic {
         SOUND_EVENTS.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
+        LOOT_MODIFIERS.register(modEventBus);
         com.gatheredsatyr53.xpmagic.gametest.XPMagicGameTests.init(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);

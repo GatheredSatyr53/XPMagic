@@ -1,0 +1,13 @@
+{
+  "type": "xpmagic:memory_drop",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:entities/shulker"
+    }
+  ],
+  "enchantment": "xpmagic:saturation",
+  "from": "minecraft:shulker_shell",
+  "to": "xpmagic:memory_pearl"
+}
