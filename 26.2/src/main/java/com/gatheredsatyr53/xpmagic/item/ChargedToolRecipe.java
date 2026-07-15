@@ -2,6 +2,7 @@ package com.gatheredsatyr53.xpmagic.item;
 
 import java.util.List;
 
+import com.gatheredsatyr53.xpmagic.Config;
 import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -25,9 +26,19 @@ import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * A shaped recipe that pools the {@code lightning_charge} of everything in the grid onto its result —
- * forge a Memory Crystal Sword from crystals that drank a thunderbolt and the sword keeps the charge,
- * and with it a bonus to attack damage (see {@link LightningCharge}).
+ * A shaped recipe that carries what the Memory Crystals in the grid hold onto the tool forged from
+ * them. Two things cross over, and they are deliberately different in kind (see {@link ToolStats}):
+ *
+ * <ul>
+ * <li>{@code lightning_charge} — pooled and paid out at once. Forge a sword from crystals that drank a
+ *     thunderbolt and it swings harder from the first blow; a pickaxe bites into stone faster.</li>
+ * <li>{@code xp_capacity} — pooled and spent on {@code max_evolution_potential}: not a bonus but a
+ *     ceiling, the room the tool has to grow into through use. Crystals a good explosion packed dense
+ *     make a tool that can go further, though it starts no stronger.</li>
+ * </ul>
+ *
+ * <p>So the same crystal answers two questions at the forge — how good is this tool now, and how good
+ * can it ever get — and a player can aim for either.
  *
  * <p>Vanilla's {@code shaped} recipes drop ingredient components on the floor, and {@code TransmuteRecipe}
  * — the one vanilla recipe that does carry them over — is shaped as "one input plus material", which a
@@ -81,24 +92,53 @@ public class ChargedToolRecipe extends NormalCraftingRecipe {
     }
 
     /**
-     * The charge is pooled here rather than in the handler, so the crafting grid's result slot shows the
-     * finished weapon with its real damage before the player ever takes it.
+     * Both values are pooled here rather than in a handler, so the crafting grid's result slot shows the
+     * finished tool with its real numbers before the player ever takes it.
      */
     @Override
     public ItemStack assemble(CraftingInput input) {
         ItemStack tool = this.result.create();
-        LightningCharge.applyTo(tool, totalCharge(input));
+
+        int charge = totalCharge(input);
+        if (charge > 0) {
+            tool.set(XPMagic.LIGHTNING_CHARGE.get(), charge);
+        }
+        tool.set(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), totalCapacity(input) * Config.evolutionPerCapacity);
+
+        ToolStats.recompute(tool);
         return tool;
     }
 
     /**
-     * Charge summed over the whole grid: every crystal that went into the weapon gives up what it holds,
-     * so two half-charged crystals are worth one full one. {@link LightningCharge} caps what that buys.
+     * Charge summed over the whole grid: every crystal that went into the tool gives up what it holds,
+     * so two half-charged crystals are worth one full one. {@link ToolStats} caps what that buys.
      */
     private static int totalCharge(CraftingInput input) {
         int total = 0;
         for (ItemStack stack : input.items()) {
             total += stack.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
+        }
+        return total;
+    }
+
+    /**
+     * Capacity summed the same way, which decides how far the tool can evolve — minus the lightning
+     * share, which must not count twice.
+     *
+     * <p>A bolt raises a crystal's {@code xp_capacity} rather than sitting beside it (see
+     * {@link com.gatheredsatyr53.xpmagic.LightningChargingHandler}), and {@code lightning_charge} is
+     * the record of how much of the capacity came from the sky. Summing capacity raw would let a
+     * charged crystal buy both an immediate bonus and a higher ceiling off the same energy. Only what
+     * the crystal owed to its own density — base plus the explosion's compaction — buys room to grow.
+     *
+     * <p>Note this reads the crystals' capacity but never copies the component onto the tool — see
+     * {@link ToolStats} for why a tool must not carry {@code xp_capacity}.
+     */
+    private static int totalCapacity(CraftingInput input) {
+        int total = 0;
+        for (ItemStack stack : input.items()) {
+            total += stack.getOrDefault(XPMagic.XP_CAPACITY.get(), 0)
+                   - stack.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
         }
         return total;
     }

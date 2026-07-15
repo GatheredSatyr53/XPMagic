@@ -21,5 +21,15 @@ public final class XPMagicItemTagsProvider extends TagsProvider<Item> {
         // Repair material for the Memory Crystal tools (referenced by MEMORY_CRYSTAL_MATERIAL).
         this.tag(XPMagic.MEMORY_CRYSTAL_TOOL_MATERIALS)
             .add(XPMagic.MEMORY_CRYSTAL.getKey());
+
+        // Which stat a tool's lightning charge and evolution buy. The axe sits with the weapons: it
+        // does mine wood, but its reason to exist is the damage.
+        this.tag(XPMagic.EVOLVING_WEAPONS)
+            .add(XPMagic.MEMORY_CRYSTAL_SWORD.getKey())
+            .add(XPMagic.MEMORY_CRYSTAL_AXE.getKey());
+
+        this.tag(XPMagic.EVOLVING_DIGGERS)
+            .add(XPMagic.MEMORY_CRYSTAL_PICKAXE.getKey())
+            .add(XPMagic.MEMORY_CRYSTAL_SHOVEL.getKey());
     }
 }

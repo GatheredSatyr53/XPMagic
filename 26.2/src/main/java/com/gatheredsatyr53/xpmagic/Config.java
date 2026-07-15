@@ -59,9 +59,10 @@ public class Config {
             .comment("Maximum xp_capacity a Memory Crystal can reach by lightning charging.")
             .defineInRange("lightningMaxCapacity", 40, 0, 4096);
 
-    // Charged weapons: a tool forged from charged crystals pools their lightning_charge and spends it
-    // on attack damage. A crystal tops out near 20 charge (base capacity 20 against a 40 cap), so a
-    // two-crystal sword reaches roughly +2.0 damage and a three-crystal axe runs into the cap below.
+    // Charged tools: a tool forged from charged crystals pools their lightning_charge and spends it
+    // immediately — on attack damage for a weapon, on mining speed for a digging tool. A crystal tops
+    // out near 20 charge (base capacity 20 against a 40 cap), so a two-crystal sword reaches roughly
+    // +2.0 damage and a three-crystal axe runs into the cap below.
     private static final ModConfigSpec.DoubleValue LIGHTNING_DAMAGE_PER_CHARGE = BUILDER
             .comment("Attack damage a weapon gains per point of lightning_charge carried over from the Memory Crystals it was forged from.")
             .defineInRange("lightningDamagePerCharge", 0.05, 0.0, 100.0);
@@ -69,6 +70,39 @@ public class Config {
     private static final ModConfigSpec.DoubleValue LIGHTNING_MAX_DAMAGE_BONUS = BUILDER
             .comment("Ceiling on the attack damage lightning_charge can buy a single weapon, however much charge went into it.")
             .defineInRange("lightningMaxDamageBonus", 3.0, 0.0, 1024.0);
+
+    // The digging counterpart of the two above, deliberately given the same defaults: mining_efficiency
+    // adds onto a base mining speed of 8, attack damage onto a base of 8.75, so +3.0 lands at roughly
+    // the same +35% on either profile.
+    private static final ModConfigSpec.DoubleValue LIGHTNING_MINING_EFFICIENCY_PER_CHARGE = BUILDER
+            .comment("Mining efficiency a digging tool gains per point of lightning_charge carried over from the Memory Crystals it was forged from.")
+            .defineInRange("lightningMiningEfficiencyPerCharge", 0.05, 0.0, 100.0);
+
+    private static final ModConfigSpec.DoubleValue LIGHTNING_MAX_MINING_EFFICIENCY_BONUS = BUILDER
+            .comment("Ceiling on the mining efficiency lightning_charge can buy a single digging tool, however much charge went into it.")
+            .defineInRange("lightningMaxMiningEfficiencyBonus", 3.0, 0.0, 1024.0);
+
+    // Tool evolution: a tool grows with use. Every kill (weapons) or correctly-mined block (digging
+    // tools) adds a point of evolution_potential; each evolutionStepCost points is one step of growth.
+    // How far a tool can grow is decided at the forge: max_evolution_potential is the summed xp_capacity
+    // of the crystals it was made from, times evolutionPerCapacity. Denser crystals — the ones a good
+    // explosion compacted, or a bolt of lightning charged — therefore make a tool with more room to grow.
+    // Note the two mechanics stay separate on purpose: lightning_charge pays out at once and does not
+    // touch the cap, while capacity buys potential and never pays out at once.
+    private static final ModConfigSpec.IntValue EVOLUTION_PER_CAPACITY = BUILDER
+            .comment("Points of max_evolution_potential granted per point of summed xp_capacity of the crystals a tool was forged from.")
+            .defineInRange("evolutionPerCapacity", 20, 0, 4096);
+
+    private static final ModConfigSpec.IntValue EVOLUTION_STEP_COST = BUILDER
+            .comment("Points of evolution_potential per step of growth. The number of steps a tool can ever reach is max_evolution_potential / this.")
+            .defineInRange("evolutionStepCost", 100, 1, 100000);
+
+    // What one step is worth is NOT configured here: it rides on each tool as the evolution_gain
+    // component (see XPMagic's item registrations), because it has to differ per tool rather than per
+    // profile. The axe is forged from three crystals and the sword from two, so the axe reaches ~12
+    // steps against the sword's ~8; paying them the same per step would have evolution quietly widen
+    // the damage gap the two were balanced around. Being a component, a datapack can retune any single
+    // tool — or give evolution to a tool this mod never registered — without a config key per item.
 
     // Anvil crushing: a Memory Crystal an anvil lands on is shattered back into Memory Powder.
     // Compaction (and any lightning charge) scatters on impact, so this is deliberately lossy — the
@@ -101,6 +135,10 @@ public class Config {
     public static int lightningMaxCapacity;
     public static double lightningDamagePerCharge;
     public static double lightningMaxDamageBonus;
+    public static double lightningMiningEfficiencyPerCharge;
+    public static double lightningMaxMiningEfficiencyBonus;
+    public static int evolutionPerCapacity;
+    public static int evolutionStepCost;
     public static boolean crushCrystals;
     public static int shatterCapacity;
     public static int soulFireTicksPerCapacity;
@@ -121,6 +159,10 @@ public class Config {
         lightningMaxCapacity = LIGHTNING_MAX_CAPACITY.get();
         lightningDamagePerCharge = LIGHTNING_DAMAGE_PER_CHARGE.get();
         lightningMaxDamageBonus = LIGHTNING_MAX_DAMAGE_BONUS.get();
+        lightningMiningEfficiencyPerCharge = LIGHTNING_MINING_EFFICIENCY_PER_CHARGE.get();
+        lightningMaxMiningEfficiencyBonus = LIGHTNING_MAX_MINING_EFFICIENCY_BONUS.get();
+        evolutionPerCapacity = EVOLUTION_PER_CAPACITY.get();
+        evolutionStepCost = EVOLUTION_STEP_COST.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();

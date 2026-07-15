@@ -96,9 +96,11 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
         this.stonecutterResultFromBase(RecipeCategory.MISC, XPMagic.TIME_CRYSTAL_WAFER.get(), XPMagic.TIME_CRYSTAL_BLOCK.get(), 2);
         this.stonecutterResultFromBase(RecipeCategory.MISC, XPMagic.TIME_CRYSTAL_ROD.get(), XPMagic.TIME_CRYSTAL_WAFER.get(), 4);
 
-        // Sword and axe are built as charged tools: whatever lightning_charge the crystals carry pools
-        // onto the weapon as bonus attack damage. The pickaxe and shovel below stay plain shaped — the
-        // charge only buys attack damage, which is dead weight on a digging tool.
+        // All four tools are built as charged tools, so the crystals' lightning_charge and xp_capacity
+        // cross onto them: the charge as an immediate bonus (damage for the sword and axe, mining
+        // efficiency for the pickaxe and shovel), the capacity as the ceiling on how far the tool can
+        // later evolve. A plain vanilla shaped recipe drops ingredient components on the floor, so a
+        // tool forged by one would come out with no ceiling and could never grow at all.
         ChargedToolRecipeBuilder.chargedTool(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_SWORD.get())
             .pattern(" X ")
             .pattern(" X ")
@@ -108,7 +110,7 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
-        this.shaped(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_PICKAXE.get())
+        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_PICKAXE.get())
             .pattern("XXX")
             .pattern(" Y ")
             .pattern(" Y ")
@@ -126,7 +128,7 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
-        this.shaped(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_SHOVEL.get())
+        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_SHOVEL.get())
             .pattern(" X ")
             .pattern(" Y ")
             .pattern(" Y ")

@@ -1,5 +1,6 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.item.ToolStats;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -42,6 +43,22 @@ public final class XPMagicClientEvents {
         if (burned > 0) {
             event.getToolTip().add(Component.translatable("tooltip.xpmagic.burned_away", burned)
                                             .withStyle(ChatFormatting.DARK_AQUA));
+        }
+        // Evolution: the step count is what the player feels (vanilla already draws the attribute line
+        // the steps bought), while the raw points show how close the next one is. A tool that has run
+        // out of room reads as maxed rather than showing a bar that will never move again.
+        int ceiling = stack.getOrDefault(XPMagic.MAX_EVOLUTION_POTENTIAL.get(), 0);
+        if (ceiling > 0) {
+            int steps = ToolStats.steps(stack);
+            int maxSteps = ToolStats.maxSteps(stack);
+            event.getToolTip().add(Component.translatable("tooltip.xpmagic.evolution", steps, maxSteps)
+                                            .withStyle(ChatFormatting.LIGHT_PURPLE));
+            int potential = stack.getOrDefault(XPMagic.EVOLUTION_POTENTIAL.get(), 0);
+            if (steps < maxSteps) {
+                event.getToolTip().add(Component.translatable("tooltip.xpmagic.evolution_progress",
+                                                              potential, ceiling)
+                                                .withStyle(ChatFormatting.DARK_GRAY));
+            }
         }
         StoredExp storedExp = stack.get(XPMagic.STORED_EXP.get());
         if (storedExp != null) {

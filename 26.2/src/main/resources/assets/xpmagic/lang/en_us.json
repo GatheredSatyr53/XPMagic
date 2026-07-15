@@ -23,6 +23,8 @@
   "tooltip.xpmagic.compaction_bonus": "Compaction: +%s",
   "tooltip.xpmagic.lightning_charge": "Lightning charge: +%s",
   "tooltip.xpmagic.burned_away": "Burned away: %s",
+  "tooltip.xpmagic.evolution": "Evolution: step %s of %s",
+  "tooltip.xpmagic.evolution_progress": "Potential: %s / %s",
   "block.xpmagic.xp_keeping_machine": "XP Keeping Machine",
   "block.xpmagic.powder_separator": "Powder Separator",
   "block.xpmagic.powder_mixer": "Powder Mixer",

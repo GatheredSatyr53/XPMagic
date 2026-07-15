@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "xpmagic:charged_tool",
   "category": "equipment",
   "key": {
     "X": "xpmagic:memory_crystal",

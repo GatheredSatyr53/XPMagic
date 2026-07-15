@@ -113,6 +113,32 @@ public final class XPMagic {
             .build()
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> EVOLUTION_POTENTIAL = DATA_COMPONENTS.register("evolution_potential",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> MAX_EVOLUTION_POTENTIAL = DATA_COMPONENTS.register("max_evolution_potential",
+                                                                                                                                            () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
+    // What one step of evolution is worth on this tool, in whatever stat its profile spends on (see
+    // ToolStats): attack damage for a weapon, mining efficiency for a digger. A component rather than a
+    // config key because the right value is a property of the individual tool — chiefly of how many
+    // crystals it takes, since that sets how many steps it will ever reach — so a datapack retunes one
+    // tool, or grants evolution to a tool from another mod, without this mod knowing it exists.
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Float>> EVOLUTION_GAIN = DATA_COMPONENTS.register("evolution_gain",
+        () -> DataComponentType.<Float>builder()
+            .persistent(Codec.FLOAT)
+            .networkSynchronized(ByteBufCodecs.FLOAT)
+            .build()
+    );
+
     // Owner recorded on a Player Key; the machine drains XP from this player
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<PlayerOwner>> PLAYER_OWNER = DATA_COMPONENTS.register("owner",
                                                                                                                () -> DataComponentType.<PlayerOwner>builder()
@@ -189,6 +215,16 @@ public final class XPMagic {
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "memory_crystal_tool_materials"));
 
+    // The two evolution profiles (see ToolStats). Both lightning_charge and evolution_potential pay out
+    // along whichever profile a tool belongs to: weapons grow attack damage and earn potential from
+    // kills, diggers grow mining speed and earn it from blocks they are the correct tool for. A tool in
+    // neither tag simply never evolves, so these tags are what makes the whole mechanic opt-in.
+    public static final TagKey<Item> EVOLVING_WEAPONS =
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "evolving_weapons"));
+
+    public static final TagKey<Item> EVOLVING_DIGGERS =
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "evolving_diggers"));
+
     // Diamond-grade material, but half the durability (780 vs 1561) — see attackDamageBaseline
     // per tool below for the +25% damage over diamond. attackDamageBonus stays at diamond's 3.0F;
     // the extra damage is added through each tool's baseline instead.
@@ -205,16 +241,24 @@ public final class XPMagic {
     //   sword 7 -> 8.75 (baseline 4.75), pickaxe 5 -> 6.25 (2.25), axe 9 -> 11.25 (7.25),
     //   shovel 5.5 -> 6.875 (2.875).
     // Attack speed baselines are the vanilla per-type values (-2.4 / -2.8 / -3.0).
+    //
+    // Each also carries an evolution_gain: what one step of growth pays out. The values are set against
+    // how many steps each tool can reach, which follows from how many crystals its recipe takes (see
+    // ChargedToolRecipe) — so the weapons land near +4.0 damage apiece at full growth and neither
+    // out-evolves the other, and the diggers reach +12 mining efficiency, between Efficiency III and IV
+    // on vanilla's scale, leaving the enchantment worth putting on top.
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_SWORD = ITEMS.register("memory_crystal_sword",
         () -> new Item(new Item.Properties()
             .setId(itemKey("memory_crystal_sword"))
             .sword(MEMORY_CRYSTAL_MATERIAL, 4.75F, -2.4F)
+            .component(EVOLUTION_GAIN.get(), 0.5F) // 2 crystals -> ~8 steps -> ~+4.0 damage
             .fireResistant()));
 
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_PICKAXE = ITEMS.register("memory_crystal_pickaxe",
         () -> new Item(new Item.Properties()
             .setId(itemKey("memory_crystal_pickaxe"))
             .pickaxe(MEMORY_CRYSTAL_MATERIAL, 2.25F, -2.8F)
+            .component(EVOLUTION_GAIN.get(), 1.0F) // 3 crystals -> ~12 steps -> ~+12 mining efficiency
             .fireResistant()));
 
     // AxeItem (not a plain Item) for the strip/scrape/wax-off behaviour; its constructor applies
@@ -222,6 +266,7 @@ public final class XPMagic {
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_AXE = ITEMS.register("memory_crystal_axe",
         () -> new AxeItem(MEMORY_CRYSTAL_MATERIAL, 7.25F, -3.0F, new Item.Properties()
             .setId(itemKey("memory_crystal_axe"))
+            .component(EVOLUTION_GAIN.get(), 0.33F) // 3 crystals -> ~12 steps -> ~+4.0 damage, as the sword
             .fireResistant()));
 
     // ShovelItem for the same reason as AxeItem: the path-flattening and campfire-dousing
@@ -230,6 +275,7 @@ public final class XPMagic {
     public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_SHOVEL = ITEMS.register("memory_crystal_shovel",
         () -> new ShovelItem(MEMORY_CRYSTAL_MATERIAL, 2.875F, -3.0F, new Item.Properties()
             .setId(itemKey("memory_crystal_shovel"))
+            .component(EVOLUTION_GAIN.get(), 3.0F) // 1 crystal -> ~4 steps -> ~+12, level with the pickaxe
             .fireResistant()));
 
     //</editor-fold>
@@ -391,6 +437,7 @@ public final class XPMagic {
         SOUND_EVENTS.register(modEventBus);
         MENU_TYPES.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
+        com.gatheredsatyr53.xpmagic.gametest.XPMagicGameTests.init(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
 
