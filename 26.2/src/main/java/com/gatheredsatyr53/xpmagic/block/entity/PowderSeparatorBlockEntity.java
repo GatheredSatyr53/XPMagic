@@ -4,13 +4,14 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -23,7 +24,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -91,7 +91,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         return this.dataAccess;
     }
 
-    public ItemStackHandler getInventory() {
+    public Container getInventory() {
         return this.inventory;
     }
 
@@ -169,7 +169,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
     /** True if the input holds powder and every fraction that would be produced has room. */
     public boolean canProcess() {
-        ItemStack in = this.inventory.getStackInSlot(SLOT_INPUT);
+        ItemStack in = this.inventory.getItem(SLOT_INPUT);
         if (!in.is(XPMagic.MEMORY_POWDER.get()))
             return false;
 
@@ -178,7 +178,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         for (int i = 0; i < FRACTION_SLOTS.length; ++i) {
             if (!emit[i])
                 continue;
-            ItemStack out = this.inventory.getStackInSlot(FRACTION_SLOTS[i]);
+            ItemStack out = this.inventory.getItem(FRACTION_SLOTS[i]);
             if (!out.isEmpty() && (!out.is(fractions[i]) || out.getCount() >= out.getMaxStackSize()))
                 return false;
         }
@@ -198,7 +198,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
         Item[] fractions = fractionItems();
         int[] caps = fractionCaps();
-        this.inventory.getStackInSlot(SLOT_INPUT).shrink(1);
+        this.inventory.getItem(SLOT_INPUT).shrink(1);
 
         int budget = SOURCE_CAPACITY;
         int yield = 0;
@@ -218,9 +218,9 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
 
     /** Adds one of the given fraction to its output slot (room is assumed, checked by canProcess). */
     private void putFraction(int index, Item fraction) {
-        ItemStack out = this.inventory.getStackInSlot(FRACTION_SLOTS[index]);
+        ItemStack out = this.inventory.getItem(FRACTION_SLOTS[index]);
         if (out.isEmpty())
-            this.inventory.setStackInSlot(FRACTION_SLOTS[index], new ItemStack(fraction));
+            this.inventory.setItem(FRACTION_SLOTS[index], new ItemStack(fraction));
         else
             out.grow(1);
     }
@@ -228,15 +228,14 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, this.inventory.items());
+        ContainerHelper.saveAllItems(output, this.inventory.getItems());
         output.putInt("vibration_ticks", this.vibrationTicks);
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        this.inventory.setSize(SLOT_COUNT);
-        ContainerHelper.loadAllItems(input, this.inventory.items());
+        ContainerHelper.loadAllItems(input, this.inventory.getItems());
         this.vibrationTicks = input.getIntOr("vibration_ticks", 0);
     }
 
@@ -244,27 +243,25 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
         if (this.level != null)
-            Containers.dropContents(this.level, pos, this.inventory.items());
+            Containers.dropContents(this.level, pos, this.inventory.getItems());
     }
 
-    private final class SeparatorInventory extends ItemStackHandler {
+    private final class SeparatorInventory extends SimpleContainer {
 
         SeparatorInventory() {
             super(SLOT_COUNT);
         }
 
-        NonNullList<ItemStack> items() {
-            return this.stacks;
-        }
-
+        // Only the input accepts insertion (from GUI or hopper); the fraction outputs reject it.
         @Override
-        protected void onContentsChanged(int slot) {
-            PowderSeparatorBlockEntity.this.setChanged();
-        }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
+        public boolean canPlaceItem(int slot, ItemStack stack) {
             return PowderSeparatorBlockEntity.this.isItemValid(slot, stack);
+        }
+
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            PowderSeparatorBlockEntity.this.setChanged();
         }
     }
 }

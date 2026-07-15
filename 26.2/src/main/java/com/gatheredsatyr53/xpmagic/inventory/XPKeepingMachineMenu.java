@@ -5,6 +5,8 @@ import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
@@ -13,9 +15,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
 
 import static com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity.*;
 
@@ -38,7 +37,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     private final Player player;
 
     public XPKeepingMachineMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, new ItemStackHandler(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
+        this(containerId, playerInventory, new SimpleContainer(SLOT_COUNT), new SimpleContainerData(DATA_COUNT),
             ContainerLevelAccess.NULL);
     }
 
@@ -47,7 +46,7 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
             ContainerLevelAccess.create(machine.getLevel(), machine.getBlockPos()));
     }
 
-    private XPKeepingMachineMenu(int containerId, Inventory playerInventory, IItemHandler machineInventory,
+    private XPKeepingMachineMenu(int containerId, Inventory playerInventory, Container machineInventory,
                                  ContainerData data, ContainerLevelAccess access) {
         super(XPMagic.XP_KEEPING_MACHINE_MENU.get(), containerId);
         this.data = data;
@@ -59,19 +58,12 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
         this.addSlot(new ConditionalInputSlot(machineInventory, SLOT_FUEL, 49, 39, this::isFuel));
         this.addSlot(new ConditionalInputSlot(machineInventory, SLOT_MATRIX, 67, 59, this::isMatrix));
         this.addSlot(new OutputSlot(machineInventory, SLOT_OUTPUT, 116, 39));
-        this.addSlot(new SlotItemHandler(machineInventory, SLOT_KEY, 9, 9) {
+        // canPlaceItem is false for the key slot (blocks hoppers); GUI placement is gated by
+        // ownership here instead, independent of the container's insertion rule.
+        this.addSlot(new Slot(machineInventory, SLOT_KEY, 9, 9) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return isOwnKey(stack);
-            }
-
-            @Override
-            public int getMaxStackSize(ItemStack stack) {
-                // The handler reports isItemValid=false for the key slot (to block hopper
-                // insertion), which would make SlotItemHandler simulate a capacity of 0 and
-                // refuse GUI placement. Ownership is already enforced by mayPlace, so report
-                // the real capacity here.
-                return stack.getMaxStackSize();
             }
         });
 

@@ -1,18 +1,18 @@
 package com.gatheredsatyr53.xpmagic.inventory;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
-public class ConditionalInputSlot extends SlotItemHandler {
+public class ConditionalInputSlot extends Slot {
     private final Predicate<ItemStack> condition;
 
-    public ConditionalInputSlot(IItemHandler itemHandler, int index, int xPosition,
+    public ConditionalInputSlot(Container container, int index, int xPosition,
                                 int yPosition, Predicate<ItemStack> condition) {
-        super(itemHandler, index, xPosition, yPosition);
+        super(container, index, xPosition, yPosition);
 
         this.condition = condition;
     }
