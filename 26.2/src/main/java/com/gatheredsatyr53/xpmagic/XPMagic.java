@@ -114,6 +114,17 @@ public final class XPMagic {
             .build()
     );
 
+    // How much of a Memory Pearl's xp_capacity was packed in by feeding it Vindictive Flesh on an anvil,
+    // kept apart from the base 40 the same way lightning_charge is kept apart from a crystal's base — so
+    // the tooltip can name it instead of mislabelling it as an explosion's compaction (which never
+    // touches a pearl). See VindictiveFleshHandler.
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> VINDICTIVE_CAPACITY = DATA_COMPONENTS.register("vindictive_capacity",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
     // Ticks an item has spent sitting in soul fire (blue flame), accumulated by SoulFireHandler to pace
     // how fast it burns xp_capacity off a transforming crystal. Doubles as the "this item was touched by
     // blue flame" flag: any stack carrying a non-zero value has been in soul fire.
@@ -235,6 +246,10 @@ public final class XPMagic {
             .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
             .usingConvertsTo(Items.GLASS_BOTTLE)
         ));
+
+    public static final DeferredHolder<Item, Item> VINDICTIVE_FLESH = ITEMS.register("vindictive_flesh",
+        () -> new Item(new Item.Properties()
+            .setId(itemKey("vindictive_flesh"))));
 
     // Tools carved from a Memory Crystal. Repaired by the crystal itself (tag below).
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
@@ -438,6 +453,7 @@ public final class XPMagic {
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
                 output.accept(TIME_CRYSTAL_ROD.get());
+                output.accept(VINDICTIVE_FLESH.get());
                 output.accept(MEMORY_CRYSTAL_SWORD.get());
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());

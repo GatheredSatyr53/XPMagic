@@ -32,7 +32,7 @@ public final class XPMagicGlobalLootModifiers extends GlobalLootModifierProvider
         HolderLookup.Provider lookup = this.registries.join();
 
         swap("enderman_memory_pearl", "entities/enderman", Items.ENDER_PEARL, XPMagic.MEMORY_PEARL.get(), 0.5F, lookup);
-        swap("shulker_memory_pearl", "entities/shulker", Items.SHULKER_SHELL, XPMagic.MEMORY_PEARL.get(), 0.25F, lookup);
+        swap("zombie_vindictive_flesh", "entities/zombie", Items.ROTTEN_FLESH, XPMagic.VINDICTIVE_FLESH.get(), 0.25F, lookup);
     }
 
     private void swap(String name, String lootTable, Item from, Item to, float chance, HolderLookup.Provider lookup) {

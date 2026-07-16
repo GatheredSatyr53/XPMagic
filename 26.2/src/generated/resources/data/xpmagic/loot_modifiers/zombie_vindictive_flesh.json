@@ -4,10 +4,10 @@
   "conditions": [
     {
       "condition": "neoforge:loot_table_id",
-      "loot_table_id": "minecraft:entities/shulker"
+      "loot_table_id": "minecraft:entities/zombie"
     }
   ],
   "enchantment": "xpmagic:saturation",
-  "from": "minecraft:shulker_shell",
-  "to": "xpmagic:memory_pearl"
+  "from": "minecraft:rotten_flesh",
+  "to": "xpmagic:vindictive_flesh"
 }

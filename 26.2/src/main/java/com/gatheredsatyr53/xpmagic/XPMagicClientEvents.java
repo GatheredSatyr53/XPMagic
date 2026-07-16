@@ -22,12 +22,13 @@ public final class XPMagicClientEvents {
             event.getToolTip().add(Component.translatable("tooltip.xpmagic.xp_capacity", capacity)
                                             .withStyle(ChatFormatting.GRAY));
 
-            // Capacity above the item's baked-in base comes from two separate sources: an explosion's
-            // compaction and a lightning charge. The lightning share is tracked on its own component;
-            // whatever remains over base is compaction. Show each contribution as its own line.
+            // Capacity above the item's baked-in base comes from separate sources, each tracked on its
+            // own component: a lightning charge and Vindictive Flesh. Whatever is left over base after
+            // subtracting those is an explosion's compaction. Show each contribution as its own line.
             int base = stack.getItem().getDefaultInstance().getOrDefault(XPMagic.XP_CAPACITY.get(), capacity);
             int lightning = stack.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
-            int compaction = capacity - base - lightning;
+            int vindictive = stack.getOrDefault(XPMagic.VINDICTIVE_CAPACITY.get(), 0);
+            int compaction = capacity - base - lightning - vindictive;
             if (compaction > 0) {
                 event.getToolTip().add(Component.translatable("tooltip.xpmagic.compaction_bonus", compaction)
                                                 .withStyle(ChatFormatting.AQUA));
@@ -35,6 +36,10 @@ public final class XPMagicClientEvents {
             if (lightning > 0) {
                 event.getToolTip().add(Component.translatable("tooltip.xpmagic.lightning_charge", lightning)
                                                 .withStyle(ChatFormatting.YELLOW));
+            }
+            if (vindictive > 0) {
+                event.getToolTip().add(Component.translatable("tooltip.xpmagic.vindictive_capacity", vindictive)
+                                                .withStyle(ChatFormatting.DARK_GREEN));
             }
         }
         // Soul fire burns one point of capacity per soulFireTicksPerCapacity ticks in the flame, so

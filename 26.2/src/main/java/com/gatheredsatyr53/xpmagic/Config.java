@@ -134,6 +134,22 @@ public class Config {
             .comment("xp_capacity budget released per Memory Crystal an anvil shatters, then broken at random into powder fractions (largest favoured). Keep below a crystal's own xp_capacity so crushing stays a lossy recycle, never a dupe.")
             .defineInRange("shatterCapacity", 10, 0, 4096);
 
+    // Vindictive Flesh: dropped by zombies, and fed to a Memory Pearl on an anvil to pack the pearl
+    // denser — raising its xp_capacity above the base 40, up to vindictivePearlMaxCapacity. Like
+    // lightning on a crystal this is genuine external input (a zombie's remembered grudge), not a dupe:
+    // xp_capacity is vessel size, so a bigger pearl stores no experience it was not later given.
+    private static final ModConfigSpec.IntValue VINDICTIVE_PEARL_MAX_CAPACITY = BUILDER
+            .comment("The xp_capacity a Memory Pearl can be packed up to by feeding it Vindictive Flesh (its base is 40).")
+            .defineInRange("vindictivePearlMaxCapacity", 60, 40, 4096);
+
+    private static final ModConfigSpec.IntValue VINDICTIVE_CAPACITY_PER_FLESH = BUILDER
+            .comment("xp_capacity a Memory Pearl gains per Vindictive Flesh consumed on the anvil.")
+            .defineInRange("vindictiveCapacityPerFlesh", 2, 0, 256);
+
+    private static final ModConfigSpec.IntValue VINDICTIVE_XP_COST_PER_FLESH = BUILDER
+            .comment("Experience levels the anvil charges per Vindictive Flesh consumed. It costs experience to densify a vessel for experience.")
+            .defineInRange("vindictiveXpCostPerFlesh", 1, 0, 256);
+
     // Soul-fire transformation: a Memory Crystal left in soul fire (blue flame) has its xp_capacity
     // burned away one point at a time; when it hits 0 the crystal transforms into a Time Crystal. The
     // soul_fire_time component also marks any item that has touched blue flame, for detection elsewhere.
@@ -163,6 +179,9 @@ public class Config {
     public static double evolutionLuckBonus;
     public static boolean crushCrystals;
     public static int shatterCapacity;
+    public static int vindictivePearlMaxCapacity;
+    public static int vindictiveCapacityPerFlesh;
+    public static int vindictiveXpCostPerFlesh;
     public static int soulFireTicksPerCapacity;
 
     private static boolean validateItemName(final Object obj) {
@@ -190,6 +209,9 @@ public class Config {
         evolutionLuckBonus = EVOLUTION_LUCK_BONUS.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
+        vindictivePearlMaxCapacity = VINDICTIVE_PEARL_MAX_CAPACITY.get();
+        vindictiveCapacityPerFlesh = VINDICTIVE_CAPACITY_PER_FLESH.get();
+        vindictiveXpCostPerFlesh = VINDICTIVE_XP_COST_PER_FLESH.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();
 
         // convert the list of strings into a set of items

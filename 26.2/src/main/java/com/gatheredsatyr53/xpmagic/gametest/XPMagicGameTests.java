@@ -66,6 +66,18 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> PEARL_IS_AN_XP_STORE =
         register("pearl_is_an_xp_store", LootTests.PEARL_IS_AN_XP_STORE);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_FILLS_TO_CAP =
+        register("flesh_fills_to_cap", VindictiveFleshTests.FLESH_FILLS_TO_CAP);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_ADDS_PER_UNIT =
+        register("flesh_adds_per_unit", VindictiveFleshTests.FLESH_ADDS_PER_UNIT);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_RESPECTS_THE_CEILING =
+        register("flesh_respects_the_ceiling", VindictiveFleshTests.FLESH_RESPECTS_THE_CEILING);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> ANVIL_WIRES_THE_FEED =
+        register("anvil_wires_the_feed", VindictiveFleshTests.ANVIL_WIRES_THE_FEED);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -96,6 +108,11 @@ public final class XPMagicGameTests {
         registerTest(event, environment, SATURATION_SWAPS_DROP, 200);
         registerTest(event, environment, PLAIN_WEAPON_KEEPS_DROP, 200);
         registerTest(event, environment, PEARL_IS_AN_XP_STORE);
+
+        registerTest(event, environment, FLESH_FILLS_TO_CAP);
+        registerTest(event, environment, FLESH_ADDS_PER_UNIT);
+        registerTest(event, environment, FLESH_RESPECTS_THE_CEILING);
+        registerTest(event, environment, ANVIL_WIRES_THE_FEED);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,
