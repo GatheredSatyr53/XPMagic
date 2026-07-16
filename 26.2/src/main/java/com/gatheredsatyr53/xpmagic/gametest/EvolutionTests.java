@@ -240,6 +240,56 @@ public final class EvolutionTests {
     };
 
     /**
+     * The milestones ramp their own attribute in over the tail of growth, each in its own units — and,
+     * above all, priced apart from the primary gain. This is the regression guard for the bug where the
+     * secondary borrowed the primary's per-step rate and drove reach to roughly +8 blocks: here a fully
+     * grown pickaxe must land on exactly its configured reach target, not a multiple of it.
+     */
+    public static final Consumer<GameTestHelper> MILESTONES_RAMP_IN_OWN_UNITS = helper -> {
+        ItemStack pickaxe = craftPickaxe(helper); // 3x20 capacity -> 12 steps, gain 1.0
+        var reach = Attributes.BLOCK_INTERACTION_RANGE;
+        var luck = Attributes.LUCK;
+
+        // Below the first threshold (0.3 of 12 = 3.6 steps): neither milestone has begun.
+        setSteps(pickaxe, 3);
+        helper.assertTrue(bonusFor(pickaxe, reach) == 0.0, "no reach below the first milestone");
+        helper.assertTrue(bonusFor(pickaxe, luck) == 0.0, "no luck below the second milestone");
+
+        // Just past the first threshold: reach has begun, small, and luck has not.
+        setSteps(pickaxe, 4);
+        double reachEarly = bonusFor(pickaxe, reach);
+        helper.assertTrue(reachEarly > 0.0 && reachEarly < Config.evolutionReachBonus,
+            "reach should be ramping, not full or absent, got " + reachEarly);
+        helper.assertTrue(bonusFor(pickaxe, luck) == 0.0, "luck should still be closed at 1/3 growth");
+
+        // Just below the second threshold (0.7 of 12 = 8.4 steps): reach on, luck still off.
+        setSteps(pickaxe, 8);
+        helper.assertTrue(bonusFor(pickaxe, luck) == 0.0, "luck should not open until 0.7 of growth");
+
+        // Full growth: each milestone sits on exactly its configured target — the whole point.
+        setSteps(pickaxe, 12);
+        double reachFull = bonusFor(pickaxe, reach);
+        double luckFull = bonusFor(pickaxe, luck);
+        helper.assertTrue(Math.abs(reachFull - Config.evolutionReachBonus) < 1.0E-4,
+            "a fully grown pickaxe should reach exactly its target " + Config.evolutionReachBonus
+            + ", got " + reachFull + " (the old bug put this near +8)");
+        helper.assertTrue(Math.abs(luckFull - Config.evolutionLuckBonus) < 1.0E-4,
+            "luck should reach its target " + Config.evolutionLuckBonus + ", got " + luckFull);
+
+        // The other profile pays its milestone into a different attribute, in that attribute's units.
+        ItemStack sword = craftSword(helper, crystal(20, 0), crystal(20, 0));
+        setSteps(sword, ToolStats.maxSteps(sword));
+        double knockFull = bonusFor(sword, Attributes.ATTACK_KNOCKBACK);
+        helper.assertTrue(Math.abs(knockFull - Config.evolutionKnockbackBonus) < 1.0E-4,
+            "a fully grown sword should reach its knockback target " + Config.evolutionKnockbackBonus
+            + ", got " + knockFull);
+        helper.assertTrue(bonusFor(sword, Attributes.BLOCK_INTERACTION_RANGE) == 0.0,
+            "a weapon must not gain the digger's reach milestone");
+
+        helper.succeed();
+    };
+
+    /**
      * A survival player: the mock the framework hands out otherwise runs in creative, and a creative
      * player's {@code preventsBlockDrops} short-circuits {@code destroyBlock} before any drops event
      * ever fires — the mining test would then pass by never testing anything.
@@ -293,17 +343,28 @@ public final class EvolutionTests {
 
     /** The attack damage our modifiers add, ignoring the weapon's own base entry. */
     private static double bonusDamage(ItemStack stack) {
+        return bonusFor(stack, Attributes.ATTACK_DAMAGE);
+    }
+
+    /** Sum of the modifiers this mod adds to a given attribute, ignoring vanilla's own entries. */
+    private static double bonusFor(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute) {
         ItemAttributeModifiers modifiers =
             stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 
         double total = 0.0;
         for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
-            if (entry.attribute().equals(Attributes.ATTACK_DAMAGE)
+            if (entry.attribute().equals(attribute)
                 && entry.modifier().id().getNamespace().equals(XPMagic.MODID)) {
                 total += entry.modifier().amount();
             }
         }
         return total;
+    }
+
+    /** Drives a tool to exactly {@code n} steps of growth and recomputes, for precise milestone probing. */
+    private static void setSteps(ItemStack stack, int n) {
+        stack.set(XPMagic.EVOLUTION_POTENTIAL.get(), n * Config.evolutionStepCost);
+        ToolStats.recompute(stack);
     }
 
     /**

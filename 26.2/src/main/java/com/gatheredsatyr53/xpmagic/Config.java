@@ -97,12 +97,31 @@ public class Config {
             .comment("Points of evolution_potential per step of growth. The number of steps a tool can ever reach is max_evolution_potential / this.")
             .defineInRange("evolutionStepCost", 100, 1, 100000);
 
-    // What one step is worth is NOT configured here: it rides on each tool as the evolution_gain
-    // component (see XPMagic's item registrations), because it has to differ per tool rather than per
-    // profile. The axe is forged from three crystals and the sword from two, so the axe reaches ~12
-    // steps against the sword's ~8; paying them the same per step would have evolution quietly widen
-    // the damage gap the two were balanced around. Being a component, a datapack can retune any single
-    // tool — or give evolution to a tool this mod never registered — without a config key per item.
+    // What the PRIMARY stat's step is worth is NOT configured here: it rides on each tool as the
+    // evolution_gain component (see XPMagic's item registrations), because it has to differ per tool
+    // rather than per profile. The axe is forged from three crystals and the sword from two, so the axe
+    // reaches ~12 steps against the sword's ~8; paying them the same per step would have evolution
+    // quietly widen the damage gap the two were balanced around. Being a component, a datapack can
+    // retune any single tool — or give evolution to a tool this mod never registered — without a config
+    // key per item.
+
+    // The two MILESTONE stats, on the other hand, are per-profile and live here. A weapon unlocks
+    // knockback then luck; a digger unlocks reach then luck. Each is a target bonus reached at full
+    // growth, in the milestone attribute's OWN units — which is exactly why it cannot be derived from
+    // evolution_gain: +2 blocks of reach and +12 mining efficiency are both "a lot", and one rate
+    // cannot price both (pricing reach off the primary gain once sent it past +8 blocks). The
+    // thresholds at which they start (0.3 and 0.7 of full growth) live in ToolStats.
+    private static final ModConfigSpec.DoubleValue EVOLUTION_REACH_BONUS = BUILDER
+            .comment("Block reach a fully grown digging tool gains at its first milestone, on top of the base 4.5.")
+            .defineInRange("evolutionReachBonus", 2.0, 0.0, 59.5);
+
+    private static final ModConfigSpec.DoubleValue EVOLUTION_KNOCKBACK_BONUS = BUILDER
+            .comment("Attack knockback a fully grown weapon gains at its first milestone (1.0 is about one level of the Knockback enchantment).")
+            .defineInRange("evolutionKnockbackBonus", 1.0, 0.0, 1024.0);
+
+    private static final ModConfigSpec.DoubleValue EVOLUTION_LUCK_BONUS = BUILDER
+            .comment("Luck a fully grown tool gains at its second milestone (shared by weapons and diggers).")
+            .defineInRange("evolutionLuckBonus", 1.0, 0.0, 1024.0);
 
     // Anvil crushing: a Memory Crystal an anvil lands on is shattered back into Memory Powder.
     // Compaction (and any lightning charge) scatters on impact, so this is deliberately lossy — the
@@ -139,6 +158,9 @@ public class Config {
     public static double lightningMaxMiningEfficiencyBonus;
     public static int evolutionPerCapacity;
     public static int evolutionStepCost;
+    public static double evolutionReachBonus;
+    public static double evolutionKnockbackBonus;
+    public static double evolutionLuckBonus;
     public static boolean crushCrystals;
     public static int shatterCapacity;
     public static int soulFireTicksPerCapacity;
@@ -163,6 +185,9 @@ public class Config {
         lightningMaxMiningEfficiencyBonus = LIGHTNING_MAX_MINING_EFFICIENCY_BONUS.get();
         evolutionPerCapacity = EVOLUTION_PER_CAPACITY.get();
         evolutionStepCost = EVOLUTION_STEP_COST.get();
+        evolutionReachBonus = EVOLUTION_REACH_BONUS.get();
+        evolutionKnockbackBonus = EVOLUTION_KNOCKBACK_BONUS.get();
+        evolutionLuckBonus = EVOLUTION_LUCK_BONUS.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();
