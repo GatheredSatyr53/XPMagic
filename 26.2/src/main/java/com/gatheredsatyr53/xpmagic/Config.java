@@ -135,12 +135,17 @@ public class Config {
             .defineInRange("shatterCapacity", 10, 0, 4096);
 
     // Vindictive Flesh: dropped by zombies, and fed to a Memory Pearl on an anvil to pack the pearl
-    // denser — raising its xp_capacity above the base 40, up to vindictivePearlMaxCapacity. Like
-    // lightning on a crystal this is genuine external input (a zombie's remembered grudge), not a dupe:
-    // xp_capacity is vessel size, so a bigger pearl stores no experience it was not later given.
-    private static final ModConfigSpec.IntValue VINDICTIVE_PEARL_MAX_CAPACITY = BUILDER
-            .comment("The xp_capacity a Memory Pearl can be packed up to by feeding it Vindictive Flesh (its base is 40).")
-            .defineInRange("vindictivePearlMaxCapacity", 60, 40, 4096);
+    // denser — raising its xp_capacity above the base 40. Like lightning on a crystal this is genuine
+    // external input (a zombie's remembered grudge), not a dupe: xp_capacity is vessel size, so a bigger
+    // pearl stores no experience it was not later given.
+    //
+    // The ceiling is on how much FLESH may add (tracked on vindictive_capacity), not on the pearl's
+    // absolute capacity — so this is one independent source among the pearl's several, each capping its
+    // own slice. Three such slices of 20 raise a pearl from 40 to a round 100 regardless of the order
+    // they are applied in; capping absolute capacity instead would make that order matter.
+    private static final ModConfigSpec.IntValue VINDICTIVE_CAPACITY_CAP = BUILDER
+            .comment("The most xp_capacity that Vindictive Flesh can add to a single Memory Pearl (its own slice, on top of the base 40 and any other source).")
+            .defineInRange("vindictiveCapacityCap", 20, 0, 4096);
 
     private static final ModConfigSpec.IntValue VINDICTIVE_CAPACITY_PER_FLESH = BUILDER
             .comment("xp_capacity a Memory Pearl gains per Vindictive Flesh consumed on the anvil.")
@@ -179,7 +184,7 @@ public class Config {
     public static double evolutionLuckBonus;
     public static boolean crushCrystals;
     public static int shatterCapacity;
-    public static int vindictivePearlMaxCapacity;
+    public static int vindictiveCapacityCap;
     public static int vindictiveCapacityPerFlesh;
     public static int vindictiveXpCostPerFlesh;
     public static int soulFireTicksPerCapacity;
@@ -209,7 +214,7 @@ public class Config {
         evolutionLuckBonus = EVOLUTION_LUCK_BONUS.get();
         crushCrystals = CRUSH_CRYSTALS.get();
         shatterCapacity = SHATTER_CAPACITY.get();
-        vindictivePearlMaxCapacity = VINDICTIVE_PEARL_MAX_CAPACITY.get();
+        vindictiveCapacityCap = VINDICTIVE_CAPACITY_CAP.get();
         vindictiveCapacityPerFlesh = VINDICTIVE_CAPACITY_PER_FLESH.get();
         vindictiveXpCostPerFlesh = VINDICTIVE_XP_COST_PER_FLESH.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();

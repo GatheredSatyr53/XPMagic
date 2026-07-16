@@ -18,27 +18,47 @@ public final class VindictiveFleshTests {
 
     private VindictiveFleshTests() {}
 
-    /** A full stack tops a fresh pearl off to exactly the ceiling — never past it — in one take. */
-    public static final Consumer<GameTestHelper> FLESH_FILLS_TO_CAP = helper -> {
-        ItemStack pearl = pearl(40); // base
+    /** A full stack fills flesh's whole slice on a fresh pearl — never past it — in one take. */
+    public static final Consumer<GameTestHelper> FLESH_FILLS_ITS_SLICE = helper -> {
+        ItemStack pearl = pearl(40); // base, no flesh yet
         VindictiveFleshHandler.Result r = VindictiveFleshHandler.feed(pearl, 100);
         helper.assertTrue(r != null, "feeding a base pearl should produce a result");
 
-        int cap = Config.vindictivePearlMaxCapacity;
-        int gained = cap - 40;
-        int expectedFlesh = (gained + Config.vindictiveCapacityPerFlesh - 1) / Config.vindictiveCapacityPerFlesh;
+        int slice = Config.vindictiveCapacityCap;
+        int expectedFlesh = (slice + Config.vindictiveCapacityPerFlesh - 1) / Config.vindictiveCapacityPerFlesh;
 
-        helper.assertTrue(capacity(r.output()) == cap,
-            "a fed pearl should reach the ceiling " + cap + ", got " + capacity(r.output()));
-        helper.assertTrue(vindictive(r.output()) == gained,
-            "the whole gain should be tracked as vindictive: expected " + gained + ", got " + vindictive(r.output()));
+        helper.assertTrue(vindictive(r.output()) == slice,
+            "flesh should give its whole slice " + slice + ", got " + vindictive(r.output()));
+        helper.assertTrue(capacity(r.output()) == 40 + slice,
+            "a base pearl fed to the slice should read " + (40 + slice) + ", got " + capacity(r.output()));
         helper.assertTrue(r.fleshUsed() == expectedFlesh,
-            "should consume only the flesh the room needed: expected " + expectedFlesh + ", got " + r.fleshUsed());
+            "should consume only the flesh the slice needed: expected " + expectedFlesh + ", got " + r.fleshUsed());
         helper.assertTrue(r.xpCost() == expectedFlesh * Config.vindictiveXpCostPerFlesh,
             "xp cost should scale with flesh used, got " + r.xpCost());
 
         // The input must be untouched — feed builds a copy, it does not mutate the stack in the slot.
         helper.assertTrue(capacity(pearl) == 40, "feed must not mutate the input pearl");
+
+        helper.succeed();
+    };
+
+    /**
+     * The point of the slice: flesh caps on what flesh has added, not on absolute capacity. A pearl
+     * another source has already grown still gets its full flesh slice on top — so three independent
+     * sources of {@code slice} compose to a round 100 whatever order they run in.
+     */
+    public static final Consumer<GameTestHelper> FLESH_IS_INDEPENDENT = helper -> {
+        int slice = Config.vindictiveCapacityCap;
+
+        // A pearl some other source raised to 80, with no flesh in it yet.
+        ItemStack grown = pearl(80, 0);
+        VindictiveFleshHandler.Result r = VindictiveFleshHandler.feed(grown, 100);
+        helper.assertTrue(r != null, "flesh should still have room even on an already-grown pearl");
+        helper.assertTrue(vindictive(r.output()) == slice,
+            "flesh should give its full slice regardless of other sources, got " + vindictive(r.output()));
+        helper.assertTrue(capacity(r.output()) == 80 + slice,
+            "flesh should add on top of the other source: expected " + (80 + slice)
+            + ", got " + capacity(r.output()) + " (capping absolute capacity would starve it here)");
 
         helper.succeed();
     };
@@ -61,19 +81,21 @@ public final class VindictiveFleshTests {
         helper.succeed();
     };
 
-    /** At the ceiling there is nothing to buy, and a pearl one point short never overshoots it. */
-    public static final Consumer<GameTestHelper> FLESH_RESPECTS_THE_CEILING = helper -> {
-        int cap = Config.vindictivePearlMaxCapacity;
+    /** When flesh has already given its slice there is nothing more to buy, and it never overshoots. */
+    public static final Consumer<GameTestHelper> FLESH_RESPECTS_ITS_SLICE = helper -> {
+        int slice = Config.vindictiveCapacityCap;
 
-        helper.assertTrue(VindictiveFleshHandler.feed(pearl(cap), 64) == null,
-            "a pearl already at the ceiling should yield nothing");
+        // A pearl that flesh has already filled to its slice: no further gain.
+        helper.assertTrue(VindictiveFleshHandler.feed(pearl(40 + slice, slice), 64) == null,
+            "a pearl whose flesh slice is full should yield nothing");
 
-        // One below the ceiling with a whole stack offered: takes exactly one flesh, lands exactly on cap.
-        VindictiveFleshHandler.Result r = VindictiveFleshHandler.feed(pearl(cap - 1), 64);
-        helper.assertTrue(r != null && capacity(r.output()) == cap,
-            "a nearly-full pearl should land on the cap, got " + (r == null ? "null" : capacity(r.output())));
+        // One point of slice left, a whole stack offered: takes exactly one flesh, lands on the slice.
+        VindictiveFleshHandler.Result r = VindictiveFleshHandler.feed(pearl(40 + slice - 1, slice - 1), 64);
+        helper.assertTrue(r != null && vindictive(r.output()) == slice,
+            "a nearly-full slice should land on the slice, got "
+            + (r == null ? "null" : vindictive(r.output())));
         helper.assertTrue(r.fleshUsed() == 1,
-            "filling a single point of room should cost a single flesh, not a whole stack, got " + r.fleshUsed());
+            "filling a single point of slice should cost a single flesh, not a whole stack, got " + r.fleshUsed());
 
         // A stack of pearls is ambiguous to raise, so feed declines it.
         ItemStack two = pearl(40);
@@ -102,9 +124,10 @@ public final class VindictiveFleshTests {
         helper.assertTrue(event.getMaterialCost() == 3,
             "the handler should set the material cost to the flesh consumed, got " + event.getMaterialCost());
 
-        // A pearl with nothing to gain must leave the anvil to vanilla — output stays empty.
+        // A pearl whose flesh slice is already full must leave the anvil to vanilla — output stays empty.
+        int slice = Config.vindictiveCapacityCap;
         var noop = new net.neoforged.neoforge.event.AnvilUpdateEvent(
-            pearl(Config.vindictivePearlMaxCapacity), flesh, null, ItemStack.EMPTY, 0, 0, player);
+            pearl(40 + slice, slice), flesh, null, ItemStack.EMPTY, 0, 0, player);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(noop);
         helper.assertTrue(noop.getOutput().isEmpty(),
             "a full pearl should produce no anvil output, got " + noop.getOutput());
@@ -115,6 +138,13 @@ public final class VindictiveFleshTests {
     private static ItemStack pearl(int capacity) {
         ItemStack stack = new ItemStack(XPMagic.MEMORY_PEARL.get());
         stack.set(XPMagic.XP_CAPACITY.get(), capacity);
+        return stack;
+    }
+
+    /** A pearl at {@code capacity} of which {@code vindictive} was contributed by flesh already. */
+    private static ItemStack pearl(int capacity, int vindictive) {
+        ItemStack stack = pearl(capacity);
+        stack.set(XPMagic.VINDICTIVE_CAPACITY.get(), vindictive);
         return stack;
     }
 
