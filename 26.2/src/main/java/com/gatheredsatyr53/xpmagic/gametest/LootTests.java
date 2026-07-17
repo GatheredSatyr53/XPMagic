@@ -36,8 +36,11 @@ public final class LootTests {
     /** Enderman drops 0-1 pearls, each swapped at 50%, so a single kill proves nothing. */
     private static final int KILLS = 100;
 
-    /** Coal ore drops one coal, swapped at 25%, so a single break proves nothing either. */
-    private static final int ORE_BREAKS = 100;
+    /**
+     * Coal ore drops one coal, swapped at only 10% (veins are large), so this needs more samples than
+     * the pearls to keep the same safety margin: at p=0.10, 0.9^300 is a ~1-in-10^13 chance of no swap.
+     */
+    private static final int ORE_BREAKS = 300;
 
     private LootTests() {}
 
@@ -114,8 +117,9 @@ public final class LootTests {
      * The block half of the swap, and the one that caught the bug: an ore's loot has no attacking
      * entity at all — the enchantment rides the pickaxe as {@code LootContextParams.TOOL}. This drives
      * a real {@code destroyBlock} through {@code ServerPlayerGameMode} so the block loot context, the
-     * global loot modifier json and the tool-side enchantment read all run for real. At p=0.25 per
-     * break, a hundred breaks yielding nothing is a ~1-in-10^12 event, so this is a genuine failure.
+     * global loot modifier json and the tool-side enchantment read all run for real. At p=0.10 per
+     * break, {@link #ORE_BREAKS} breaks yielding nothing is a ~1-in-10^13 event, so this is a genuine
+     * failure rather than bad luck.
      */
     public static final Consumer<GameTestHelper> SATURATION_SWAPS_ORE_DROP = helper -> {
         ServerPlayer player = player(helper);
