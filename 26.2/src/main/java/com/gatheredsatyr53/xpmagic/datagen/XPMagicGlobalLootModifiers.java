@@ -33,6 +33,8 @@ public final class XPMagicGlobalLootModifiers extends GlobalLootModifierProvider
 
         swap("enderman_memory_pearl", "entities/enderman", Items.ENDER_PEARL, XPMagic.MEMORY_PEARL.get(), 0.5F, lookup);
         swap("zombie_vindictive_flesh", "entities/zombie", Items.ROTTEN_FLESH, XPMagic.VINDICTIVE_FLESH.get(), 0.25F, lookup);
+        swap("coal_ore_nostalgic_coal", "blocks/coal_ore", Items.COAL, XPMagic.NOSTALGIC_COAL.get(), 0.1F, lookup);
+        swap("deepslate_coal_ore_nostalgic_coal", "blocks/deepslate_coal_ore", Items.COAL, XPMagic.NOSTALGIC_COAL.get(), 0.1F, lookup);
     }
 
     private void swap(String name, String lootTable, Item from, Item to, float chance, HolderLookup.Provider lookup) {

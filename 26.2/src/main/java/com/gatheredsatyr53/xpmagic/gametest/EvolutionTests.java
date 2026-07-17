@@ -320,7 +320,7 @@ public final class EvolutionTests {
     }
 
     /** Three plain crystals, so the pickaxe comes out with the ceiling its recipe implies. */
-    private static ItemStack craftPickaxe(GameTestHelper helper) {
+    static ItemStack craftPickaxe(GameTestHelper helper) {
         return craft(helper, "Memory Crystal Pickaxe",
             crystal(20, 0),  crystal(20, 0), crystal(20, 0),
             ItemStack.EMPTY, rod(),          ItemStack.EMPTY,

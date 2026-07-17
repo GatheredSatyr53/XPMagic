@@ -66,6 +66,12 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> PEARL_IS_AN_XP_STORE =
         register("pearl_is_an_xp_store", LootTests.PEARL_IS_AN_XP_STORE);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> SATURATION_SWAPS_ORE_DROP =
+        register("saturation_swaps_ore_drop", LootTests.SATURATION_SWAPS_ORE_DROP);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_PICKAXE_KEEPS_ORE_DROP =
+        register("plain_pickaxe_keeps_ore_drop", LootTests.PLAIN_PICKAXE_KEEPS_ORE_DROP);
+
     private static final ResourceKey<Consumer<GameTestHelper>> FLESH_FILLS_ITS_SLICE =
         register("flesh_fills_its_slice", VindictiveFleshTests.FLESH_FILLS_ITS_SLICE);
 
@@ -111,6 +117,10 @@ public final class XPMagicGameTests {
         registerTest(event, environment, SATURATION_SWAPS_DROP, 200);
         registerTest(event, environment, PLAIN_WEAPON_KEEPS_DROP, 200);
         registerTest(event, environment, PEARL_IS_AN_XP_STORE);
+
+        // The ore tests break a hundred coal ores apiece to sample a 25% swap, so they need room too.
+        registerTest(event, environment, SATURATION_SWAPS_ORE_DROP, 200);
+        registerTest(event, environment, PLAIN_PICKAXE_KEEPS_ORE_DROP, 200);
 
         registerTest(event, environment, FLESH_FILLS_ITS_SLICE);
         registerTest(event, environment, FLESH_IS_INDEPENDENT);

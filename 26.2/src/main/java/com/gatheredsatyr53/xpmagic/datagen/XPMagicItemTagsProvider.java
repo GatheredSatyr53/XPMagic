@@ -31,5 +31,9 @@ public final class XPMagicItemTagsProvider extends TagsProvider<Item> {
         this.tag(XPMagic.EVOLVING_DIGGERS)
             .add(XPMagic.MEMORY_CRYSTAL_PICKAXE.getKey())
             .add(XPMagic.MEMORY_CRYSTAL_SHOVEL.getKey());
+
+        this.tag(XPMagic.EVOLVING_TOOLS)
+            .addTag(XPMagic.EVOLVING_WEAPONS)
+            .addTag(XPMagic.EVOLVING_DIGGERS);
     }
 }

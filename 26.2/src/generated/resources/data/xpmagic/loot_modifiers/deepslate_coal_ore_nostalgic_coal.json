@@ -1,0 +1,13 @@
+{
+  "type": "xpmagic:memory_drop",
+  "chance": 0.1,
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:blocks/deepslate_coal_ore"
+    }
+  ],
+  "enchantment": "xpmagic:saturation",
+  "from": "minecraft:coal",
+  "to": "xpmagic:nostalgic_coal"
+}

@@ -9,6 +9,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -58,14 +59,23 @@ public class MemoryDropModifier extends LootModifier {
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-        // Mirrors EnchantedCountIncreaseFunction: the killer is ATTACKING_ENTITY, and the level goes
-        // through EventHooks so other mods' adjustments to it apply to us too — NeoForge asks any mod
-        // implementing an enchantment-driven loot rule to fire EnchantedEntityLootEvent.
+        // Two loot contexts carry the enchantment differently. Mob drops (entities/...) name the
+        // killer as ATTACKING_ENTITY, mirroring EnchantedCountIncreaseFunction; the level goes through
+        // EventHooks so other mods' adjustments to it apply to us too (NeoForge asks any mod with an
+        // enchantment-driven loot rule to fire EnchantedEntityLootEvent). Block drops (blocks/...) have
+        // no attacker at all — the enchantment lives on the mining TOOL, so we read the level off it.
+        int level = 0;
         Entity killer = context.getOptionalParameter(LootContextParams.ATTACKING_ENTITY);
-        if (!(killer instanceof LivingEntity living)) return generatedLoot;
-
-        int level = EnchantmentHelper.getEnchantmentLevel(this.enchantment, living);
-        level = EventHooks.getEntityLootEnchantmentLevel(this.enchantment, level, context);
+        if (killer instanceof LivingEntity living) {
+            level = EnchantmentHelper.getEnchantmentLevel(this.enchantment, living);
+            level = EventHooks.getEntityLootEnchantmentLevel(this.enchantment, level, context);
+        }
+        if (level == 0) {
+            ItemInstance tool = context.getOptionalParameter(LootContextParams.TOOL);
+            if (tool != null) {
+                level = EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, tool);
+            }
+        }
         if (level == 0) return generatedLoot;
 
         RandomSource random = context.getRandom();

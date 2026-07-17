@@ -16,6 +16,6 @@
   "slots": [
     "mainhand"
   ],
-  "supported_items": "#xpmagic:evolving_weapons",
+  "supported_items": "#xpmagic:evolving_tools",
   "weight": 30
 }

@@ -251,9 +251,16 @@ public final class XPMagic {
         () -> new Item(new Item.Properties()
             .setId(itemKey("vindictive_flesh"))));
 
+    public static final DeferredHolder<Item, Item> NOSTALGIC_COAL = ITEMS.register("nostalgic_coal",
+        () -> new Item(new Item.Properties()
+            .setId(itemKey("nostalgic_coal"))));
+
     // Tools carved from a Memory Crystal. Repaired by the crystal itself (tag below).
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "memory_crystal_tool_materials"));
+
+    public static final TagKey<Item> EVOLVING_TOOLS =
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "evolving_tools"));
 
     // The two evolution profiles (see ToolStats). Both lightning_charge and evolution_potential pay out
     // along whichever profile a tool belongs to: weapons grow attack damage and earn potential from
@@ -450,10 +457,11 @@ public final class XPMagic {
                 output.accept(FINE_POWDER.get());
                 output.accept(MEMORY_PEARL.get());
                 output.accept(MEMORY_CRYSTAL.get());
+                output.accept(VINDICTIVE_FLESH.get());
+                output.accept(NOSTALGIC_COAL.get());
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
                 output.accept(TIME_CRYSTAL_ROD.get());
-                output.accept(VINDICTIVE_FLESH.get());
                 output.accept(MEMORY_CRYSTAL_SWORD.get());
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());

@@ -32,7 +32,7 @@ public final class XPMagicEnchantmentProvider {
                 SATURATION,
                 Enchantment.enchantment(
                         Enchantment.definition(
-                            items.getOrThrow(XPMagic.EVOLVING_WEAPONS),
+                            items.getOrThrow(XPMagic.EVOLVING_TOOLS),
                             30,
                             1,
                             Enchantment.dynamicCost(3, 1),

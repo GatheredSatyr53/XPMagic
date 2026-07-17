@@ -8,6 +8,7 @@ import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
 import com.gatheredsatyr53.xpmagic.datagen.XPMagicEnchantmentProvider;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -20,7 +21,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -32,6 +35,9 @@ public final class LootTests {
 
     /** Enderman drops 0-1 pearls, each swapped at 50%, so a single kill proves nothing. */
     private static final int KILLS = 100;
+
+    /** Coal ore drops one coal, swapped at 25%, so a single break proves nothing either. */
+    private static final int ORE_BREAKS = 100;
 
     private LootTests() {}
 
@@ -104,8 +110,69 @@ public final class LootTests {
         helper.succeed();
     };
 
+    /**
+     * The block half of the swap, and the one that caught the bug: an ore's loot has no attacking
+     * entity at all — the enchantment rides the pickaxe as {@code LootContextParams.TOOL}. This drives
+     * a real {@code destroyBlock} through {@code ServerPlayerGameMode} so the block loot context, the
+     * global loot modifier json and the tool-side enchantment read all run for real. At p=0.25 per
+     * break, a hundred breaks yielding nothing is a ~1-in-10^12 event, so this is a genuine failure.
+     */
+    public static final Consumer<GameTestHelper> SATURATION_SWAPS_ORE_DROP = helper -> {
+        ServerPlayer player = player(helper);
+        // The real evolving pickaxe, not a vanilla stand-in: Saturation's supported_items is the
+        // evolving_tools tag, so enchanting the crystal pickaxe also proves the tag still admits it.
+        ItemStack pickaxe = EvolutionTests.craftPickaxe(helper);
+        pickaxe.enchant(saturation(helper), 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe);
+
+        mineCoalOre(helper, player);
+
+        int nostalgic = count(helper, XPMagic.NOSTALGIC_COAL.get());
+        helper.assertTrue(nostalgic > 0,
+            "a Saturation pickaxe should have swapped some coal, got none in " + ORE_BREAKS + " breaks");
+
+        helper.succeed();
+    };
+
+    /**
+     * The deterministic counterpart: a plain pickaxe must never mint nostalgic coal, and ordinary coal
+     * must still drop — so a silent failure to run the ore loot at all cannot pass for a clean swap.
+     */
+    public static final Consumer<GameTestHelper> PLAIN_PICKAXE_KEEPS_ORE_DROP = helper -> {
+        ServerPlayer player = player(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, EvolutionTests.craftPickaxe(helper));
+
+        mineCoalOre(helper, player);
+
+        int nostalgic = count(helper, XPMagic.NOSTALGIC_COAL.get());
+        helper.assertTrue(nostalgic == 0, "an unenchanted pickaxe must never swap coal, got " + nostalgic);
+
+        int plain = count(helper, Items.COAL);
+        helper.assertTrue(plain > 0,
+            "the vanilla drop should still happen, got no coal in " + ORE_BREAKS + " breaks");
+
+        helper.succeed();
+    };
+
     private static ServerPlayer player(GameTestHelper helper) {
+        // GameType.SURVIVAL, not creative: a creative player's preventsBlockDrops short-circuits
+        // destroyBlock before any loot runs, so the ore tests would pass by testing nothing.
         return (ServerPlayer) helper.makeMockServerPlayer(GameType.SURVIVAL);
+    }
+
+    private static Holder<Enchantment> saturation(GameTestHelper helper) {
+        return helper.getLevel().registryAccess()
+            .lookupOrThrow(Registries.ENCHANTMENT)
+            .getOrThrow(XPMagicEnchantmentProvider.SATURATION);
+    }
+
+    private static void mineCoalOre(GameTestHelper helper, ServerPlayer player) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(BlockPos.ZERO);
+        for (int i = 0; i < ORE_BREAKS; i++) {
+            level.setBlockAndUpdate(pos, Blocks.COAL_ORE.defaultBlockState());
+            helper.assertTrue(player.gameMode.destroyBlock(pos), "the coal ore should have been destroyed");
+        }
     }
 
     private static void killEndermen(GameTestHelper helper, ServerPlayer player) {
