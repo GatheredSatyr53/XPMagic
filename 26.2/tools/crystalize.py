@@ -27,6 +27,13 @@ hotspot. Use --axis luma -- it drives t from each pixel's own brightness instead
 of its position, so the output inherits the (seamless) source's tiling exactly
 while still mapping the block's light/dark through the crystal's palette.
 
+luma normally normalises t across THIS image's own luma min/max, so overlaying
+anything (flowers on leaves) shifts the window and recolours the base too. Pin
+the window with --range to stop that: recolour the plain texture normally, then
+recolour the overlaid variant with --range ref:<plain.png> (or --range lo,hi).
+Shared pixels then map identically and the overlay only adds; values outside the
+window clamp to the palette ends.
+
 Each crystal is one baked transform table (--table, default
 memory_crystal_transform.json). Bake a new one per crystal with --learn, then
 reuse the same script to apply any -- e.g. time_crystal_transform.json.
@@ -35,6 +42,7 @@ Usage:
     python crystalize.py <diamond_sprite.png> <out.png>
                                         [--axis diag|blade|blade-rev|luma]
                                         [--table <transform.json>]
+                                        [--range lo,hi | --range ref:<plain.png>]
     python crystalize.py --learn <diamond.png> <crystal.png> [<out_table.json>]
                                                  # inputs stay local, only the
                                                  # colour+position table is written
@@ -104,12 +112,17 @@ def make_predict(per):
     return predict
 
 
-def axis_field(a, axis, per):
+def axis_field(a, axis, per, rng=None):
     """Return a per-pixel t map for the chosen gradient axis.
 
     diag keeps raw x+y (exact crystal repro); rotated axes are stretched onto
     the learned t-range so the same navy->gold sweep spans the sprite; luma
-    drives t from pixel brightness (no position) so the result stays tileable."""
+    drives t from pixel brightness (no position) so the result stays tileable.
+
+    rng=(lo, hi) pins the normalisation window instead of taking it from this
+    image's own min/max. Feed the same rng to a plain texture and to an overlaid
+    variant (e.g. leaves vs flowering leaves) and shared pixels map identically,
+    so the overlay can't shift the base's colours. Out-of-window values clamp."""
     h, w = a.shape[:2]
     yy, xx = np.mgrid[0:h, 0:w]
     if axis == "diag":
@@ -120,17 +133,28 @@ def axis_field(a, axis, per):
         proj = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
     else:
         proj = (xx - yy) if axis == "blade" else (yy - xx)  # blade-rev
-    lo, hi = proj[opaque].min(), proj[opaque].max()
+    lo, hi = rng if rng is not None else (proj[opaque].min(), proj[opaque].max())
     ts = [t for tbl in per.values() for t in tbl]
     tmin, tmax = min(ts), max(ts)
-    return tmin + (proj - lo) / max(hi - lo, 1) * (tmax - tmin)
+    frac = np.clip((proj - lo) / max(hi - lo, 1), 0.0, 1.0)
+    return tmin + frac * (tmax - tmin)
 
 
-def apply(inp, outp, axis="diag", table=DEFAULT_TABLE):
+def measure_range(inp, axis="luma"):
+    """The (lo, hi) luma window a plain texture would use on its own -- pass it
+    back as --range when recolouring an overlaid variant of the same texture."""
+    a = np.array(Image.open(inp).convert("RGBA"))
+    opaque = a[:, :, 3] > 0
+    rgb = a[:, :, :3].astype(float)
+    proj = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
+    return float(proj[opaque].min()), float(proj[opaque].max())
+
+
+def apply(inp, outp, axis="diag", table=DEFAULT_TABLE, rng=None):
     per = load_table(table)
     predict = make_predict(per)
     a = np.array(Image.open(inp).convert("RGBA"))
-    tmap = axis_field(a, axis, per)
+    tmap = axis_field(a, axis, per, rng)
     h, w = a.shape[:2]
     for y in range(h):
         for x in range(w):
@@ -149,7 +173,7 @@ def main(argv):
         if len(rest) == 3:
             return learn(rest[0], rest[1], rest[2])
         sys.exit(__doc__)
-    axis, table = "diag", DEFAULT_TABLE
+    axis, table, rng_arg = "diag", DEFAULT_TABLE, None
     pos = []
     i = 0
     while i < len(argv):
@@ -162,11 +186,21 @@ def main(argv):
             table = argv[i + 1]; i += 2; continue
         if a.startswith("--table="):
             table = a.split("=", 1)[1]; i += 1; continue
+        if a == "--range" and i + 1 < len(argv):
+            rng_arg = argv[i + 1]; i += 2; continue
+        if a.startswith("--range="):
+            rng_arg = a.split("=", 1)[1]; i += 1; continue
         pos.append(a); i += 1
-    if len(pos) == 2 and axis in ("diag", "blade", "blade-rev", "luma"):
-        apply(pos[0], pos[1], axis, table)
-    else:
+    if len(pos) != 2 or axis not in ("diag", "blade", "blade-rev", "luma"):
         sys.exit(__doc__)
+    rng = None
+    if rng_arg is not None:
+        if rng_arg.startswith("ref:"):          # derive window from a reference png
+            rng = measure_range(rng_arg[4:])
+        else:                                    # explicit "lo,hi"
+            rng = tuple(float(v) for v in rng_arg.split(","))
+        print(f"pinned luma window: {rng[0]:.0f}..{rng[1]:.0f}")
+    apply(pos[0], pos[1], axis, table, rng)
 
 
 if __name__ == "__main__":
