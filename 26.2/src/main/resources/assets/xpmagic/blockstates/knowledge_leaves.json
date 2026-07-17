@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "bearing=false": { "model": "xpmagic:block/knowledge_leaves" },
+    "bearing=true": { "model": "xpmagic:block/knowledge_leaves_bearing" }
+  }
+}

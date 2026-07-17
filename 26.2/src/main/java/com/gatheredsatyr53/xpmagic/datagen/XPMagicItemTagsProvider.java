@@ -32,8 +32,12 @@ public final class XPMagicItemTagsProvider extends TagsProvider<Item> {
             .add(XPMagic.MEMORY_CRYSTAL_PICKAXE.getKey())
             .add(XPMagic.MEMORY_CRYSTAL_SHOVEL.getKey());
 
+        // The hoe joins EVOLVING_TOOLS directly, not through the two profile sub-tags: it must accept
+        // the Saturation enchantment (supported_items = EVOLVING_TOOLS) yet never evolve, so it stays
+        // out of EVOLVING_WEAPONS and EVOLVING_DIGGERS.
         this.tag(XPMagic.EVOLVING_TOOLS)
             .addTag(XPMagic.EVOLVING_WEAPONS)
-            .addTag(XPMagic.EVOLVING_DIGGERS);
+            .addTag(XPMagic.EVOLVING_DIGGERS)
+            .add(XPMagic.MEMORY_CRYSTAL_HOE.getKey());
     }
 }

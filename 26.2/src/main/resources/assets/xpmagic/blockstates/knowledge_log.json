@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "xpmagic:block/knowledge_log" },
+    "axis=x": { "model": "xpmagic:block/knowledge_log", "x": 90, "y": 90 },
+    "axis=z": { "model": "xpmagic:block/knowledge_log", "x": 90 }
+  }
+}

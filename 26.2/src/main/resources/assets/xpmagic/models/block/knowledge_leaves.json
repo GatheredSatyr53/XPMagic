@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "xpmagic:block/knowledge_leaves"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "xpmagic:block/knowledge_sapling"
+  }
+}

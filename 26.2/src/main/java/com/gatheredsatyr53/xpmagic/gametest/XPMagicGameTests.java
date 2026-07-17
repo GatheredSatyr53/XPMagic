@@ -99,6 +99,21 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> ANVIL_WIRES_THE_FEED =
         register("anvil_wires_the_feed", VindictiveFleshTests.ANVIL_WIRES_THE_FEED);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> SATURATION_HOE_TILLS_TRUTH =
+        register("saturation_hoe_tills_truth", KnowledgeTreeTests.SATURATION_HOE_TILLS_TRUTH);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_HOE_TILLS_VANILLA =
+        register("plain_hoe_tills_vanilla", KnowledgeTreeTests.PLAIN_HOE_TILLS_VANILLA);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> GRAIN_PLANTS_ON_TRUTH =
+        register("grain_plants_on_truth", KnowledgeTreeTests.GRAIN_PLANTS_ON_TRUTH);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> GRAIN_INERT_OFF_TRUTH =
+        register("grain_inert_off_truth", KnowledgeTreeTests.GRAIN_INERT_OFF_TRUTH);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> SAPLING_GROWS_TREE =
+        register("sapling_grows_tree", KnowledgeTreeTests.SAPLING_GROWS_TREE);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -145,6 +160,12 @@ public final class XPMagicGameTests {
         registerTest(event, environment, FLESH_ADDS_PER_UNIT);
         registerTest(event, environment, FLESH_RESPECTS_ITS_SLICE);
         registerTest(event, environment, ANVIL_WIRES_THE_FEED);
+
+        registerTest(event, environment, SATURATION_HOE_TILLS_TRUTH);
+        registerTest(event, environment, PLAIN_HOE_TILLS_VANILLA);
+        registerTest(event, environment, GRAIN_PLANTS_ON_TRUTH);
+        registerTest(event, environment, GRAIN_INERT_OFF_TRUTH);
+        registerTest(event, environment, SAPLING_GROWS_TREE);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,

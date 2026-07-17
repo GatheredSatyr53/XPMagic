@@ -1,9 +1,13 @@
 package com.gatheredsatyr53.xpmagic;
 
+import com.gatheredsatyr53.xpmagic.block.KnowledgeLeavesBlock;
+import com.gatheredsatyr53.xpmagic.block.KnowledgeSaplingBlock;
 import com.gatheredsatyr53.xpmagic.block.PowderMixerBlock;
 import com.gatheredsatyr53.xpmagic.block.PowderSeparatorBlock;
+import com.gatheredsatyr53.xpmagic.block.TruthFarmlandBlock;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.block.XPKeepingMachineBlock;
+import com.gatheredsatyr53.xpmagic.item.TruthGrainItem;
 import com.gatheredsatyr53.xpmagic.block.entity.PowderSeparatorBlockEntity;
 import com.gatheredsatyr53.xpmagic.block.entity.VibrationStandBlockEntity;
 import com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity;
@@ -32,6 +36,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
@@ -39,11 +44,17 @@ import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+
+import java.util.Optional;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -255,9 +266,16 @@ public final class XPMagic {
         () -> new Item(new Item.Properties()
             .setId(itemKey("nostalgic_coal"))));
 
+    // A seed as much as a curio: sown on Truth Farmland it grows the Tree of Knowledge (TruthGrainItem).
     public static final DeferredHolder<Item, Item> TRUTH_GRAIN = ITEMS.register("truth_grain",
-        () -> new Item(new Item.Properties()
+        () -> new TruthGrainItem(new Item.Properties()
             .setId(itemKey("truth_grain"))));
+
+    // What the Tree of Knowledge bears and the whole chain is grown for. Destined to be fed to a Memory
+    // Pearl; for now it is simply the harvest.
+    public static final DeferredHolder<Item, Item> FRUIT_OF_KNOWLEDGE = ITEMS.register("fruit_of_knowledge",
+        () -> new Item(new Item.Properties()
+            .setId(itemKey("fruit_of_knowledge"))));
 
     // Tools carved from a Memory Crystal. Repaired by the crystal itself (tag below).
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
@@ -329,6 +347,16 @@ public final class XPMagic {
             .component(EVOLUTION_GAIN.get(), 3.0F) // 1 crystal -> ~4 steps -> ~+12, level with the pickaxe
             .fireResistant()));
 
+    // The hoe exists to be the key to Truth Farmland: enchanted with Saturation it tills the special
+    // seedbed a Grain of Truth roots in (see TruthFarmlandHandler). It deliberately does NOT evolve —
+    // it is in EVOLVING_TOOLS (so Saturation is allowed on it) but neither EVOLVING_WEAPONS nor
+    // EVOLVING_DIGGERS, so it carries no evolution_gain. Damage baselines mirror the diamond hoe, on
+    // which the +25% is dead weight anyway; fireResistant is what earns it its crystalline nature.
+    public static final DeferredHolder<Item, Item> MEMORY_CRYSTAL_HOE = ITEMS.register("memory_crystal_hoe",
+        () -> new HoeItem(MEMORY_CRYSTAL_MATERIAL, -3.0F, 0.0F, new Item.Properties()
+            .setId(itemKey("memory_crystal_hoe"))
+            .fireResistant()));
+
     //</editor-fold>
 
     //<editor-fold desc="Blocks">
@@ -379,6 +407,61 @@ public final class XPMagic {
                                                  .strength(6.25F, 7.5F)
                                                  .sound(SoundType.METAL)));
 
+    // The Tree of Knowledge and the ground it grows on.
+
+    // The configured feature the Knowledge Sapling grows into, resolved from the datapack at runtime
+    // (data/xpmagic/worldgen/configured_feature/knowledge_tree.json). Only a ResourceKey is needed here;
+    // the TreeGrower never spawns naturally, so no placed feature or biome modifier exists. Declared
+    // ahead of the sapling block below, which passes the grower to its constructor.
+    public static final ResourceKey<ConfiguredFeature<?, ?>> KNOWLEDGE_TREE_FEATURE =
+        ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(MODID, "knowledge_tree"));
+
+    public static final TreeGrower KNOWLEDGE_TREE_GROWER = new TreeGrower(
+        MODID + ":knowledge_tree", Optional.empty(), Optional.of(KNOWLEDGE_TREE_FEATURE), Optional.empty());
+
+    // Left only by a Saturation-enchanted Memory Crystal hoe; the sole soil a Grain of Truth roots in.
+    // No BlockItem — like vanilla farmland, you make it by tilling, you don't carry it.
+    public static final DeferredHolder<Block, Block> TRUTH_FARMLAND = BLOCKS.register("truth_farmland",
+        () -> new TruthFarmlandBlock(BlockBehaviour.Properties.of()
+                                                              .setId(blockKey("truth_farmland"))
+                                                              .mapColor(MapColor.DIRT)
+                                                              .randomTicks()
+                                                              .strength(0.6F)
+                                                              .sound(SoundType.GRAVEL)
+                                                              .isViewBlocking((s, l, p) -> true)
+                                                              .isSuffocating((s, l, p) -> true)));
+
+    public static final DeferredHolder<Block, Block> KNOWLEDGE_LOG = BLOCKS.register("knowledge_log",
+        () -> new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                                                              .setId(blockKey("knowledge_log"))
+                                                              .mapColor(MapColor.COLOR_PURPLE)
+                                                              .strength(2.0F)
+                                                              .sound(SoundType.WOOD)
+                                                              .ignitedByLava()));
+
+    public static final DeferredHolder<Block, Block> KNOWLEDGE_LEAVES = BLOCKS.register("knowledge_leaves",
+        () -> new KnowledgeLeavesBlock(BlockBehaviour.Properties.of()
+                                                                .setId(blockKey("knowledge_leaves"))
+                                                                .mapColor(MapColor.COLOR_PURPLE)
+                                                                .strength(0.2F)
+                                                                .randomTicks()
+                                                                .sound(SoundType.GRASS)
+                                                                .noOcclusion()
+                                                                .isValidSpawn((s, l, p, e) -> false)
+                                                                .isSuffocating((s, l, p) -> false)
+                                                                .isViewBlocking((s, l, p) -> false)
+                                                                .ignitedByLava()));
+
+    public static final DeferredHolder<Block, Block> KNOWLEDGE_SAPLING = BLOCKS.register("knowledge_sapling",
+        () -> new KnowledgeSaplingBlock(KNOWLEDGE_TREE_GROWER, BlockBehaviour.Properties.of()
+                                                                             .setId(blockKey("knowledge_sapling"))
+                                                                             .mapColor(MapColor.PLANT)
+                                                                             .noCollision()
+                                                                             .randomTicks()
+                                                                             .instabreak()
+                                                                             .sound(SoundType.GRASS)
+                                                                             .pushReaction(PushReaction.DESTROY)));
+
     //</editor-fold>
 
     //<editor-fold desc="BlockItems">
@@ -405,6 +488,21 @@ public final class XPMagic {
     public static final DeferredHolder<Item, Item> TIME_CRYSTAL_BLOCK_ITEM = ITEMS.register("time_crystal_block",
          () -> new BlockItem(TIME_CRYSTAL_BLOCK.get(), new Item.Properties()
             .setId(itemKey("time_crystal_block"))
+            .useBlockDescriptionPrefix()));
+
+    public static final DeferredHolder<Item, Item> KNOWLEDGE_LOG_ITEM = ITEMS.register("knowledge_log",
+        () -> new BlockItem(KNOWLEDGE_LOG.get(), new Item.Properties()
+            .setId(itemKey("knowledge_log"))
+            .useBlockDescriptionPrefix()));
+
+    public static final DeferredHolder<Item, Item> KNOWLEDGE_LEAVES_ITEM = ITEMS.register("knowledge_leaves",
+        () -> new BlockItem(KNOWLEDGE_LEAVES.get(), new Item.Properties()
+            .setId(itemKey("knowledge_leaves"))
+            .useBlockDescriptionPrefix()));
+
+    public static final DeferredHolder<Item, Item> KNOWLEDGE_SAPLING_ITEM = ITEMS.register("knowledge_sapling",
+        () -> new BlockItem(KNOWLEDGE_SAPLING.get(), new Item.Properties()
+            .setId(itemKey("knowledge_sapling"))
             .useBlockDescriptionPrefix()));
 
     //</editor-fold>
@@ -464,6 +562,7 @@ public final class XPMagic {
                 output.accept(VINDICTIVE_FLESH.get());
                 output.accept(NOSTALGIC_COAL.get());
                 output.accept(TRUTH_GRAIN.get());
+                output.accept(FRUIT_OF_KNOWLEDGE.get());
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
                 output.accept(TIME_CRYSTAL_ROD.get());
@@ -471,6 +570,7 @@ public final class XPMagic {
                 output.accept(MEMORY_CRYSTAL_PICKAXE.get());
                 output.accept(MEMORY_CRYSTAL_AXE.get());
                 output.accept(MEMORY_CRYSTAL_SHOVEL.get());
+                output.accept(MEMORY_CRYSTAL_HOE.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
                 output.accept(XP_COCKTAIL.get());
@@ -480,6 +580,9 @@ public final class XPMagic {
                 output.accept(VIBRATION_STAND_ITEM.get());
                 output.accept(POWDER_MIXER_ITEM.get());
                 output.accept(TIME_CRYSTAL_BLOCK_ITEM.get());
+                output.accept(KNOWLEDGE_LOG_ITEM.get());
+                output.accept(KNOWLEDGE_LEAVES_ITEM.get());
+                output.accept(KNOWLEDGE_SAPLING_ITEM.get());
             })
             .build());
 
