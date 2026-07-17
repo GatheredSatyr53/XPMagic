@@ -18,15 +18,23 @@ features one colour:
     diag       t = x + y   (default; raw canvas coords -- exact crystal repro)
     blade      t = x - y   (along a bottom-left->top-right blade; gold at tip)
     blade-rev  t = y - x   (same axis, gold at pommel)
+    luma       t = pixel luminance   (no position -> tileable; see below)
 Rotated axes are stretched onto the learned gradient range; diag stays raw.
 
-Each crystal is one baked transform table (--table, default crystal_transform.json
-= Memory Crystal). Bake a new one per crystal with --learn, then reuse the same
-script to apply any of them -- e.g. time_transform.json for the Time Crystal.
+For a TILING texture (blocks), any position axis breaks seamlessness: opposite
+edges land at different points on the sweep, so the tile shows a repeating
+hotspot. Use --axis luma -- it drives t from each pixel's own brightness instead
+of its position, so the output inherits the (seamless) source's tiling exactly
+while still mapping the block's light/dark through the crystal's palette.
+
+Each crystal is one baked transform table (--table, default
+memory_crystal_transform.json). Bake a new one per crystal with --learn, then
+reuse the same script to apply any -- e.g. time_crystal_transform.json.
 
 Usage:
-    python crystalize.py <diamond_sprite.png> <out.png> [--axis diag|blade|blade-rev]
-                                                         [--table <transform.json>]
+    python crystalize.py <diamond_sprite.png> <out.png>
+                                        [--axis diag|blade|blade-rev|luma]
+                                        [--table <transform.json>]
     python crystalize.py --learn <diamond.png> <crystal.png> [<out_table.json>]
                                                  # inputs stay local, only the
                                                  # colour+position table is written
@@ -100,13 +108,18 @@ def axis_field(a, axis, per):
     """Return a per-pixel t map for the chosen gradient axis.
 
     diag keeps raw x+y (exact crystal repro); rotated axes are stretched onto
-    the learned t-range so the same navy->gold sweep spans the sprite."""
+    the learned t-range so the same navy->gold sweep spans the sprite; luma
+    drives t from pixel brightness (no position) so the result stays tileable."""
     h, w = a.shape[:2]
     yy, xx = np.mgrid[0:h, 0:w]
     if axis == "diag":
         return (xx + yy).astype(float)
-    proj = (xx - yy) if axis == "blade" else (yy - xx)  # blade-rev
     opaque = a[:, :, 3] > 0
+    if axis == "luma":
+        rgb = a[:, :, :3].astype(float)
+        proj = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
+    else:
+        proj = (xx - yy) if axis == "blade" else (yy - xx)  # blade-rev
     lo, hi = proj[opaque].min(), proj[opaque].max()
     ts = [t for tbl in per.values() for t in tbl]
     tmin, tmax = min(ts), max(ts)
@@ -150,7 +163,7 @@ def main(argv):
         if a.startswith("--table="):
             table = a.split("=", 1)[1]; i += 1; continue
         pos.append(a); i += 1
-    if len(pos) == 2 and axis in ("diag", "blade", "blade-rev"):
+    if len(pos) == 2 and axis in ("diag", "blade", "blade-rev", "luma"):
         apply(pos[0], pos[1], axis, table)
     else:
         sys.exit(__doc__)
