@@ -1,8 +1,10 @@
 package com.gatheredsatyr53.xpmagic.loot;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
@@ -20,13 +22,23 @@ import net.neoforged.neoforge.common.loot.LootModifier;
 import net.neoforged.neoforge.event.EventHooks;
 
 /**
- * Swaps a mob's own drop for a memory-infused counterpart when the killer carries {@code enchantment}.
+ * Rewards a memory-infused drop when the harvester carries {@code enchantment}. Two modes, chosen by
+ * the JSON's {@code add} flag:
+ *
+ * <ul>
+ *   <li><b>replace</b> (default): each {@code from} item has a {@code chance} of becoming a {@code to}
+ *       item — the mob-drop swap, e.g. an ender pearl into a memory pearl.
+ *   <li><b>add</b>: the original loot is left whole and, with {@code chance}, one {@code to} item is
+ *       appended as a bonus. Here {@code from} is unused (and omitted) — the roll keys off the loot
+ *       table firing, not off a particular drop, so a gravel table that rolled flint instead of gravel
+ *       still gets its grain.
+ * </ul>
  *
  * <p>The Saturation enchantment itself is an empty flag — it holds no enchantment effect components,
  * because none of them can touch mob loot. Vanilla's Silk Touch works the same way: the drop swap
  * lives in loot, and the enchantment is only what loot asks about. This modifier is the asking side.
  *
- * <p>Which mob and which item are left to the JSON ({@code from}/{@code to} plus a
+ * <p>Which table and which item are left to the JSON ({@code from}/{@code to} plus a
  * {@code LootTableIdCondition}), so a new pairing costs a data file and no Java.
  */
 public class MemoryDropModifier extends LootModifier {
@@ -36,25 +48,29 @@ public class MemoryDropModifier extends LootModifier {
             .and(
                 instance.group(
                     Enchantment.CODEC.fieldOf("enchantment").forGetter(m -> m.enchantment),
-                    BuiltInRegistries.ITEM.byNameCodec().fieldOf("from").forGetter(m -> m.from),
+                    BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("from").forGetter(m -> m.from),
                     BuiltInRegistries.ITEM.byNameCodec().fieldOf("to").forGetter(m -> m.to),
-                    net.minecraft.util.ExtraCodecs.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(m -> m.chance)
+                    net.minecraft.util.ExtraCodecs.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(m -> m.chance),
+                    Codec.BOOL.optionalFieldOf("add", false).forGetter(m -> m.add)
                 )
             )
             .apply(instance, MemoryDropModifier::new)
     );
 
     private final Holder<Enchantment> enchantment;
-    private final Item from;
+    private final Optional<Item> from;
     private final Item to;
     private final float chance;
+    private final boolean add;
 
-    public MemoryDropModifier(LootItemCondition[] conditions, int priority, Holder<Enchantment> enchantment, Item from, Item to, float chance) {
+    public MemoryDropModifier(LootItemCondition[] conditions, int priority, Holder<Enchantment> enchantment,
+                              Optional<Item> from, Item to, float chance, boolean add) {
         super(conditions, priority);
         this.enchantment = enchantment;
         this.from = from;
         this.to = to;
         this.chance = chance;
+        this.add = add;
     }
 
     @Override
@@ -79,9 +95,21 @@ public class MemoryDropModifier extends LootModifier {
         if (level == 0) return generatedLoot;
 
         RandomSource random = context.getRandom();
+
+        if (this.add) {
+            // Bonus on top: the original loot is untouched, and one roll decides a single extra item.
+            if (random.nextFloat() >= this.chance) return generatedLoot;
+            ObjectArrayList<ItemStack> result = new ObjectArrayList<>(generatedLoot.size() + 1);
+            result.addAll(generatedLoot);
+            result.add(new ItemStack(this.to));
+            return result;
+        }
+
+        Item fromItem = this.from.orElseThrow(
+            () -> new IllegalStateException("a replace-mode memory_drop modifier needs a 'from' item"));
         ObjectArrayList<ItemStack> result = new ObjectArrayList<>(generatedLoot.size());
         for (ItemStack stack : generatedLoot) {
-            if (!stack.is(this.from)) {
+            if (!stack.is(fromItem)) {
                 result.add(stack);
                 continue;
             }

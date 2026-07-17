@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
@@ -41,6 +42,12 @@ public final class LootTests {
      * the pearls to keep the same safety margin: at p=0.10, 0.9^300 is a ~1-in-10^13 chance of no swap.
      */
     private static final int ORE_BREAKS = 300;
+
+    /**
+     * Truth Grain is a 1% bonus, the rarest of these, so it needs the most samples: at p=0.01, 0.99^3000
+     * is a ~1-in-10^13 chance of no grain in {@link #DIG_COUNT} digs.
+     */
+    private static final int DIG_COUNT = 3000;
 
     private LootTests() {}
 
@@ -158,6 +165,84 @@ public final class LootTests {
         helper.succeed();
     };
 
+    /**
+     * The add-mode side: Truth Grain does not replace anything, it rides on top. Digging dirt with a
+     * Saturation tool must still yield dirt and, over enough digs, some grain — so this asserts both,
+     * which also pins that "add" leaves the original loot whole rather than swapping it.
+     */
+    public static final Consumer<GameTestHelper> TRUTH_GRAIN_BONUS_ON_DIRT = helper -> {
+        ServerPlayer player = player(helper);
+        ItemStack tool = EvolutionTests.craftPickaxe(helper); // any Saturation-carrying digger will do
+        tool.enchant(saturation(helper), 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, tool);
+
+        mine(helper, player, Blocks.DIRT);
+
+        int grain = count(helper, XPMagic.TRUTH_GRAIN.get());
+        helper.assertTrue(grain > 0,
+            "digging dirt with Saturation should drop some Truth Grain, got none in " + DIG_COUNT + " digs");
+        int dirt = count(helper, Items.DIRT);
+        helper.assertTrue(dirt > 0, "add mode must leave the dirt itself: got none back in " + DIG_COUNT + " digs");
+
+        helper.succeed();
+    };
+
+    /**
+     * Grass block is the one a shovel actually meets most, and the reason the pairing is per-table:
+     * mining it runs blocks/grass_block (dropping a dirt item), never blocks/dirt, so its own bonus
+     * entry has to fire for the grain to appear here.
+     */
+    public static final Consumer<GameTestHelper> TRUTH_GRAIN_BONUS_ON_GRASS = helper -> {
+        ServerPlayer player = player(helper);
+        ItemStack tool = EvolutionTests.craftPickaxe(helper);
+        tool.enchant(saturation(helper), 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, tool);
+
+        mine(helper, player, Blocks.GRASS_BLOCK);
+
+        int grain = count(helper, XPMagic.TRUTH_GRAIN.get());
+        helper.assertTrue(grain > 0,
+            "digging grass block with Saturation should drop some Truth Grain, got none in " + DIG_COUNT + " digs");
+
+        helper.succeed();
+    };
+
+    /**
+     * Gravel is the case that proves the roll keys off the table, not off a drop item: gravel sometimes
+     * rolls flint instead of gravel, and the grain must still come either way.
+     */
+    public static final Consumer<GameTestHelper> TRUTH_GRAIN_BONUS_ON_GRAVEL = helper -> {
+        ServerPlayer player = player(helper);
+        ItemStack tool = EvolutionTests.craftPickaxe(helper);
+        tool.enchant(saturation(helper), 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, tool);
+
+        mine(helper, player, Blocks.GRAVEL);
+
+        int grain = count(helper, XPMagic.TRUTH_GRAIN.get());
+        helper.assertTrue(grain > 0,
+            "digging gravel with Saturation should drop some Truth Grain, got none in " + DIG_COUNT + " digs");
+        int gravelOrFlint = count(helper, Items.GRAVEL) + count(helper, Items.FLINT);
+        helper.assertTrue(gravelOrFlint > 0, "the gravel table should still have dropped its own item");
+
+        helper.succeed();
+    };
+
+    /** The deterministic guard: no Saturation, no grain — while the block itself still drops. */
+    public static final Consumer<GameTestHelper> PLAIN_TOOL_NO_TRUTH_GRAIN = helper -> {
+        ServerPlayer player = player(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, EvolutionTests.craftPickaxe(helper));
+
+        mine(helper, player, Blocks.DIRT);
+
+        int grain = count(helper, XPMagic.TRUTH_GRAIN.get());
+        helper.assertTrue(grain == 0, "an unenchanted tool must never mint Truth Grain, got " + grain);
+        int dirt = count(helper, Items.DIRT);
+        helper.assertTrue(dirt > 0, "the dirt should still drop, got none in " + DIG_COUNT + " digs");
+
+        helper.succeed();
+    };
+
     private static ServerPlayer player(GameTestHelper helper) {
         // GameType.SURVIVAL, not creative: a creative player's preventsBlockDrops short-circuits
         // destroyBlock before any loot runs, so the ore tests would pass by testing nothing.
@@ -171,11 +256,19 @@ public final class LootTests {
     }
 
     private static void mineCoalOre(GameTestHelper helper, ServerPlayer player) {
+        mine(helper, player, Blocks.COAL_ORE, ORE_BREAKS);
+    }
+
+    private static void mine(GameTestHelper helper, ServerPlayer player, Block block) {
+        mine(helper, player, block, DIG_COUNT);
+    }
+
+    private static void mine(GameTestHelper helper, ServerPlayer player, Block block, int times) {
         ServerLevel level = helper.getLevel();
         BlockPos pos = helper.absolutePos(BlockPos.ZERO);
-        for (int i = 0; i < ORE_BREAKS; i++) {
-            level.setBlockAndUpdate(pos, Blocks.COAL_ORE.defaultBlockState());
-            helper.assertTrue(player.gameMode.destroyBlock(pos), "the coal ore should have been destroyed");
+        for (int i = 0; i < times; i++) {
+            level.setBlockAndUpdate(pos, block.defaultBlockState());
+            helper.assertTrue(player.gameMode.destroyBlock(pos), "the block should have been destroyed");
         }
     }
 

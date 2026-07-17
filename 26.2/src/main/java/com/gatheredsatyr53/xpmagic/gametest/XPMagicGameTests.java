@@ -72,6 +72,18 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_PICKAXE_KEEPS_ORE_DROP =
         register("plain_pickaxe_keeps_ore_drop", LootTests.PLAIN_PICKAXE_KEEPS_ORE_DROP);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> TRUTH_GRAIN_BONUS_ON_DIRT =
+        register("truth_grain_bonus_on_dirt", LootTests.TRUTH_GRAIN_BONUS_ON_DIRT);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> TRUTH_GRAIN_BONUS_ON_GRASS =
+        register("truth_grain_bonus_on_grass", LootTests.TRUTH_GRAIN_BONUS_ON_GRASS);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> TRUTH_GRAIN_BONUS_ON_GRAVEL =
+        register("truth_grain_bonus_on_gravel", LootTests.TRUTH_GRAIN_BONUS_ON_GRAVEL);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_TOOL_NO_TRUTH_GRAIN =
+        register("plain_tool_no_truth_grain", LootTests.PLAIN_TOOL_NO_TRUTH_GRAIN);
+
     private static final ResourceKey<Consumer<GameTestHelper>> FLESH_FILLS_ITS_SLICE =
         register("flesh_fills_its_slice", VindictiveFleshTests.FLESH_FILLS_ITS_SLICE);
 
@@ -118,9 +130,15 @@ public final class XPMagicGameTests {
         registerTest(event, environment, PLAIN_WEAPON_KEEPS_DROP, 200);
         registerTest(event, environment, PEARL_IS_AN_XP_STORE);
 
-        // The ore tests break a hundred coal ores apiece to sample a 25% swap, so they need room too.
+        // The ore tests break hundreds of coal ores apiece to sample a 10% swap, so they need room too.
         registerTest(event, environment, SATURATION_SWAPS_ORE_DROP, 200);
         registerTest(event, environment, PLAIN_PICKAXE_KEEPS_ORE_DROP, 200);
+
+        // The grain tests dig even more blocks apiece to sample a 5% bonus.
+        registerTest(event, environment, TRUTH_GRAIN_BONUS_ON_DIRT, 200);
+        registerTest(event, environment, TRUTH_GRAIN_BONUS_ON_GRASS, 200);
+        registerTest(event, environment, TRUTH_GRAIN_BONUS_ON_GRAVEL, 200);
+        registerTest(event, environment, PLAIN_TOOL_NO_TRUTH_GRAIN, 200);
 
         registerTest(event, environment, FLESH_FILLS_ITS_SLICE);
         registerTest(event, environment, FLESH_IS_INDEPENDENT);

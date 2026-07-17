@@ -1,0 +1,13 @@
+{
+  "type": "xpmagic:memory_drop",
+  "add": true,
+  "chance": 0.01,
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:blocks/dirt"
+    }
+  ],
+  "enchantment": "xpmagic:saturation",
+  "to": "xpmagic:truth_grain"
+}

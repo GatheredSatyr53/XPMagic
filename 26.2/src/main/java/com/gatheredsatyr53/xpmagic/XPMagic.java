@@ -255,6 +255,10 @@ public final class XPMagic {
         () -> new Item(new Item.Properties()
             .setId(itemKey("nostalgic_coal"))));
 
+    public static final DeferredHolder<Item, Item> TRUTH_GRAIN = ITEMS.register("truth_grain",
+        () -> new Item(new Item.Properties()
+            .setId(itemKey("truth_grain"))));
+
     // Tools carved from a Memory Crystal. Repaired by the crystal itself (tag below).
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "memory_crystal_tool_materials"));
@@ -459,6 +463,7 @@ public final class XPMagic {
                 output.accept(MEMORY_CRYSTAL.get());
                 output.accept(VINDICTIVE_FLESH.get());
                 output.accept(NOSTALGIC_COAL.get());
+                output.accept(TRUTH_GRAIN.get());
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
                 output.accept(TIME_CRYSTAL_ROD.get());
