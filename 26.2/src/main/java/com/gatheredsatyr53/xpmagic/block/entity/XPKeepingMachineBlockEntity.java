@@ -6,10 +6,12 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
@@ -252,12 +254,33 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
             Containers.dropContents(this.level, pos, this.inventory.getItems());
     }
 
-    private final class MachineInventory extends SimpleContainer {
+    private final class MachineInventory extends SimpleContainer implements WorldlyContainer {
+
+        /** Hoppers below extract the finished cocktail. */
+        private static final int[] OUTPUT_SLOTS = {SLOT_OUTPUT};
+        /** Any other face feeds the bottle/fuel/matrix inputs; the owner-bound key is never automatable. */
+        private static final int[] INPUT_SLOTS = {SLOT_BOTTLE, SLOT_FUEL, SLOT_MATRIX};
 
         private ItemStack lastKey = ItemStack.EMPTY;
 
         MachineInventory() {
             super(SLOT_COUNT);
+        }
+
+        @Override
+        public int[] getSlotsForFace(Direction side) {
+            return side == Direction.DOWN ? OUTPUT_SLOTS : INPUT_SLOTS;
+        }
+
+        @Override
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+            return canPlaceItem(slot, stack);
+        }
+
+        // Only the finished cocktail leaves via automation; inputs and the key stay put.
+        @Override
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+            return slot == SLOT_OUTPUT;
         }
 
         /** Re-baseline the key snapshot to the current key slot (called after NBT load). */

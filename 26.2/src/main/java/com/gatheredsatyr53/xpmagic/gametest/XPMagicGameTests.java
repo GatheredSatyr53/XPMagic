@@ -114,6 +114,15 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> SAPLING_GROWS_TREE =
         register("sapling_grows_tree", KnowledgeTreeTests.SAPLING_GROWS_TREE);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_PULLS_FRACTION_NOT_POWDER =
+        register("hopper_pulls_fraction_not_powder", MachineHopperTests.HOPPER_PULLS_FRACTION_NOT_POWDER);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_FEEDS_SEPARATOR_INPUT =
+        register("hopper_feeds_separator_input", MachineHopperTests.HOPPER_FEEDS_SEPARATOR_INPUT);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_LEAVES_MACHINE_INPUTS =
+        register("hopper_leaves_machine_inputs", MachineHopperTests.HOPPER_LEAVES_MACHINE_INPUTS);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -166,6 +175,11 @@ public final class XPMagicGameTests {
         registerTest(event, environment, GRAIN_PLANTS_ON_TRUTH);
         registerTest(event, environment, GRAIN_INERT_OFF_TRUTH);
         registerTest(event, environment, SAPLING_GROWS_TREE);
+
+        // Hopper transfers run on an 8-tick cooldown, so these need room to settle before asserting.
+        registerTest(event, environment, HOPPER_PULLS_FRACTION_NOT_POWDER, MachineHopperTests.MAX_TICKS);
+        registerTest(event, environment, HOPPER_FEEDS_SEPARATOR_INPUT, MachineHopperTests.MAX_TICKS);
+        registerTest(event, environment, HOPPER_LEAVES_MACHINE_INPUTS, MachineHopperTests.MAX_TICKS);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,

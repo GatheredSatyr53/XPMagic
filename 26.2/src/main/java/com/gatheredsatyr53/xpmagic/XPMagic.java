@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
@@ -68,7 +69,7 @@ import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 
 @Mod(XPMagic.MODID)
 public final class XPMagic {
@@ -671,12 +672,13 @@ public final class XPMagic {
 
     // Expose each machine's Container inventory as an item-handler capability so hoppers and other
     // automation can insert/extract. NeoForge 26.2 uses the resource transfer API here:
-    // VanillaContainerWrapper adapts the vanilla Container to a ResourceHandler<ItemResource>,
-    // honouring the container's canPlaceItem rules for insertion.
+    // WorldlyContainerWrapper adapts the vanilla WorldlyContainer to a ResourceHandler<ItemResource>,
+    // honouring the machine's per-face slot lists and its canPlaceItemThroughFace / canTakeItemThroughFace
+    // rules so hoppers only feed inputs and only pull finished outputs (never inputs or the owner key).
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.Item.BLOCK, XP_KEEPING_MACHINE_BLOCK_ENTITY.get(),
-            (blockEntity, side) -> VanillaContainerWrapper.of(blockEntity.getInventory()));
+            (blockEntity, side) -> new WorldlyContainerWrapper((WorldlyContainer) blockEntity.getInventory(), side));
         event.registerBlockEntity(Capabilities.Item.BLOCK, POWDER_SEPARATOR_BLOCK_ENTITY.get(),
-            (blockEntity, side) -> VanillaContainerWrapper.of(blockEntity.getInventory()));
+            (blockEntity, side) -> new WorldlyContainerWrapper((WorldlyContainer) blockEntity.getInventory(), side));
     }
 }

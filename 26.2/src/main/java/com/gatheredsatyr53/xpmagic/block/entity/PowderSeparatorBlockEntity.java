@@ -4,10 +4,12 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.jspecify.annotations.Nullable;
 
 public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -246,7 +249,10 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
             Containers.dropContents(this.level, pos, this.inventory.getItems());
     }
 
-    private final class SeparatorInventory extends SimpleContainer {
+    private final class SeparatorInventory extends SimpleContainer implements WorldlyContainer {
+
+        /** Faces other than DOWN expose only the powder input for hopper insertion. */
+        private static final int[] INPUT_SLOTS = {SLOT_INPUT};
 
         SeparatorInventory() {
             super(SLOT_COUNT);
@@ -256,6 +262,23 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
         @Override
         public boolean canPlaceItem(int slot, ItemStack stack) {
             return PowderSeparatorBlockEntity.this.isItemValid(slot, stack);
+        }
+
+        // Hoppers below pull sifted fractions; hoppers on any other face feed powder into the input.
+        @Override
+        public int[] getSlotsForFace(Direction side) {
+            return side == Direction.DOWN ? FRACTION_SLOTS : INPUT_SLOTS;
+        }
+
+        @Override
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+            return canPlaceItem(slot, stack);
+        }
+
+        // Only the fraction outputs may be extracted; the un-sifted input never leaves via automation.
+        @Override
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+            return slot != SLOT_INPUT;
         }
 
         @Override
