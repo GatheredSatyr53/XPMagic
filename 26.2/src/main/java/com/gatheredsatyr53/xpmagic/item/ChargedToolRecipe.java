@@ -125,7 +125,7 @@ public class ChargedToolRecipe extends NormalCraftingRecipe {
      * share, which must not count twice.
      *
      * <p>A bolt raises a crystal's {@code xp_capacity} rather than sitting beside it (see
-     * {@link com.gatheredsatyr53.xpmagic.LightningChargingHandler}), and {@code lightning_charge} is
+     * {@link com.gatheredsatyr53.xpmagic.handler.LightningChargingHandler}), and {@code lightning_charge} is
      * the record of how much of the capacity came from the sky. Summing capacity raw would let a
      * charged crystal buy both an immediate bonus and a higher ceiling off the same energy. Only what
      * the crystal owed to its own density — base plus the explosion's compaction — buys room to grow.

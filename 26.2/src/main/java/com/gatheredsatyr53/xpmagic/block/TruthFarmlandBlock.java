@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The Truth Farmland — the special tilth a Memory Crystal hoe carrying {@code xpmagic:saturation}
- * leaves behind (see {@link com.gatheredsatyr53.xpmagic.TruthFarmlandHandler}). It is the only soil a
+ * leaves behind (see {@link com.gatheredsatyr53.xpmagic.handler.TruthFarmlandHandler}). It is the only soil a
  * {@link com.gatheredsatyr53.xpmagic.item.TruthGrainItem Grain of Truth} will take root in, so it must
  * be as permanent as the effort that made it: unlike vanilla farmland it stays fully moist forever,
  * never reverts to dirt, and is not trampled flat — not even by the solid trunk the Tree of Knowledge

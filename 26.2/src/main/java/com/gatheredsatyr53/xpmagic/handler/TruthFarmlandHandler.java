@@ -1,4 +1,5 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.handler;
+import com.gatheredsatyr53.xpmagic.XPMagic;
 
 import com.gatheredsatyr53.xpmagic.datagen.XPMagicEnchantmentProvider;
 

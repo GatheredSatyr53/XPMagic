@@ -1,4 +1,6 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.handler;
+import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.Config;
 
 import java.util.List;
 import java.util.function.IntSupplier;

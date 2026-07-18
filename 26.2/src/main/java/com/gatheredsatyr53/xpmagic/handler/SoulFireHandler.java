@@ -1,4 +1,6 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.handler;
+import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.Config;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;

@@ -2,6 +2,7 @@ package com.gatheredsatyr53.xpmagic;
 
 import com.gatheredsatyr53.xpmagic.item.ToolStats;
 import com.gatheredsatyr53.xpmagic.nbt.StoredExp;
+import com.gatheredsatyr53.xpmagic.handler.PearlFeedingHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;

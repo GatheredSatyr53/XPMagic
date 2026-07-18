@@ -1,4 +1,5 @@
-package com.gatheredsatyr53.xpmagic;
+package com.gatheredsatyr53.xpmagic.handler;
+import com.gatheredsatyr53.xpmagic.XPMagic;
 
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EquipmentSlot;

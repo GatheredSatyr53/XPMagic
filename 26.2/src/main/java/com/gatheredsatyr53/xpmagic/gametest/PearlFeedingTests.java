@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.gatheredsatyr53.xpmagic.Config;
-import com.gatheredsatyr53.xpmagic.PearlFeedingHandler;
-import com.gatheredsatyr53.xpmagic.PearlFeedingHandler.PearlFuel;
+import com.gatheredsatyr53.xpmagic.handler.PearlFeedingHandler;
+import com.gatheredsatyr53.xpmagic.handler.PearlFeedingHandler.PearlFuel;
 import com.gatheredsatyr53.xpmagic.XPMagic;
 
 import net.minecraft.gametest.framework.GameTestHelper;

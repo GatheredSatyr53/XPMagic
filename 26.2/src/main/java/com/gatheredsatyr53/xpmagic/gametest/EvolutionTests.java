@@ -181,7 +181,7 @@ public final class EvolutionTests {
     };
 
     /**
-     * The weapon half of {@link com.gatheredsatyr53.xpmagic.EvolutionHandler}, driven through a real
+     * The weapon half of {@link com.gatheredsatyr53.xpmagic.handler.EvolutionHandler}, driven through a real
      * kill rather than by calling the handler: spawn a mob, hit it with a player holding the sword, and
      * see whether the sword in the player's hand grew.
      */
