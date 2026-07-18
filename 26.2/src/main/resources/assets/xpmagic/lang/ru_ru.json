@@ -29,6 +29,8 @@
   "tooltip.xpmagic.compaction_bonus": "Уплотнение: +%s",
   "tooltip.xpmagic.lightning_charge": "Заряд молнии: +%s",
   "tooltip.xpmagic.vindictive_capacity": "Злопамятность: +%s",
+  "tooltip.xpmagic.nostalgic_capacity": "Ностальгия: +%s",
+  "tooltip.xpmagic.knowledge_capacity": "Познание: +%s",
   "tooltip.xpmagic.burned_away": "Выгорело: %s",
   "tooltip.xpmagic.evolution": "Эволюция: ступень %s из %s",
   "tooltip.xpmagic.evolution_progress": "Потенциал: %s / %s",

@@ -84,20 +84,20 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> PLAIN_TOOL_NO_TRUTH_GRAIN =
         register("plain_tool_no_truth_grain", LootTests.PLAIN_TOOL_NO_TRUTH_GRAIN);
 
-    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_FILLS_ITS_SLICE =
-        register("flesh_fills_its_slice", VindictiveFleshTests.FLESH_FILLS_ITS_SLICE);
+    private static final ResourceKey<Consumer<GameTestHelper>> EACH_FUEL_FILLS_ITS_SLICE =
+        register("each_fuel_fills_its_slice", PearlFeedingTests.EACH_FUEL_FILLS_ITS_SLICE);
 
-    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_IS_INDEPENDENT =
-        register("flesh_is_independent", VindictiveFleshTests.FLESH_IS_INDEPENDENT);
+    private static final ResourceKey<Consumer<GameTestHelper>> FUELS_COMPOSE_TO_100 =
+        register("fuels_compose_to_100", PearlFeedingTests.FUELS_COMPOSE_TO_100);
 
-    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_ADDS_PER_UNIT =
-        register("flesh_adds_per_unit", VindictiveFleshTests.FLESH_ADDS_PER_UNIT);
+    private static final ResourceKey<Consumer<GameTestHelper>> FUELS_ARE_INDEPENDENT =
+        register("fuels_are_independent", PearlFeedingTests.FUELS_ARE_INDEPENDENT);
 
-    private static final ResourceKey<Consumer<GameTestHelper>> FLESH_RESPECTS_ITS_SLICE =
-        register("flesh_respects_its_slice", VindictiveFleshTests.FLESH_RESPECTS_ITS_SLICE);
+    private static final ResourceKey<Consumer<GameTestHelper>> FUEL_RESPECTS_ITS_SLICE =
+        register("fuel_respects_its_slice", PearlFeedingTests.FUEL_RESPECTS_ITS_SLICE);
 
-    private static final ResourceKey<Consumer<GameTestHelper>> ANVIL_WIRES_THE_FEED =
-        register("anvil_wires_the_feed", VindictiveFleshTests.ANVIL_WIRES_THE_FEED);
+    private static final ResourceKey<Consumer<GameTestHelper>> ANVIL_WIRES_EACH_FUEL =
+        register("anvil_wires_each_fuel", PearlFeedingTests.ANVIL_WIRES_EACH_FUEL);
 
     private static final ResourceKey<Consumer<GameTestHelper>> SATURATION_HOE_TILLS_TRUTH =
         register("saturation_hoe_tills_truth", KnowledgeTreeTests.SATURATION_HOE_TILLS_TRUTH);
@@ -155,11 +155,11 @@ public final class XPMagicGameTests {
         registerTest(event, environment, TRUTH_GRAIN_BONUS_ON_GRAVEL, 200);
         registerTest(event, environment, PLAIN_TOOL_NO_TRUTH_GRAIN, 200);
 
-        registerTest(event, environment, FLESH_FILLS_ITS_SLICE);
-        registerTest(event, environment, FLESH_IS_INDEPENDENT);
-        registerTest(event, environment, FLESH_ADDS_PER_UNIT);
-        registerTest(event, environment, FLESH_RESPECTS_ITS_SLICE);
-        registerTest(event, environment, ANVIL_WIRES_THE_FEED);
+        registerTest(event, environment, EACH_FUEL_FILLS_ITS_SLICE);
+        registerTest(event, environment, FUELS_COMPOSE_TO_100);
+        registerTest(event, environment, FUELS_ARE_INDEPENDENT);
+        registerTest(event, environment, FUEL_RESPECTS_ITS_SLICE);
+        registerTest(event, environment, ANVIL_WIRES_EACH_FUEL);
 
         registerTest(event, environment, SATURATION_HOE_TILLS_TRUTH);
         registerTest(event, environment, PLAIN_HOE_TILLS_VANILLA);

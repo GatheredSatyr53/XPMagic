@@ -125,11 +125,26 @@ public final class XPMagic {
             .build()
     );
 
-    // How much of a Memory Pearl's xp_capacity was packed in by feeding it Vindictive Flesh on an anvil,
+    // How much of a Memory Pearl's xp_capacity each feeding source packed in (see PearlFeedingHandler),
     // kept apart from the base 40 the same way lightning_charge is kept apart from a crystal's base — so
-    // the tooltip can name it instead of mislabelling it as an explosion's compaction (which never
-    // touches a pearl). See VindictiveFleshHandler.
+    // the tooltip can name each instead of mislabelling it as an explosion's compaction (which never
+    // touches a pearl), and, more importantly, so each source can cap its own slice independently of the
+    // others. Three slices of 20 raise a pearl from 40 to a round 100 in any order.
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> VINDICTIVE_CAPACITY = DATA_COMPONENTS.register("vindictive_capacity",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> NOSTALGIC_CAPACITY = DATA_COMPONENTS.register("nostalgic_capacity",
+        () -> DataComponentType.<Integer>builder()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> KNOWLEDGE_CAPACITY = DATA_COMPONENTS.register("knowledge_capacity",
         () -> DataComponentType.<Integer>builder()
             .persistent(Codec.INT)
             .networkSynchronized(ByteBufCodecs.VAR_INT)

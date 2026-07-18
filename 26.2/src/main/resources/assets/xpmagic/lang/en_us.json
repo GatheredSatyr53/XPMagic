@@ -29,6 +29,8 @@
   "tooltip.xpmagic.compaction_bonus": "Compaction: +%s",
   "tooltip.xpmagic.lightning_charge": "Lightning charge: +%s",
   "tooltip.xpmagic.vindictive_capacity": "Vindictive: +%s",
+  "tooltip.xpmagic.nostalgic_capacity": "Nostalgic: +%s",
+  "tooltip.xpmagic.knowledge_capacity": "Knowledge: +%s",
   "tooltip.xpmagic.burned_away": "Burned away: %s",
   "tooltip.xpmagic.evolution": "Evolution: step %s of %s",
   "tooltip.xpmagic.evolution_progress": "Potential: %s / %s",

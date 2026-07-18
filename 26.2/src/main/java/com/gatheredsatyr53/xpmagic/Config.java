@@ -134,15 +134,17 @@ public class Config {
             .comment("xp_capacity budget released per Memory Crystal an anvil shatters, then broken at random into powder fractions (largest favoured). Keep below a crystal's own xp_capacity so crushing stays a lossy recycle, never a dupe.")
             .defineInRange("shatterCapacity", 10, 0, 4096);
 
-    // Vindictive Flesh: dropped by zombies, and fed to a Memory Pearl on an anvil to pack the pearl
-    // denser — raising its xp_capacity above the base 40. Like lightning on a crystal this is genuine
-    // external input (a zombie's remembered grudge), not a dupe: xp_capacity is vessel size, so a bigger
-    // pearl stores no experience it was not later given.
+    // Pearl feeding: three items pack a Memory Pearl denser on an anvil, each raising its xp_capacity
+    // above the base 40 — a zombie's remembered grudge (Vindictive Flesh), remembered warmth (Nostalgic
+    // Coal), and the fruit the whole Tree of Knowledge is grown for. Like lightning on a crystal this is
+    // genuine external input, not a dupe: xp_capacity is vessel size, so a bigger pearl stores no
+    // experience it was not later given.
     //
-    // The ceiling is on how much FLESH may add (tracked on vindictive_capacity), not on the pearl's
-    // absolute capacity — so this is one independent source among the pearl's several, each capping its
-    // own slice. Three such slices of 20 raise a pearl from 40 to a round 100 regardless of the order
-    // they are applied in; capping absolute capacity instead would make that order matter.
+    // Each source caps how much IT may add (tracked on its own component), not the pearl's absolute
+    // capacity — so the three are independent, and their slices of 20 raise a pearl from 40 to a round
+    // 100 in any order. Capping absolute capacity instead would make the order matter. See
+    // PearlFeedingHandler. (Fruit is the rarest, so you may want a higher per-item there — fewer, more
+    // potent — while keeping the slice at 20.)
     private static final ModConfigSpec.IntValue VINDICTIVE_CAPACITY_CAP = BUILDER
             .comment("The most xp_capacity that Vindictive Flesh can add to a single Memory Pearl (its own slice, on top of the base 40 and any other source).")
             .defineInRange("vindictiveCapacityCap", 20, 0, 4096);
@@ -154,6 +156,30 @@ public class Config {
     private static final ModConfigSpec.IntValue VINDICTIVE_XP_COST_PER_FLESH = BUILDER
             .comment("Experience levels the anvil charges per Vindictive Flesh consumed. It costs experience to densify a vessel for experience.")
             .defineInRange("vindictiveXpCostPerFlesh", 1, 0, 256);
+
+    private static final ModConfigSpec.IntValue NOSTALGIC_CAPACITY_CAP = BUILDER
+            .comment("The most xp_capacity that Nostalgic Coal can add to a single Memory Pearl (its own slice).")
+            .defineInRange("nostalgicCapacityCap", 20, 0, 4096);
+
+    private static final ModConfigSpec.IntValue NOSTALGIC_CAPACITY_PER_COAL = BUILDER
+            .comment("xp_capacity a Memory Pearl gains per Nostalgic Coal consumed on the anvil.")
+            .defineInRange("nostalgicCapacityPerCoal", 2, 0, 256);
+
+    private static final ModConfigSpec.IntValue NOSTALGIC_XP_COST_PER_COAL = BUILDER
+            .comment("Experience levels the anvil charges per Nostalgic Coal consumed.")
+            .defineInRange("nostalgicXpCostPerCoal", 1, 0, 256);
+
+    private static final ModConfigSpec.IntValue KNOWLEDGE_CAPACITY_CAP = BUILDER
+            .comment("The most xp_capacity that a Fruit of Knowledge can add to a single Memory Pearl (its own slice).")
+            .defineInRange("knowledgeCapacityCap", 20, 0, 4096);
+
+    private static final ModConfigSpec.IntValue KNOWLEDGE_CAPACITY_PER_FRUIT = BUILDER
+            .comment("xp_capacity a Memory Pearl gains per Fruit of Knowledge consumed on the anvil.")
+            .defineInRange("knowledgeCapacityPerFruit", 2, 0, 256);
+
+    private static final ModConfigSpec.IntValue KNOWLEDGE_XP_COST_PER_FRUIT = BUILDER
+            .comment("Experience levels the anvil charges per Fruit of Knowledge consumed.")
+            .defineInRange("knowledgeXpCostPerFruit", 1, 0, 256);
 
     // Soul-fire transformation: a Memory Crystal left in soul fire (blue flame) has its xp_capacity
     // burned away one point at a time; when it hits 0 the crystal transforms into a Time Crystal. The
@@ -186,6 +212,12 @@ public class Config {
     public static int shatterCapacity;
     public static int vindictiveCapacityCap;
     public static int vindictiveCapacityPerFlesh;
+    public static int nostalgicCapacityCap;
+    public static int nostalgicCapacityPerCoal;
+    public static int nostalgicXpCostPerCoal;
+    public static int knowledgeCapacityCap;
+    public static int knowledgeCapacityPerFruit;
+    public static int knowledgeXpCostPerFruit;
     public static int vindictiveXpCostPerFlesh;
     public static int soulFireTicksPerCapacity;
 
@@ -217,6 +249,12 @@ public class Config {
         vindictiveCapacityCap = VINDICTIVE_CAPACITY_CAP.get();
         vindictiveCapacityPerFlesh = VINDICTIVE_CAPACITY_PER_FLESH.get();
         vindictiveXpCostPerFlesh = VINDICTIVE_XP_COST_PER_FLESH.get();
+        nostalgicCapacityCap = NOSTALGIC_CAPACITY_CAP.get();
+        nostalgicCapacityPerCoal = NOSTALGIC_CAPACITY_PER_COAL.get();
+        nostalgicXpCostPerCoal = NOSTALGIC_XP_COST_PER_COAL.get();
+        knowledgeCapacityCap = KNOWLEDGE_CAPACITY_CAP.get();
+        knowledgeCapacityPerFruit = KNOWLEDGE_CAPACITY_PER_FRUIT.get();
+        knowledgeXpCostPerFruit = KNOWLEDGE_XP_COST_PER_FRUIT.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();
 
         // convert the list of strings into a set of items

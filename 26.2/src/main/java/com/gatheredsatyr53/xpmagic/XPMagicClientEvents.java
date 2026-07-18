@@ -23,12 +23,15 @@ public final class XPMagicClientEvents {
                                             .withStyle(ChatFormatting.GRAY));
 
             // Capacity above the item's baked-in base comes from separate sources, each tracked on its
-            // own component: a lightning charge and Vindictive Flesh. Whatever is left over base after
-            // subtracting those is an explosion's compaction. Show each contribution as its own line.
+            // own component: a lightning charge and the pearl-feeding fuels. Whatever is left over base
+            // after subtracting all of those is an explosion's compaction. Show each as its own line.
             int base = stack.getItem().getDefaultInstance().getOrDefault(XPMagic.XP_CAPACITY.get(), capacity);
             int lightning = stack.getOrDefault(XPMagic.LIGHTNING_CHARGE.get(), 0);
-            int vindictive = stack.getOrDefault(XPMagic.VINDICTIVE_CAPACITY.get(), 0);
-            int compaction = capacity - base - lightning - vindictive;
+            int fromFuels = 0;
+            for (PearlFeedingHandler.PearlFuel fuel : PearlFeedingHandler.FUELS) {
+                fromFuels += stack.getOrDefault(fuel.tally().get(), 0);
+            }
+            int compaction = capacity - base - lightning - fromFuels;
             if (compaction > 0) {
                 event.getToolTip().add(Component.translatable("tooltip.xpmagic.compaction_bonus", compaction)
                                                 .withStyle(ChatFormatting.AQUA));
@@ -37,9 +40,12 @@ public final class XPMagicClientEvents {
                 event.getToolTip().add(Component.translatable("tooltip.xpmagic.lightning_charge", lightning)
                                                 .withStyle(ChatFormatting.YELLOW));
             }
-            if (vindictive > 0) {
-                event.getToolTip().add(Component.translatable("tooltip.xpmagic.vindictive_capacity", vindictive)
-                                                .withStyle(ChatFormatting.DARK_GREEN));
+            for (PearlFeedingHandler.PearlFuel fuel : PearlFeedingHandler.FUELS) {
+                int contributed = stack.getOrDefault(fuel.tally().get(), 0);
+                if (contributed > 0) {
+                    event.getToolTip().add(Component.translatable(fuel.tooltipKey(), contributed)
+                                                    .withStyle(fuel.color()));
+                }
             }
         }
         // Soul fire burns one point of capacity per soulFireTicksPerCapacity ticks in the flame, so
