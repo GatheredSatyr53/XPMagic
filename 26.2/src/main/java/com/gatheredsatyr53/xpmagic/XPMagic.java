@@ -29,7 +29,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -43,6 +45,7 @@ import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.equipment.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -296,6 +299,9 @@ public final class XPMagic {
     public static final TagKey<Item> MEMORY_CRYSTAL_TOOL_MATERIALS =
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "memory_crystal_tool_materials"));
 
+    public static final TagKey<Item> TIME_CRYSTAL_ARMOR_MATERIALS =
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "time_crystal_armor_materials"));
+
     public static final TagKey<Item> EVOLVING_TOOLS =
             TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MODID, "evolving_tools"));
 
@@ -319,6 +325,23 @@ public final class XPMagic {
         3.0F,                                 // attackDamageBonus (diamond)
         10,                                   // enchantment value (diamond)
         MEMORY_CRYSTAL_TOOL_MATERIALS         // repair items
+    );
+
+    // The worn-armour texture is keyed by a ResourceKey<EquipmentAsset>. This is NOT a registry object:
+    // EquipmentAssets.ROOT_ID (Registries.EQUIPMENT_ASSET) is a phantom registry that holds no entries,
+    // so there is nothing to put through a DeferredRegister — the key is just declared here, exactly like
+    // KNOWLEDGE_TREE_FEATURE below. The actual look is a client resource at
+    //   assets/xpmagic/equipment/time_crystal.json (an EquipmentClientInfo)
+    // which points its humanoid / humanoid_leggings layers at
+    //   assets/xpmagic/textures/entity/equipment/humanoid/time_crystal.png
+    //   assets/xpmagic/textures/entity/equipment/humanoid_leggings/time_crystal.png
+    // (Layer.getTextureLocation resolves textures/entity/equipment/<layer_type>/<path>.png). Previously
+    // this was EquipmentAssets.DIAMOND, which borrowed vanilla's diamond armour skin.
+    public static final ResourceKey<EquipmentAsset> TIME_CRYSTAL_ASSET =
+        ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(MODID, "time_crystal"));
+
+    public static final ArmorMaterial TIME_CRYSTAL_MATERIAL = new ArmorMaterial(
+        66, ArmorMaterials.makeDefense(6, 12, 16, 6, 22), 10, SoundEvents.ARMOR_EQUIP_DIAMOND, 4.0F, 0.0F, TIME_CRYSTAL_ARMOR_MATERIALS, TIME_CRYSTAL_ASSET
     );
 
     // Damage tooltip = 1 (player base) + baseline + material bonus (3.0). Targets are diamond +25%:
@@ -371,6 +394,30 @@ public final class XPMagic {
         () -> new HoeItem(MEMORY_CRYSTAL_MATERIAL, -3.0F, 0.0F, new Item.Properties()
             .setId(itemKey("memory_crystal_hoe"))
             .fireResistant()));
+
+    public static final DeferredHolder<Item, Item> TIME_CRYSTAL_HELMET = ITEMS.register("time_crystal_helmet",
+        () -> new Item(new Item.Properties()
+        .setId(itemKey("time_crystal_helmet"))
+        .humanoidArmor(TIME_CRYSTAL_MATERIAL, ArmorType.HELMET)
+        .fireResistant()));
+
+    public static final DeferredHolder<Item, Item> TIME_CRYSTAL_CHESTPLATE = ITEMS.register("time_crystal_chestplate",
+        () -> new Item(new Item.Properties()
+        .setId(itemKey("time_crystal_chestplate"))
+        .humanoidArmor(TIME_CRYSTAL_MATERIAL, ArmorType.CHESTPLATE)
+        .fireResistant()));
+
+    public static final DeferredHolder<Item, Item> TIME_CRYSTAL_LEGGINGS = ITEMS.register("time_crystal_leggings",
+        () -> new Item(new Item.Properties()
+        .setId(itemKey("time_crystal_leggings"))
+        .humanoidArmor(TIME_CRYSTAL_MATERIAL, ArmorType.LEGGINGS)
+        .fireResistant()));
+
+    public static final DeferredHolder<Item, Item> TIME_CRYSTAL_BOOTS = ITEMS.register("time_crystal_boots",
+        () -> new Item(new Item.Properties()
+        .setId(itemKey("time_crystal_boots"))
+        .humanoidArmor(TIME_CRYSTAL_MATERIAL, ArmorType.BOOTS)
+        .fireResistant()));
 
     //</editor-fold>
 
@@ -582,6 +629,10 @@ public final class XPMagic {
                 output.accept(MEMORY_CRYSTAL_AXE.get());
                 output.accept(MEMORY_CRYSTAL_SHOVEL.get());
                 output.accept(MEMORY_CRYSTAL_HOE.get());
+                output.accept(TIME_CRYSTAL_HELMET.get());
+                output.accept(TIME_CRYSTAL_CHESTPLATE.get());
+                output.accept(TIME_CRYSTAL_LEGGINGS.get());
+                output.accept(TIME_CRYSTAL_BOOTS.get());
                 output.accept(MEMORY_PEARL.get());
                 output.accept(VINDICTIVE_FLESH.get());
                 output.accept(NOSTALGIC_COAL.get());

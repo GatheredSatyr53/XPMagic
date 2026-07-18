@@ -1,0 +1,13 @@
+{
+  "layers": {
+    "humanoid": [
+      { "texture": "xpmagic:time_crystal" }
+    ],
+    "humanoid_baby": [
+      { "texture": "xpmagic:time_crystal" }
+    ],
+    "humanoid_leggings": [
+      { "texture": "xpmagic:time_crystal" }
+    ]
+  }
+}

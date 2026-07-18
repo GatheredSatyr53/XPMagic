@@ -22,6 +22,9 @@ public final class XPMagicItemTagsProvider extends TagsProvider<Item> {
         this.tag(XPMagic.MEMORY_CRYSTAL_TOOL_MATERIALS)
             .add(XPMagic.MEMORY_CRYSTAL.getKey());
 
+        this.tag(XPMagic.TIME_CRYSTAL_ARMOR_MATERIALS)
+            .add(XPMagic.TIME_CRYSTAL.getKey());
+
         // Which stat a tool's lightning charge and evolution buy. The axe sits with the weapons: it
         // does mine wood, but its reason to exist is the damage.
         this.tag(XPMagic.EVOLVING_WEAPONS)
