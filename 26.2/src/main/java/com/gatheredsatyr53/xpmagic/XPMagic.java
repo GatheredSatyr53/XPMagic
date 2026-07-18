@@ -15,6 +15,7 @@ import com.gatheredsatyr53.xpmagic.inventory.PowderMixerMenu;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
 import com.gatheredsatyr53.xpmagic.item.ChargedToolRecipe;
+import com.gatheredsatyr53.xpmagic.item.GuidebookItem;
 import com.gatheredsatyr53.xpmagic.item.PlayerKeyItem;
 import com.gatheredsatyr53.xpmagic.loot.MemoryDropModifier;
 import com.gatheredsatyr53.xpmagic.nbt.PlayerOwner;
@@ -261,6 +262,10 @@ public final class XPMagic {
         () -> new Item(new Item.Properties()
             .setId(itemKey("time_crystal_rod"))
             .fireResistant()));
+
+    // The in-game manual. Given to players on first login and craftable; opens a book on use.
+    public static final DeferredHolder<Item, Item> GUIDEBOOK = ITEMS.register("guidebook",
+        () -> new GuidebookItem(new Item.Properties().setId(itemKey("guidebook")).stacksTo(1)));
 
     public static final DeferredHolder<Item, Item> PROCESSING_CHIP = ITEMS.register("processing_chip",
         () -> new Item(new Item.Properties().setId(itemKey("processing_chip"))));
@@ -627,6 +632,7 @@ public final class XPMagic {
             .title(Component.translatable("itemGroup.xpmagic"))
             .icon(() -> XP_COCKTAIL.get().getDefaultInstance())
             .displayItems((params, output) -> {
+                output.accept(GUIDEBOOK.get());
                 output.accept(XP_COCKTAIL.get());
                 output.accept(MEMORY_POWDER.get());
                 output.accept(COARSE_POWDER.get());

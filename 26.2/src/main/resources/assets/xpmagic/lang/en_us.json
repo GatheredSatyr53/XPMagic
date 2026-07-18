@@ -63,5 +63,22 @@
   "tooltip.xpmagic.mixer.units": "Output units: %s",
   "tooltip.xpmagic.mixer.exceeded": "Unit capacity %s exceeds cap %s",
   "tooltip.xpmagic.mixer.blocked": "Output blocked",
-  "enchantment.xpmagic.saturation": "Saturation"
+  "enchantment.xpmagic.saturation": "Saturation",
+  "item.xpmagic.guidebook": "XPMagic Guidebook",
+  "guide.xpmagic.title": "XPMagic",
+  "guide.xpmagic.intro": "A mod about storing and reworking experience. Click a chapter:",
+  "guide.xpmagic.toc.storage": "• Storing XP",
+  "guide.xpmagic.toc.powder": "• Powder & Fractions",
+  "guide.xpmagic.toc.crystals": "• Crystals",
+  "guide.xpmagic.toc.pearl": "• Memory Pearls",
+  "guide.xpmagic.toc.gear": "• Gear",
+  "guide.xpmagic.toc.tree": "• Tree of Knowledge",
+  "guide.xpmagic.toc.chips": "• Chips & Start",
+  "guide.xpmagic.page.storage": "§5§lStoring XP§r\n\nThe XP Keeping Machine is a furnace for experience. Put in a bottle, fuel, a carrier (powder or crystal) and a name key. While the key's owner is online it drains their XP into an XP Cocktail. Drink it to get the XP back.",
+  "guide.xpmagic.page.powder": "§5§lPowder & Fractions§r\n\nMemory Powder (cap 10) is XP fuel. The Powder Separator splits it into coarse (5), medium (2) and fine (1) fractions — but only with a Vibration Stand below it (fuel + redstone). The Powder Mixer recombines fractions.",
+  "guide.xpmagic.page.crystals": "§5§lCrystals§r\n\nAn explosion fuses Memory Powder into a Memory Crystal (cap 20 + a bonus). Lightning charges a dropped crystal. An anvil shatters it back to powder (lossy). In soul fire a crystal burns down into a Time Crystal → block, wafer, rod.",
+  "guide.xpmagic.page.pearl": "§5§lMemory Pearls§r\n\nThe Memory Pearl (cap 40) is the largest store. An enderman killed by a memory-crystal weapon with Saturation drops one. On an anvil, feed the pearl Vindictive Flesh, Nostalgic Coal or Fruit of Knowledge — up to cap 100.",
+  "guide.xpmagic.page.gear": "§5§lGear§r\n\nMemory Crystal tools are diamond-tier, +25% damage and fireproof. Sword, pickaxe, axe and shovel evolve via a special recipe and grow from use (kills or mining). Time Crystal armor is fireproof.",
+  "guide.xpmagic.page.tree": "§5§lTree of Knowledge§r\n\nWith a memory-crystal hoe enchanted with Saturation, till Truth Farmland — only there does Truth Grain grow. Grain → Knowledge Sapling → Tree of Knowledge → Fruit of Knowledge, fuel for pearls.",
+  "guide.xpmagic.page.chips": "§5§lChips & Start§r\n\nStart with a Processing Chip and a Memory Chip — machines and the key are built from them. Make an XP Keeping Machine and some Memory Powder, then follow the chapters. Good luck!"
 }

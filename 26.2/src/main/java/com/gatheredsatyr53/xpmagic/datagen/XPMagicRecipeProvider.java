@@ -31,6 +31,12 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_redstone", this.has(Items.REDSTONE))
             .save(this.output);
 
+        this.shapeless(RecipeCategory.MISC, XPMagic.GUIDEBOOK.get())
+            .requires(Items.BOOK)
+            .requires(XPMagic.MEMORY_POWDER.get())
+            .unlockedBy("has_memory_powder", this.has(XPMagic.MEMORY_POWDER.get()))
+            .save(this.output);
+
         this.shaped(RecipeCategory.MISC, XPMagic.PROCESSING_CHIP.get())
             .pattern("XXX")
             .pattern("YZY")
