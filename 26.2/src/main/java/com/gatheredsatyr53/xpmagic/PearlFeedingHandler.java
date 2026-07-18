@@ -63,10 +63,10 @@ public final class PearlFeedingHandler {
     public static final List<PearlFuel> FUELS = List.of(
         new PearlFuel(XPMagic.VINDICTIVE_FLESH, XPMagic.VINDICTIVE_CAPACITY,
             () -> Config.vindictiveCapacityCap, () -> Config.vindictiveCapacityPerFlesh,
-            () -> Config.vindictiveXpCostPerFlesh, "tooltip.xpmagic.vindictive_capacity", ChatFormatting.DARK_GREEN),
+            () -> Config.vindictiveXpCostPerFlesh, "tooltip.xpmagic.vindictive_capacity", ChatFormatting.RED),
         new PearlFuel(XPMagic.NOSTALGIC_COAL, XPMagic.NOSTALGIC_CAPACITY,
             () -> Config.nostalgicCapacityCap, () -> Config.nostalgicCapacityPerCoal,
-            () -> Config.nostalgicXpCostPerCoal, "tooltip.xpmagic.nostalgic_capacity", ChatFormatting.GOLD),
+            () -> Config.nostalgicXpCostPerCoal, "tooltip.xpmagic.nostalgic_capacity", ChatFormatting.YELLOW),
         new PearlFuel(XPMagic.FRUIT_OF_KNOWLEDGE, XPMagic.KNOWLEDGE_CAPACITY,
             () -> Config.knowledgeCapacityCap, () -> Config.knowledgeCapacityPerFruit,
             () -> Config.knowledgeXpCostPerFruit, "tooltip.xpmagic.knowledge_capacity", ChatFormatting.GREEN));

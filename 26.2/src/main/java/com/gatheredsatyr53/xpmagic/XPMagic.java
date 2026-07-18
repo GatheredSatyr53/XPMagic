@@ -568,16 +568,12 @@ public final class XPMagic {
             .title(Component.translatable("itemGroup.xpmagic"))
             .icon(() -> XP_COCKTAIL.get().getDefaultInstance())
             .displayItems((params, output) -> {
+                output.accept(XP_COCKTAIL.get());
                 output.accept(MEMORY_POWDER.get());
                 output.accept(COARSE_POWDER.get());
                 output.accept(MEDIUM_POWDER.get());
                 output.accept(FINE_POWDER.get());
-                output.accept(MEMORY_PEARL.get());
                 output.accept(MEMORY_CRYSTAL.get());
-                output.accept(VINDICTIVE_FLESH.get());
-                output.accept(NOSTALGIC_COAL.get());
-                output.accept(TRUTH_GRAIN.get());
-                output.accept(FRUIT_OF_KNOWLEDGE.get());
                 output.accept(TIME_CRYSTAL.get());
                 output.accept(TIME_CRYSTAL_WAFER.get());
                 output.accept(TIME_CRYSTAL_ROD.get());
@@ -586,18 +582,22 @@ public final class XPMagic {
                 output.accept(MEMORY_CRYSTAL_AXE.get());
                 output.accept(MEMORY_CRYSTAL_SHOVEL.get());
                 output.accept(MEMORY_CRYSTAL_HOE.get());
+                output.accept(MEMORY_PEARL.get());
+                output.accept(VINDICTIVE_FLESH.get());
+                output.accept(NOSTALGIC_COAL.get());
+                output.accept(TRUTH_GRAIN.get());
+                output.accept(KNOWLEDGE_SAPLING_ITEM.get());
+                output.accept(KNOWLEDGE_LOG_ITEM.get());
+                output.accept(KNOWLEDGE_LEAVES_ITEM.get());
+                output.accept(FRUIT_OF_KNOWLEDGE.get());
                 output.accept(PROCESSING_CHIP.get());
                 output.accept(MEMORY_CHIP.get());
-                output.accept(XP_COCKTAIL.get());
                 output.accept(PLAYER_KEY.get());
                 output.accept(XP_KEEPING_MACHINE_ITEM.get());
                 output.accept(POWDER_SEPARATOR_ITEM.get());
                 output.accept(VIBRATION_STAND_ITEM.get());
                 output.accept(POWDER_MIXER_ITEM.get());
                 output.accept(TIME_CRYSTAL_BLOCK_ITEM.get());
-                output.accept(KNOWLEDGE_LOG_ITEM.get());
-                output.accept(KNOWLEDGE_LEAVES_ITEM.get());
-                output.accept(KNOWLEDGE_SAPLING_ITEM.get());
             })
             .build());
 
