@@ -1,6 +1,28 @@
 {
-  "parent": "minecraft:block/cross",
-  "textures": {
-    "cross": "xpmagic:block/knowledge_sapling"
-  }
+    "__comment": "A block/cross shifted down 1px (y -1..15, rotation origin y 7): Truth Farmland is 15/16 tall (FarmlandBlock.SHAPE), so a normal cross would float 1px above its surface. This drops the sprite to sit flush on the tilth.",
+    "ambientocclusion": false,
+    "textures": {
+        "particle": "xpmagic:block/knowledge_sapling",
+        "cross": "xpmagic:block/knowledge_sapling"
+    },
+    "elements": [
+        {   "from": [ 0.8, -1, 8 ],
+            "to": [ 15.2, 15, 8 ],
+            "rotation": { "origin": [ 8, 7, 8 ], "axis": "y", "angle": 45, "rescale": true },
+            "shade": false,
+            "faces": {
+                "north": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" },
+                "south": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" }
+            }
+        },
+        {   "from": [ 8, -1, 0.8 ],
+            "to": [ 8, 15, 15.2 ],
+            "rotation": { "origin": [ 8, 7, 8 ], "axis": "y", "angle": 45, "rescale": true },
+            "shade": false,
+            "faces": {
+                "west": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" },
+                "east": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" }
+            }
+        }
+    ]
 }

@@ -1,8 +1,7 @@
 {
-  "parent": "minecraft:block/cube_bottom_top",
+  "parent": "minecraft:block/template_farmland",
   "textures": {
-    "top": "minecraft:block/farmland_moist",
-    "side": "minecraft:block/dirt",
-    "bottom": "minecraft:block/dirt"
+    "dirt": "xpmagic:block/truth_farmland_side",
+    "top": "xpmagic:block/truth_farmland"
   }
 }
