@@ -9,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -61,17 +62,30 @@ public class VibrationStandBlock extends OrientedMachineBlock {
             : createTickerHelper(type, XPMagic.VIBRATION_STAND_BLOCK_ENTITY.get(), VibrationStandBlockEntity::serverTick);
     }
 
-    // Right-click with any furnace fuel to add its burn time to the stand.
+    // Right-click with any furnace fuel to load it into the stand's fuel slot (furnace model): as much
+    // of the held stack as fits is moved in, and the stand burns it a piece at a time while powered.
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                           Player player, InteractionHand hand, BlockHitResult hitResult) {
-        int burnDuration = level.fuelValues().burnDuration(stack);
-        if (burnDuration <= 0)
+        if (level.fuelValues().burnDuration(stack) <= 0)
             return InteractionResult.PASS;
 
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof VibrationStandBlockEntity stand) {
-            stand.addFuel(burnDuration);
-            stack.consume(1, player);
+            Container inventory = stand.getInventory();
+            ItemStack slot = inventory.getItem(VibrationStandBlockEntity.SLOT_FUEL);
+            // A different fuel already occupies the slot, or it is already full: leave the hand alone.
+            if (!slot.isEmpty() && !ItemStack.isSameItemSameComponents(slot, stack))
+                return InteractionResult.PASS;
+            int capacity = slot.isEmpty() ? stack.getMaxStackSize() : slot.getMaxStackSize();
+            int moved = Math.min(capacity - slot.getCount(), stack.getCount());
+            if (moved <= 0)
+                return InteractionResult.PASS;
+
+            ItemStack loaded = slot.isEmpty() ? stack.copyWithCount(moved) : slot.copy();
+            if (!slot.isEmpty())
+                loaded.grow(moved);
+            inventory.setItem(VibrationStandBlockEntity.SLOT_FUEL, loaded);
+            stack.consume(moved, player);
             level.playSound(null, pos, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 0.6F, 1.4F);
         }
         return InteractionResult.SUCCESS;

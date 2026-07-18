@@ -126,6 +126,15 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> FUEL_GAUGE_QUANTISES =
         register("fuel_gauge_quantises", VibrationStandTests.FUEL_GAUGE_QUANTISES);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_FEEDS_STAND_FUEL =
+        register("hopper_feeds_stand_fuel", VibrationStandTests.HOPPER_FEEDS_STAND_FUEL);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_CANT_DRAIN_STAND_FUEL =
+        register("hopper_cant_drain_stand_fuel", VibrationStandTests.HOPPER_CANT_DRAIN_STAND_FUEL);
+
+    private static final ResourceKey<Consumer<GameTestHelper>> STAND_BURNS_SLOT_FUEL =
+        register("stand_burns_slot_fuel", VibrationStandTests.STAND_BURNS_SLOT_FUEL);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -186,6 +195,11 @@ public final class XPMagicGameTests {
 
         // Pure quantisation check, runs to completion in the first tick.
         registerTest(event, environment, FUEL_GAUGE_QUANTISES);
+
+        // The stand's furnace-model fuel handling: slot feeding, drain protection, and the burn cycle.
+        registerTest(event, environment, HOPPER_FEEDS_STAND_FUEL, VibrationStandTests.MAX_TICKS);
+        registerTest(event, environment, HOPPER_CANT_DRAIN_STAND_FUEL, VibrationStandTests.MAX_TICKS);
+        registerTest(event, environment, STAND_BURNS_SLOT_FUEL, VibrationStandTests.MAX_TICKS);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,

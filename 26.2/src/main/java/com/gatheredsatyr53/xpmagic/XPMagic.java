@@ -691,5 +691,7 @@ public final class XPMagic {
             (blockEntity, side) -> new WorldlyContainerWrapper((WorldlyContainer) blockEntity.getInventory(), side));
         event.registerBlockEntity(Capabilities.Item.BLOCK, POWDER_SEPARATOR_BLOCK_ENTITY.get(),
             (blockEntity, side) -> new WorldlyContainerWrapper((WorldlyContainer) blockEntity.getInventory(), side));
+        event.registerBlockEntity(Capabilities.Item.BLOCK, VIBRATION_STAND_BLOCK_ENTITY.get(),
+            (blockEntity, side) -> new WorldlyContainerWrapper((WorldlyContainer) blockEntity.getInventory(), side));
     }
 }
