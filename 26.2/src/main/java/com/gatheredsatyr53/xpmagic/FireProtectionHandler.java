@@ -33,7 +33,16 @@ public final class FireProtectionHandler {
         int pieces = wornPieces(event.getEntity());
         if (pieces == 0) return;
 
-        float factor = Math.max(0.0F, 1.0F - pieces * REDUCTION_PER_PIECE);
+        float factor = 1.0F - pieces * REDUCTION_PER_PIECE;
+        if (factor <= 0.0F) {
+            // Full set: total immunity. Cancel the whole damage sequence — exactly what vanilla does
+            // for the Fire Resistance effect (LivingEntity.hurtServer returns early), so there is no
+            // hurt sound, red flash, knockback or hit wobble either. Merely setting the amount to 0
+            // still lets all of those side effects play.
+            event.setCanceled(true);
+            return;
+        }
+        // Partial set: keep the reduced hit, hurt reaction and all. You still get singed, just less.
         event.setAmount(event.getAmount() * factor);
     }
 
