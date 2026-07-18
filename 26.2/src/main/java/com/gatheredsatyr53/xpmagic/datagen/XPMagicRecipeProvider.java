@@ -110,7 +110,7 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
-        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_PICKAXE.get())
+        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.TOOLS, XPMagic.MEMORY_CRYSTAL_PICKAXE.get())
             .pattern("XXX")
             .pattern(" Y ")
             .pattern(" Y ")
@@ -128,8 +128,17 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
-        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.COMBAT, XPMagic.MEMORY_CRYSTAL_SHOVEL.get())
+        ChargedToolRecipeBuilder.chargedTool(RecipeCategory.TOOLS, XPMagic.MEMORY_CRYSTAL_SHOVEL.get())
             .pattern(" X ")
+            .pattern(" Y ")
+            .pattern(" Y ")
+            .define('X', XPMagic.MEMORY_CRYSTAL.get())
+            .define('Y', XPMagic.TIME_CRYSTAL_ROD.get())
+            .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
+            .save(this.output);
+
+        this.shaped(RecipeCategory.TOOLS, XPMagic.MEMORY_CRYSTAL_HOE.get())
+            .pattern("XX ")
             .pattern(" Y ")
             .pattern(" Y ")
             .define('X', XPMagic.MEMORY_CRYSTAL.get())
