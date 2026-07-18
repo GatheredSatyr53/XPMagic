@@ -38,11 +38,17 @@ Each crystal is one baked transform table (--table, default
 memory_crystal_transform.json). Bake a new one per crystal with --learn, then
 reuse the same script to apply any -- e.g. time_crystal_transform.json.
 
+--mask <stencil.png> recolours only inside the stencil (paint it opaque+white
+where the recolour applies; black or transparent is left untouched) -- e.g. mask
+to the leaves so hand-drawn fruit keeps its own colours. The auto luma window is
+taken over the masked region alone; pixels outside pass through unchanged.
+
 Usage:
     python crystalize.py <diamond_sprite.png> <out.png>
                                         [--axis diag|blade|blade-rev|luma]
                                         [--table <transform.json>]
                                         [--range lo,hi | --range ref:<plain.png>]
+                                        [--mask <stencil.png>]
     python crystalize.py --learn <diamond.png> <crystal.png> [<out_table.json>]
                                                  # inputs stay local, only the
                                                  # colour+position table is written
@@ -112,7 +118,7 @@ def make_predict(per):
     return predict
 
 
-def axis_field(a, axis, per, rng=None):
+def axis_field(a, axis, per, rng=None, region=None):
     """Return a per-pixel t map for the chosen gradient axis.
 
     diag keeps raw x+y (exact crystal repro); rotated axes are stretched onto
@@ -122,22 +128,36 @@ def axis_field(a, axis, per, rng=None):
     rng=(lo, hi) pins the normalisation window instead of taking it from this
     image's own min/max. Feed the same rng to a plain texture and to an overlaid
     variant (e.g. leaves vs flowering leaves) and shared pixels map identically,
-    so the overlay can't shift the base's colours. Out-of-window values clamp."""
+    so the overlay can't shift the base's colours. Out-of-window values clamp.
+
+    region is the boolean set of pixels being recoloured (the mask, if any); the
+    auto window is taken over just those, so masking to a region spreads the
+    gradient across that region's own luma rather than the whole image's."""
     h, w = a.shape[:2]
     yy, xx = np.mgrid[0:h, 0:w]
     if axis == "diag":
         return (xx + yy).astype(float)
-    opaque = a[:, :, 3] > 0
+    reg = region if region is not None else (a[:, :, 3] > 0)
     if axis == "luma":
         rgb = a[:, :, :3].astype(float)
         proj = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
     else:
         proj = (xx - yy) if axis == "blade" else (yy - xx)  # blade-rev
-    lo, hi = rng if rng is not None else (proj[opaque].min(), proj[opaque].max())
+    lo, hi = rng if rng is not None else (proj[reg].min(), proj[reg].max())
     ts = [t for tbl in per.values() for t in tbl]
     tmin, tmax = min(ts), max(ts)
     frac = np.clip((proj - lo) / max(hi - lo, 1), 0.0, 1.0)
     return tmin + frac * (tmax - tmin)
+
+
+def load_mask(path, shape):
+    """Boolean stencil: True where the recolour applies. Convention -- paint the
+    region opaque and light (white); leave the rest black or transparent."""
+    m = np.array(Image.open(path).convert("RGBA"))
+    if m.shape[:2] != shape:
+        sys.exit(f"mask is {m.shape[1]}x{m.shape[0]}, image is {shape[1]}x{shape[0]}")
+    lum = 0.299 * m[:, :, 0] + 0.587 * m[:, :, 1] + 0.114 * m[:, :, 2]
+    return (m[:, :, 3] > 0) & (lum >= 128)
 
 
 def measure_range(inp, axis="luma"):
@@ -150,19 +170,25 @@ def measure_range(inp, axis="luma"):
     return float(proj[opaque].min()), float(proj[opaque].max())
 
 
-def apply(inp, outp, axis="diag", table=DEFAULT_TABLE, rng=None):
+def apply(inp, outp, axis="diag", table=DEFAULT_TABLE, rng=None, mask=None):
     per = load_table(table)
     predict = make_predict(per)
     a = np.array(Image.open(inp).convert("RGBA"))
-    tmap = axis_field(a, axis, per, rng)
     h, w = a.shape[:2]
+    opaque = a[:, :, 3] > 0
+    # sel = which pixels get recoloured. Without a mask, every visible pixel;
+    # with one, only opaque pixels inside the stencil -- the rest pass through.
+    sel = opaque if mask is None else (opaque & load_mask(mask, (h, w)))
+    if not sel.any():
+        sys.exit("nothing to recolour: mask selects no opaque pixels")
+    tmap = axis_field(a, axis, per, rng, region=sel)
     for y in range(h):
         for x in range(w):
-            if a[y, x, 3] == 0:
+            if not sel[y, x]:
                 continue
             a[y, x, :3] = np.clip(predict(tuple(int(v) for v in a[y, x, :3]), tmap[y, x]), 0, 255)
     Image.fromarray(a, "RGBA").save(outp)
-    print("wrote", outp, f"(axis={axis})")
+    print("wrote", outp, f"(axis={axis}" + (f", masked {int(sel.sum())}px" if mask else "") + ")")
 
 
 def main(argv):
@@ -173,7 +199,7 @@ def main(argv):
         if len(rest) == 3:
             return learn(rest[0], rest[1], rest[2])
         sys.exit(__doc__)
-    axis, table, rng_arg = "diag", DEFAULT_TABLE, None
+    axis, table, rng_arg, mask = "diag", DEFAULT_TABLE, None, None
     pos = []
     i = 0
     while i < len(argv):
@@ -190,6 +216,10 @@ def main(argv):
             rng_arg = argv[i + 1]; i += 2; continue
         if a.startswith("--range="):
             rng_arg = a.split("=", 1)[1]; i += 1; continue
+        if a == "--mask" and i + 1 < len(argv):
+            mask = argv[i + 1]; i += 2; continue
+        if a.startswith("--mask="):
+            mask = a.split("=", 1)[1]; i += 1; continue
         pos.append(a); i += 1
     if len(pos) != 2 or axis not in ("diag", "blade", "blade-rev", "luma"):
         sys.exit(__doc__)
@@ -200,7 +230,7 @@ def main(argv):
         else:                                    # explicit "lo,hi"
             rng = tuple(float(v) for v in rng_arg.split(","))
         print(f"pinned luma window: {rng[0]:.0f}..{rng[1]:.0f}")
-    apply(pos[0], pos[1], axis, table, rng)
+    apply(pos[0], pos[1], axis, table, rng, mask)
 
 
 if __name__ == "__main__":
