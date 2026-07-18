@@ -48,6 +48,8 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
     private int burnTimeTotal;
     private int cookTime;
     private int cookTimeTotal;
+    /** Owner's live XP, refreshed each server tick and synced to the menu; -1 when no key / owner offline. */
+    private int ownerXp = -1;
 
     private final ContainerData dataAccess = new ContainerData() {
         @Override
@@ -57,6 +59,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
                 case XPKeepingMachineMenu.DATA_BURN_TIME_TOTAL -> XPKeepingMachineBlockEntity.this.burnTimeTotal;
                 case XPKeepingMachineMenu.DATA_COOK_TIME -> XPKeepingMachineBlockEntity.this.cookTime;
                 case XPKeepingMachineMenu.DATA_COOK_TIME_TOTAL -> XPKeepingMachineBlockEntity.this.cookTimeTotal;
+                case XPKeepingMachineMenu.DATA_OWNER_XP -> XPKeepingMachineBlockEntity.this.ownerXp;
                 default -> 0;
             };
         }
@@ -68,6 +71,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
                 case XPKeepingMachineMenu.DATA_BURN_TIME_TOTAL -> XPKeepingMachineBlockEntity.this.burnTimeTotal = value;
                 case XPKeepingMachineMenu.DATA_COOK_TIME -> XPKeepingMachineBlockEntity.this.cookTime = value;
                 case XPKeepingMachineMenu.DATA_COOK_TIME_TOTAL -> XPKeepingMachineBlockEntity.this.cookTimeTotal = value;
+                case XPKeepingMachineMenu.DATA_OWNER_XP -> XPKeepingMachineBlockEntity.this.ownerXp = value;
             }
         }
 
@@ -108,13 +112,17 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         return this.dataAccess;
     }
 
-    /** The online player whose key is in the machine, or null if no key / owner offline. */
-    private @Nullable Player resolveOwner(Level level) {
-        PlayerOwner owner = this.inventory.getItem(SLOT_KEY).get(XPMagic.PLAYER_OWNER.get());
+    public static @Nullable Player resolveOwner(ItemStack ownerStack, Level level) {
+        PlayerOwner owner = ownerStack.get(XPMagic.PLAYER_OWNER.get());
         if (owner == null)
             return null;
         MinecraftServer server = level.getServer();
         return server == null ? null : server.getPlayerList().getPlayer(owner.id());
+    }
+
+    /** The online player whose key is in the machine, or null if no key / owner offline. */
+    private @Nullable Player resolveOwner(Level level) {
+        return resolveOwner(this.inventory.getItem(SLOT_KEY), level);
     }
 
     public static int getMatrixXPCapacity(XPKeepingMachineBlockEntity machine) {
@@ -135,6 +143,7 @@ public class XPKeepingMachineBlockEntity extends BlockEntity implements MenuProv
         }
 
         Player owner = machine.resolveOwner(level);
+        machine.ownerXp = owner == null ? -1 : owner.totalExperience;
         boolean ownerReady = owner != null && owner.totalExperience >= getMatrixXPCapacity(machine);
 
         if (machine.isBurning() || machine.allInputsPresent()) {

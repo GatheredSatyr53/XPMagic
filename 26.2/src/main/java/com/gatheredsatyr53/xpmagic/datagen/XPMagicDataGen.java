@@ -33,5 +33,7 @@ public final class XPMagicDataGen {
         // modifiers resolve xpmagic:saturation through it, so they must come second.
         event.createDatapackRegistryObjects(XPMagicEnchantmentProvider.provideEnchantments());
         event.createProvider(XPMagicGlobalLootModifiers::new);
+
+        event.createProvider(XPMagicDataMapProvider::new);
     }
 }

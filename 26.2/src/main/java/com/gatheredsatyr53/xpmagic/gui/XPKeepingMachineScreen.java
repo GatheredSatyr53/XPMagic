@@ -1,13 +1,21 @@
 package com.gatheredsatyr53.xpmagic.gui;
 
 import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.inventory.ConditionalInputSlot;
+import com.gatheredsatyr53.xpmagic.inventory.PowderMixerMenu;
 import com.gatheredsatyr53.xpmagic.inventory.XPKeepingMachineMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class XPKeepingMachineScreen extends AbstractContainerScreen<XPKeepingMachineMenu> {
 
@@ -51,5 +59,24 @@ public class XPKeepingMachineScreen extends AbstractContainerScreen<XPKeepingMac
         int progress = this.menu.getCookProgressScaled(PROGRESS_WIDTH);
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
             xo + PROGRESS_X, yo + PROGRESS_Y, ANIMATION_U, PROGRESS_V, progress, PROGRESS_HEIGHT, 256, 256);
+    }
+
+    @Override
+    protected List<Component> getTooltipFromContainerItem(ItemStack itemStack) {
+        List<Component> lines = super.getTooltipFromContainerItem(itemStack);
+        Slot slot = this.hoveredSlot;
+        if (slot == null || itemStack.isEmpty()) {
+            return lines;
+        }
+
+        if (itemStack.has(XPMagic.XP_CAPACITY.get())) {
+            Integer reserve = this.menu.getXPReserve();
+            if (reserve != null && reserve < 0) {
+                lines.add(Component.translatable("tooltip.xpmagic.keeper.insufficient_xp", -reserve)
+                                   .withStyle(ChatFormatting.RED));
+            }
+        }
+
+        return lines;
     }
 }

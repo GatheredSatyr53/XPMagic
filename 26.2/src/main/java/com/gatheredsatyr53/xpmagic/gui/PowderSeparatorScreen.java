@@ -15,7 +15,7 @@ public class PowderSeparatorScreen extends AbstractContainerScreen<PowderSeparat
 
     // Lit-mesh indicator: overlay sprite at u=176 drawn over the dim mesh in the panel.
     private static final int MESH_X = 66;
-    private static final int MESH_Y = 41;
+    private static final int MESH_Y = 36;
     private static final int MESH_U = 176;
     private static final int MESH_V = 0;
     private static final int MESH_W = 43;

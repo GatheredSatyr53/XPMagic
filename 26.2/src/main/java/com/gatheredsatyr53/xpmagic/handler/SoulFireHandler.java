@@ -20,7 +20,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
  * Soul-fire transformation: a Memory Crystal item entity resting in soul fire (blue flame) has its
  * {@code xp_capacity} slowly burned away — one point every {@link Config#soulFireTicksPerCapacity}
  * ticks the item spends in the flame. When the capacity reaches 0 the crystal is spent and finally
- * transforms into a Time Crystal. The whole stack drains together and converts at once.
+ * crystallises into Time Crystals. The whole stack drains together and converts at once.
+ *
+ * <p>The yield scales with what was actually burned: total capacity given up divided by
+ * {@link Config#soulFireCapacityPerTimeCrystal}. A plain base-20 crystal yields one Time Crystal (the
+ * original 1:1), a charged or fed crystal yields several, and a depleted one worth less than the cost
+ * fizzles out with nothing — so the premium material is no longer minted cheaply from a poor crystal.
  *
  * <p>Both crystals are {@code fireResistant} (see their registration), so soul fire never ignites or
  * damages them — only this handler acts on them, and the drain can safely take its full time.
@@ -96,9 +101,25 @@ public final class SoulFireHandler {
         }
     }
 
-    /** Capacity is gone: the whole stack becomes Time Crystals. */
+    /**
+     * Capacity is gone: the stack crystallises into Time Crystals. The yield is the total capacity the
+     * stack gave up (per-item capacity burned, read back from {@code soul_fire_time}, times the count)
+     * divided by {@link Config#soulFireCapacityPerTimeCrystal}. So a plain base-20 crystal still yields
+     * one, a charged or fed crystal yields more, and a depleted crystal (worth less than one) fizzles
+     * out with nothing — the premium material now reflects what was actually burned.
+     */
     private static void finish(ServerLevel level, ItemEntity item, int count) {
-        item.setItem(new ItemStack(XPMagic.TIME_CRYSTAL.get(), count));
+        int burnedPerItem = item.getItem().getOrDefault(XPMagic.SOUL_FIRE_TIME.get(), 0)
+                            / Config.soulFireTicksPerCapacity;
+        int totalBurned = burnedPerItem * count;
+        int yield = totalBurned / Config.soulFireCapacityPerTimeCrystal;
+
+        if (yield <= 0) {                 // not enough burned capacity for even one crystal
+            item.discard();
+            playFizzleEffects(level, item);
+            return;
+        }
+        item.setItem(new ItemStack(XPMagic.TIME_CRYSTAL.get(), yield));
         playFinishEffects(level, item);
     }
 
@@ -117,6 +138,16 @@ public final class SoulFireHandler {
             item.getX(), item.getY() + 0.2, item.getZ(), flames, 0.2, 0.25, 0.2, 0.02);
         level.sendParticles(ParticleTypes.SOUL,
             item.getX(), item.getY() + 0.2, item.getZ(), 2 + (int) (progress * 10), 0.2, 0.2, 0.2, 0.03);
+    }
+
+    /** A quiet, hollow puff when a depleted crystal burns away without yielding anything. */
+    private static void playFizzleEffects(ServerLevel level, ItemEntity item) {
+        level.playSound(null, item.getX(), item.getY(), item.getZ(),
+            SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 0.7F);
+        level.sendParticles(ParticleTypes.SMOKE,
+            item.getX(), item.getY() + 0.2, item.getZ(), 12, 0.2, 0.2, 0.2, 0.02);
+        level.sendParticles(ParticleTypes.SOUL,
+            item.getX(), item.getY() + 0.2, item.getZ(), 6, 0.2, 0.2, 0.2, 0.02);
     }
 
     /** A loud final wail, a crystalline chime and a big burst of souls as the transformation lands. */

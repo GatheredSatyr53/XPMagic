@@ -188,6 +188,13 @@ public class Config {
             .comment("Ticks in soul fire to burn one point of xp_capacity off a Memory Crystal; at 0 capacity it becomes a Time Crystal (20 ticks = 1 second).")
             .defineInRange("soulFireTicksPerCapacity", 20, 1, 72000);
 
+    // How much burned xp_capacity a single Time Crystal is worth. The yield is the total capacity a
+    // stack gives up, divided by this — so a plain crystal (base 20) still yields one, a charged or
+    // fed crystal yields more, and a depleted one (< this) burns away to nothing.
+    private static final ModConfigSpec.IntValue SOUL_FIRE_CAPACITY_PER_TIME_CRYSTAL = BUILDER
+            .comment("Burned xp_capacity needed per Time Crystal yielded in soul fire. A base Memory Crystal is 20, so 20 yields one; a charged crystal yields more, an under-filled one may yield none.")
+            .defineInRange("soulFireCapacityPerTimeCrystal", 20, 1, 1000);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
@@ -220,6 +227,7 @@ public class Config {
     public static int knowledgeXpCostPerFruit;
     public static int vindictiveXpCostPerFlesh;
     public static int soulFireTicksPerCapacity;
+    public static int soulFireCapacityPerTimeCrystal;
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof final String itemName && BuiltInRegistries.ITEM.containsKey(Identifier.tryParse(itemName));
@@ -256,6 +264,7 @@ public class Config {
         knowledgeCapacityPerFruit = KNOWLEDGE_CAPACITY_PER_FRUIT.get();
         knowledgeXpCostPerFruit = KNOWLEDGE_XP_COST_PER_FRUIT.get();
         soulFireTicksPerCapacity = SOUL_FIRE_TICKS_PER_CAPACITY.get();
+        soulFireCapacityPerTimeCrystal = SOUL_FIRE_CAPACITY_PER_TIME_CRYSTAL.get();
 
         // convert the list of strings into a set of items
         items = ITEM_STRINGS.get().stream()

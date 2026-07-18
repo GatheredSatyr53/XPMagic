@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -36,6 +37,9 @@ public record PlayerOwner(UUID id, String name) implements TooltipProvider {
 
     @Override
     public void addToTooltip(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag, DataComponentGetter components) {
-        consumer.accept(Component.translatable("item.xpmagic.player_key.owner", this.name));
+        consumer.accept(Component.translatable("item.xpmagic.player_key.owner", this.name).withStyle(ChatFormatting.GRAY));
+        if (flag.hasShiftDown()) {
+            consumer.accept(Component.literal("UUID: " + id.toString()).withStyle(ChatFormatting.BLUE));
+        }
     }
 }

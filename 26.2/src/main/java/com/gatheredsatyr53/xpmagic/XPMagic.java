@@ -31,8 +31,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
@@ -43,7 +43,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
-import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.equipment.*;
 import net.minecraft.world.level.block.Block;
@@ -70,6 +70,9 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
+
+import static net.minecraft.world.effect.MobEffects.*;
+import static net.minecraft.world.item.component.Consumables.*;
 
 @Mod(XPMagic.MODID)
 public final class XPMagic {
@@ -271,19 +274,27 @@ public final class XPMagic {
     public static final DeferredHolder<Item, Item> XP_COCKTAIL = ITEMS.register("xp_cocktail",
         () -> new Item(new Item.Properties()
             .setId(itemKey("xp_cocktail"))
-            .stacksTo(1)
-            .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
+            .component(DataComponents.CONSUMABLE, DEFAULT_DRINK)
             .component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
             .usingConvertsTo(Items.GLASS_BOTTLE)
         ));
 
     public static final DeferredHolder<Item, Item> VINDICTIVE_FLESH = ITEMS.register("vindictive_flesh",
         () -> new Item(new Item.Properties()
-            .setId(itemKey("vindictive_flesh"))));
+            .setId(itemKey("vindictive_flesh"))
+            .component(DataComponents.CONSUMABLE,
+                       defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(BLINDNESS,
+                                                                                                         600,
+                                                                                                         0),
+                                                                                               0.8F)
+                       ).build()
+            )
+        ));
 
     public static final DeferredHolder<Item, Item> NOSTALGIC_COAL = ITEMS.register("nostalgic_coal",
         () -> new Item(new Item.Properties()
-            .setId(itemKey("nostalgic_coal"))));
+            .setId(itemKey("nostalgic_coal"))
+        ));
 
     // A seed as much as a curio: sown on Truth Farmland it grows the Tree of Knowledge (TruthGrainItem).
     public static final DeferredHolder<Item, Item> TRUTH_GRAIN = ITEMS.register("truth_grain",

@@ -48,6 +48,7 @@
   "block.xpmagic.knowledge_leaves": "Листва Познания",
   "block.xpmagic.knowledge_sapling": "Росток Познания",
   "subtitles.xpmagic.vibration": "Виброподставка гудит",
+  "tooltip.xpmagic.keeper.insufficient_xp": "Не хватает опыта: %s",
   "tooltip.xpmagic.mixer.coarse_surplus": "Рыхлая: -25%% на %s сверх мелкой",
   "tooltip.xpmagic.mixer.coarse_balanced": "Рыхлая: скомпенсирована мелкой",
   "tooltip.xpmagic.mixer.fine_surplus": "Плотная: +25%% на %s сверх грубой",

@@ -48,6 +48,7 @@
   "block.xpmagic.knowledge_leaves": "Knowledge Leaves",
   "block.xpmagic.knowledge_sapling": "Knowledge Sapling",
   "subtitles.xpmagic.vibration": "Stand vibrates",
+  "tooltip.xpmagic.keeper.insufficient_xp": "Insufficient XP: %s",
   "tooltip.xpmagic.mixer.coarse_surplus": "Loose: -25%% on %s beyond fine",
   "tooltip.xpmagic.mixer.coarse_balanced": "Loose: offset by fine",
   "tooltip.xpmagic.mixer.fine_surplus": "Dense: +25%% on %s beyond coarse",

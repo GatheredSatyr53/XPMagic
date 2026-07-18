@@ -44,10 +44,10 @@ public class PowderSeparatorMenu extends AbstractContainerMenu {
         this.access = access;
         this.data = data;
 
-        this.addSlot(new Slot(inventory, SLOT_INPUT, 80, 21));
-        this.addSlot(new OutputSlot(inventory, SLOT_COARSE, 62, 61));
-        this.addSlot(new OutputSlot(inventory, SLOT_MEDIUM, 80, 61));
-        this.addSlot(new OutputSlot(inventory, SLOT_FINE, 98, 61));
+        this.addSlot(new Slot(inventory, SLOT_INPUT, 80, 18));
+        this.addSlot(new OutputSlot(inventory, SLOT_COARSE, 62, 55));
+        this.addSlot(new OutputSlot(inventory, SLOT_MEDIUM, 80, 55));
+        this.addSlot(new OutputSlot(inventory, SLOT_FINE, 98, 55));
 
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 9; ++col)

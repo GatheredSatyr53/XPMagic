@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 import static com.gatheredsatyr53.xpmagic.block.entity.XPKeepingMachineBlockEntity.*;
 
@@ -25,7 +26,9 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
     public static final int DATA_BURN_TIME_TOTAL = 1;
     public static final int DATA_COOK_TIME = 2;
     public static final int DATA_COOK_TIME_TOTAL = 3;
-    public static final int DATA_COUNT = 4;
+    /** Owner's live total experience, synced from the server; -1 when no key / owner offline. */
+    public static final int DATA_OWNER_XP = 4;
+    public static final int DATA_COUNT = 5;
 
     private static final int INV_START = SLOT_COUNT;
     private static final int HOTBAR_START = INV_START + 27;
@@ -153,6 +156,17 @@ public class XPKeepingMachineMenu extends AbstractContainerMenu {
 
     public boolean isLit() {
         return this.data.get(DATA_BURN_TIME) > 0;
+    }
+
+    private ItemStack getSlotItem(int slot) {
+        return this.slots.get(slot).getItem();
+    }
+
+    public @Nullable Integer getXPReserve() {
+        int ownerXp = this.data.get(DATA_OWNER_XP);
+        if (ownerXp < 0)
+            return null;   // no key, or owner offline
+        return ownerXp - getSlotItem(SLOT_MATRIX).getOrDefault(XPMagic.XP_CAPACITY.get(), 0);
     }
 
     public int getLitScaled(int maxPixels) {

@@ -146,6 +146,37 @@ public final class XPMagicRecipeProvider extends RecipeProvider {
             .unlockedBy("has_memory_crystal", this.has(XPMagic.MEMORY_CRYSTAL.get()))
             .save(this.output);
 
+        this.shaped(RecipeCategory.COMBAT, XPMagic.TIME_CRYSTAL_HELMET.get())
+            .pattern("XXX")
+            .pattern("X X")
+            .define('X', XPMagic.TIME_CRYSTAL.get())
+            .unlockedBy("has_time_crystal", this.has(XPMagic.TIME_CRYSTAL.get()))
+            .save(this.output);
+
+        this.shaped(RecipeCategory.COMBAT, XPMagic.TIME_CRYSTAL_CHESTPLATE.get())
+            .pattern("X X")
+            .pattern("XXX")
+            .pattern("XXX")
+            .define('X', XPMagic.TIME_CRYSTAL.get())
+            .unlockedBy("has_time_crystal", this.has(XPMagic.TIME_CRYSTAL.get()))
+            .save(this.output);
+
+        this.shaped(RecipeCategory.COMBAT, XPMagic.TIME_CRYSTAL_LEGGINGS.get())
+            .pattern("XXX")
+            .pattern("X X")
+            .pattern("X X")
+            .define('X', XPMagic.TIME_CRYSTAL.get())
+            .unlockedBy("has_time_crystal", this.has(XPMagic.TIME_CRYSTAL.get()))
+            .save(this.output);
+
+        this.shaped(RecipeCategory.COMBAT, XPMagic.TIME_CRYSTAL_BOOTS.get())
+            .pattern("X X")
+            .pattern("X X")
+            .define('X', XPMagic.TIME_CRYSTAL.get())
+            .unlockedBy("has_time_crystal", this.has(XPMagic.TIME_CRYSTAL.get()))
+            .save(this.output);
+
+
         // Note: powder mixing is not a data recipe — it's a fixed proportional formula computed
         // directly in PowderMixerMenu (N x 1:2:1 fractions -> N memory powder).
     }
