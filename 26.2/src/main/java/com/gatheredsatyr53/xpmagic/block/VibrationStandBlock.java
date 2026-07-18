@@ -4,6 +4,7 @@ import com.gatheredsatyr53.xpmagic.XPMagic;
 import com.gatheredsatyr53.xpmagic.block.entity.VibrationStandBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,7 +14,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -22,17 +22,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
-public class VibrationStandBlock extends BaseEntityBlock {
+public class VibrationStandBlock extends OrientedMachineBlock {
 
     public static final MapCodec<VibrationStandBlock> CODEC = simpleCodec(VibrationStandBlock::new);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    /** Quantised remaining-fuel gauge (0 = empty … 4 = full) shown on the front face. */
+    public static final IntegerProperty FUEL = IntegerProperty.create("fuel", 0, 4);
 
     public VibrationStandBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(LIT, false));
+        this.registerDefaultState(this.stateDefinition.any()
+            .setValue(FACING, Direction.NORTH).setValue(LIT, false).setValue(FUEL, 0));
     }
 
     @Override
@@ -42,7 +46,8 @@ public class VibrationStandBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(LIT);
+        super.createBlockStateDefinition(builder);
+        builder.add(LIT, FUEL);
     }
 
     @Override

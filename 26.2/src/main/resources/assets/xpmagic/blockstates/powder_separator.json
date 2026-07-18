@@ -1,8 +1,13 @@
 {
   "variants": {
-    "facing=north": { "model": "xpmagic:block/powder_separator" },
-    "facing=south": { "model": "xpmagic:block/powder_separator", "y": 180 },
-    "facing=west": { "model": "xpmagic:block/powder_separator", "y": 270 },
-    "facing=east": { "model": "xpmagic:block/powder_separator", "y": 90 }
+    "working=false,facing=north": { "model": "xpmagic:block/powder_separator" },
+    "working=false,facing=east":  { "model": "xpmagic:block/powder_separator", "y": 90 },
+    "working=false,facing=south": { "model": "xpmagic:block/powder_separator", "y": 180 },
+    "working=false,facing=west":  { "model": "xpmagic:block/powder_separator", "y": 270 },
+
+    "working=true,facing=north": { "model": "xpmagic:block/powder_separator_on" },
+    "working=true,facing=east":  { "model": "xpmagic:block/powder_separator_on", "y": 90 },
+    "working=true,facing=south": { "model": "xpmagic:block/powder_separator_on", "y": 180 },
+    "working=true,facing=west":  { "model": "xpmagic:block/powder_separator_on", "y": 270 }
   }
 }

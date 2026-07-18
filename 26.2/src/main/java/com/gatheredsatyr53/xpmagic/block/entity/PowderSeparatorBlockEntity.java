@@ -1,6 +1,7 @@
 package com.gatheredsatyr53.xpmagic.block.entity;
 
 import com.gatheredsatyr53.xpmagic.XPMagic;
+import com.gatheredsatyr53.xpmagic.block.PowderSeparatorBlock;
 import com.gatheredsatyr53.xpmagic.block.VibrationStandBlock;
 import com.gatheredsatyr53.xpmagic.inventory.PowderSeparatorMenu;
 import net.minecraft.core.BlockPos;
@@ -125,6 +126,7 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
                 be.vibrationTicks = 0;
                 setChanged(level, pos, state);
             }
+            setWorking(level, pos, state, false);
             return;
         }
 
@@ -137,6 +139,13 @@ public class PowderSeparatorBlockEntity extends BlockEntity implements MenuProvi
             }
         }
         setChanged(level, pos, state);
+        setWorking(level, pos, state, true);
+    }
+
+    /** Reflects the sifting state on the block so the front shows the falling-sand animation only while working. */
+    private static void setWorking(Level level, BlockPos pos, BlockState state, boolean working) {
+        if (state.getValue(PowderSeparatorBlock.WORKING) != working)
+            level.setBlock(pos, state.setValue(PowderSeparatorBlock.WORKING, working), 3);
     }
 
     /** Which fractions are emitted, walking largest-first while capacity fits the budget (rule B). */

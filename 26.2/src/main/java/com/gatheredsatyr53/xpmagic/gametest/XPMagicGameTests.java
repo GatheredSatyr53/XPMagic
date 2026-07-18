@@ -123,6 +123,9 @@ public final class XPMagicGameTests {
     private static final ResourceKey<Consumer<GameTestHelper>> HOPPER_LEAVES_MACHINE_INPUTS =
         register("hopper_leaves_machine_inputs", MachineHopperTests.HOPPER_LEAVES_MACHINE_INPUTS);
 
+    private static final ResourceKey<Consumer<GameTestHelper>> FUEL_GAUGE_QUANTISES =
+        register("fuel_gauge_quantises", VibrationStandTests.FUEL_GAUGE_QUANTISES);
+
     private XPMagicGameTests() {}
 
     private static ResourceKey<Consumer<GameTestHelper>> register(String name, Consumer<GameTestHelper> function) {
@@ -180,6 +183,9 @@ public final class XPMagicGameTests {
         registerTest(event, environment, HOPPER_PULLS_FRACTION_NOT_POWDER, MachineHopperTests.MAX_TICKS);
         registerTest(event, environment, HOPPER_FEEDS_SEPARATOR_INPUT, MachineHopperTests.MAX_TICKS);
         registerTest(event, environment, HOPPER_LEAVES_MACHINE_INPUTS, MachineHopperTests.MAX_TICKS);
+
+        // Pure quantisation check, runs to completion in the first tick.
+        registerTest(event, environment, FUEL_GAUGE_QUANTISES);
     }
 
     private static void registerTest(RegisterGameTestsEvent event,

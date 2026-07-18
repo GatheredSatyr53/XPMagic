@@ -2,7 +2,7 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "top": "xpmagic:block/vibration_stand_top",
-    "front": "xpmagic:block/vibration_stand_side_0",
+    "front": "xpmagic:block/vibration_stand_side_2",
     "side": "xpmagic:block/machine_side"
   }
 }

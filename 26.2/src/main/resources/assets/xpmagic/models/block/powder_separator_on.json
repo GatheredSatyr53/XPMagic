@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "top": "xpmagic:block/vibration_stand_top",
-    "front": "xpmagic:block/vibration_stand_side_0",
+    "top": "xpmagic:block/powder_separator_top",
+    "front": "xpmagic:block/powder_separator_front_on",
     "side": "xpmagic:block/machine_side"
   }
 }

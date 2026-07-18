@@ -24,6 +24,9 @@ public class VibrationStandBlockEntity extends BlockEntity {
     /** Fuel burned per vibrating tick (~13 separator cycles per coal). */
     private static final int FUEL_PER_TICK = 3;
 
+    /** Burn time that reads as a full gauge; one piece of coal (1600t) tops it out, more is capped. */
+    private static final int FUEL_GAUGE_FULL = 1600;
+
     /** Ticks between plays of the 1.0s vibration clip, so it loops back-to-back. */
     private static final int SOUND_INTERVAL = 20;
 
@@ -37,11 +40,22 @@ public class VibrationStandBlockEntity extends BlockEntity {
     public void addFuel(int burnDuration) {
         this.burnTime += burnDuration;
         setChanged();
+        if (this.level != null) {
+            BlockState state = getBlockState();
+            int gauge = fuelGauge(this.burnTime);
+            if (gauge != state.getValue(VibrationStandBlock.FUEL))
+                this.level.setBlock(this.worldPosition, state.setValue(VibrationStandBlock.FUEL, gauge), 3);
+        }
+    }
+
+    /** Maps remaining burn time onto the 0–4 fuel gauge shown on the front face. Public for game tests. */
+    public static int fuelGauge(int burnTime) {
+        if (burnTime <= 0)
+            return 0;
+        return Math.min(4, (int) Math.ceil(burnTime / (double) FUEL_GAUGE_FULL * 4));
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, VibrationStandBlockEntity stand) {
-        boolean wasLit = state.getValue(VibrationStandBlock.LIT);
-
         // Driven purely by redstone (independent of the separator above) as long as it has fuel.
         boolean vibrating = stand.burnTime > 0 && level.hasNeighborSignal(pos);
 
@@ -54,9 +68,10 @@ public class VibrationStandBlockEntity extends BlockEntity {
                 level.playSound(null, pos, XPMagic.VIBRATION_SOUND.get(), SoundSource.BLOCKS, 1.2F, 1.0F);
         }
 
-        // Flags 3 = notify neighbours (1) + sync to clients (2).
-        if (vibrating != wasLit)
-            level.setBlock(pos, state.setValue(VibrationStandBlock.LIT, vibrating), 3);
+        // Flags 3 = notify neighbours (1) + sync to clients (2). One block swap covers lit + gauge.
+        int gauge = fuelGauge(stand.burnTime);
+        if (vibrating != state.getValue(VibrationStandBlock.LIT) || gauge != state.getValue(VibrationStandBlock.FUEL))
+            level.setBlock(pos, state.setValue(VibrationStandBlock.LIT, vibrating).setValue(VibrationStandBlock.FUEL, gauge), 3);
     }
 
     /** Jolts entities standing on the stand so they visibly shake. */
