@@ -41,7 +41,7 @@ public final class GuidebookScreenOpener {
         MutableComponent page = Component.empty();
         page.append(Component.translatable("guide.xpmagic.title").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD));
         page.append(Component.literal("\n\n"));
-        page.append(Component.translatable("guide.xpmagic.intro").withStyle(ChatFormatting.DARK_GRAY));
+        page.append(Component.translatable("guide.xpmagic.intro").withStyle(ChatFormatting.BLACK));
         page.append(Component.literal("\n\n"));
         page.append(link("guide.xpmagic.toc.storage", 2));
         page.append(link("guide.xpmagic.toc.powder", 3));
